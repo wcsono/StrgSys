@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/cabecero::cabecero-seccion(titulo='Detalle Orden')}"></head>
+<body>
+
+<!-- Navegación principal -->
+<div th:replace="~{fragmentos/navegacion-principal::navegacion-principal-seccion}" th:remove="tag"></div>
+
+<div class="container mt-4">
+    <div class="text-center mb-4">
+        <h3>Detalle de la Orden</h3>
+    </div>
+
+    <div class="row">
+        <!-- Columna izquierda: Datos de la orden + botón -->
+        <div class="col-md-5">
+            <h5>Datos de la Orden</h5>
+            <table class="table table-bordered">
+                <tr><th>ID Orden</th><td th:text="${orden.idOrd}"></td></tr>
+                <tr><th>Número Orden</th><td th:text="${orden.numOrd}"></td></tr>
+                <tr><th>Cliente/Proveedor</th><td th:text="${orden.nomOrd}"></td></tr>
+                <tr><th>Tipo Documento</th><td th:text="${orden.tipoDocumento.desTd}"></td></tr>
+                <tr><th>Fecha Registro</th><td th:text="${orden.fecOrd}"></td></tr>
+                <tr><th>Documento Referencia</th><td th:text="${orden.ndocRef}"></td></tr>
+            </table>
+
+            <!-- Botón debajo de los datos -->
+            <div class="text-center mt-3">
+                <button class="btn btn-success" type="button"
+                        data-bs-toggle="offcanvas" data-bs-target="#offcanvasArticulos">
+                    <i class="bi bi-plus-circle me-1"></i> Agregar Artículos a la Orden
+                </button>
+            </div>
+        </div>
+
+        <!-- Columna derecha: Tabla de artículos -->
+        <div class="col-md-7">
+            <h5 class="text-center">Artículos en la Orden</h5>
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Descripción</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unitario</th>
+                    <th>Subtotal</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- Si hay artículos -->
+                <tr th:each="detalle : ${detalleOrdenes}" th:if="${#lists.size(detalleOrdenes) > 0}">
+                    <td th:text="${detalle.articulo.codArt}"></td>
+                    <td th:text="${detalle.articulo.desArt}"></td>
+                    <td th:text="${detalle.cantidad}"></td>
+                    <td th:text="${detalle.cosArt}"></td>
+                    <td th:text="${detalle.cantidad * detalle.cosArt}"></td>
+                </tr>
+
+                <!-- Si no hay artículos -->
+                <tr th:unless="${#lists.size(detalleOrdenes) > 0}">
+                    <td colspan="5" class="text-center text-muted">No hay Artículos agregados</td>
+                </tr>
+                </tbody>
+                <!-- Footer con card para el total -->
+                <tfoot>
+                <tr>
+                    <td colspan="5">
+                        <div class="card bg-success text-white">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Total Orden:</h5>
+                                <h4 class="mb-0">
+                                    <span th:text="${#numbers.formatDecimal(totalOrden, 1, 'COMMA', 2, 'POINT')}"></span>
+                                </h4>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                </tfoot>
+            </table>
+
+            <!-- Botón cerrar orden -->
+            <div class="text-center mt-3">
+                <form th:action="@{/orden/{id}/cerrar(id=${orden.idOrd})}" method="post">
+                    <button type="submit" class="btn btn-danger"
+                            th:disabled="${#lists.isEmpty(detalleOrdenes)}">
+                        <i class="bi bi-lock-fill me-1"></i> Cerrar Orden
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fragmento de offcanvas-articulos -->
+<div th:replace="@{/fragmentos/offcanvas-articulos}"></div>
+
+<!-- Pie de página -->
+<div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"></div>
+
+<!-- Scripts externos -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
+
+<!-- Inyección de tipTd -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const TIPTD = /*[[${orden.tipoDocumento.tipTd}]]*/ true;
+    /*]]>*/
+</script>
+
+<!-- Script principal -->
+<script src="/js/orden.js" defer></script>
+
+</body>
+</html>

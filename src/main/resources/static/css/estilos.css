@@ -1,0 +1,89 @@
+img{
+    width: 200px;
+    height: 200px;
+}
+body{
+    background-color: info;
+}
+
+/* --- Fade-in suave para el contenido del detalle --- */
+.fade-in {
+    opacity: 0;
+    transition: opacity 1s ease-in-out; /* duración y suavidad */
+}
+
+.fade-in.show {
+    opacity: 1;
+}
+
+/* --- Barra de progreso personalizada --- */
+.progress {
+    height: 25px; /* un poco más alta para mejor visibilidad */
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #f0f0f0;
+}
+
+.progress-bar {
+    font-weight: bold;
+    font-size: 0.85rem;
+    transition: width 0.2s ease; /* suaviza el avance */
+}
+
+/* --- Colores alternativos para estados --- */
+.progress-bar.bg-primary {
+    background: linear-gradient(90deg, #007bff, #3399ff);
+}
+
+.progress-bar.bg-success {
+    background: linear-gradient(90deg, #28a745, #5cd65c);
+}
+
+.progress-bar.bg-danger {
+    background: linear-gradient(90deg, #dc3545, #ff6666);
+}
+
+#detallePanel {
+    max-height: none;       /* elimina límite de altura */
+    overflow-y: visible;    /* evita scroll interno */
+}
+
+#detalleContenido {
+    max-height: none;
+    overflow-y: visible;
+}
+.img-index {
+  width: 50px;          /* mismo tamaño que el texto */
+  height: 50px;         /* mantiene proporción */
+  vertical-align: middle; /* alinea con texto e íconos */
+}
+.col-md-6.tabla-ordenes {
+    max-height: 80vh;   /* ocupa hasta el 80% de la altura de la ventana */
+    overflow-y: auto;   /* scroll vertical independiente */
+    position: sticky;
+    top: 100px;         /* ajusta según la altura de tu cabecera/navegación */
+}
+
+#detallePanel {
+    min-height: 200px;
+}
+
+/* Reduce fuente en tabla de órdenes */
+.tabla-ordenes th,
+.tabla-ordenes td {
+    font-size: 0.80rem;   /* más pequeño que el default */
+    vertical-align: middle; /* centra verticalmente */
+}
+/* Panel derecho fijo */
+.panel-derecho {
+    position: sticky;   /* lo fija en pantalla */
+    top: 10px;         /* ajusta según la altura de tu cabecera/navegación */
+    height: fit-content;
+    min-height: 200px;  /* asegura altura mínima */
+}
+
+/* Contenido dinámico dentro del panel */
+#detalleContenido {
+    max-height: none;       /* elimina límite de altura */
+    overflow-y: visible;    /* evita scroll interno */
+}

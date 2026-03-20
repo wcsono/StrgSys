@@ -1,0 +1,41 @@
+<div th:fragment="modalVer-seccion" th:remove="tag">
+    <div class="modal-header">
+        <h5 class="modal-title">Artículo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+    </div>
+
+    <div class="modal-body">
+        <form id="formEditarArticulo" th:action="@{/editar}" th:object="${articulo}" method="post">
+            <input type="hidden" th:field="*{idArt}" />
+
+            <div class="input-group mb-2">
+                <span class="input-group-text">Código</span>
+                <input type="text" th:field="*{codArt}" class="form-control fw-bold" onfocus="this.select()"/>
+                <span class="input-group-text">U. Medida</span>
+                <input type="text" th:field="*{udm}" class="form-control fw-bold" onfocus="this.select()"/>
+            </div>
+
+            <div class="input-group mb-2">
+                <span class="input-group-text">Descripción</span>
+                <input type="text" th:field="*{desArt}" class="form-control fw-bold" onfocus="this.select()"/>
+            </div>
+
+            <div class="input-group mb-2">
+                <span class="input-group-text">Fecha Registro</span>
+                <input type="date" th:field="*{fecReg}" class="form-control fw-bold" onfocus="this.select()" />
+                <span class="input-group-text">Stock Actual</span>
+                <input type="number" th:field="*{stk}" class="form-control fw-bold" onfocus="this.select()"/>
+                <span class="input-group-text">Costo</span>
+                <input type="number" th:field="*{costo}" class="form-control fw-bold" onfocus="this.select()"/>
+            </div>
+
+
+
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>

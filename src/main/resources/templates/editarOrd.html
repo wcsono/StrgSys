@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/cabecero::cabecero-seccion(titulo='Edición Orden')}"></head>
+<body>
+
+<!-- Navegación principal -->
+<div th:replace="~{fragmentos/navegacion-principal::navegacion-principal-seccion}" th:remove="tag"></div>
+
+<div class="container mt-4">
+    <div class="text-center mb-4">
+        <h3>Edición de la Orden</h3>
+    </div>
+
+    <div class="row">
+        <!-- Columna izquierda: Datos de la orden -->
+        <div class="col-md-5">
+            <h5 class="text-center text-primary mb-2">Datos de la Orden</h5>
+            <form th:action="@{/orden/guardarEdicion}" method="post">
+                <input type="hidden" th:value="${orden.idOrd}" name="idOrd"/>
+
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Número Orden</span>
+                    <input type="text" class="form-control" name="numOrd"
+                           th:value="${orden.numOrd}" onfocus="this.select()">
+                </div>
+
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Cliente/Proveedor</span>
+                    <input type="text" class="form-control" name="nomOrd"
+                           th:value="${orden.nomOrd}" style="text-transform: uppercase;"
+                           oninput="this.value = this.value.toUpperCase();" onfocus="this.select()">
+                </div>
+
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Tipo Documento</span>
+                    <select class="form-select" name="tipoDocumento.idTd">
+                        <option th:each="td : ${tds}"
+                                th:value="${td.idTd}"
+                                th:text="${td.codTd}"
+                                th:selected="${td.idTd} == ${orden.tipoDocumento.idTd}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Fecha Registro</span>
+                    <input type="date" class="form-control" name="fecOrd"
+                           th:value="${orden.fecOrd}" onfocus="this.select()">
+                </div>
+
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Documento Referencia</span>
+                    <input type="text" class="form-control" name="ndocRef"
+                           th:value="${orden.ndocRef}" style="text-transform: uppercase;"
+                           oninput="this.value = this.value.toUpperCase();" onfocus="this.select()">
+                </div>
+
+                <div class="text-center mt-3">
+                    <div th:if="${!orden.estOrd}">
+                        <button class="btn btn-success" type="button"
+                                data-bs-toggle="offcanvas" data-bs-target="#offcanvasArticulos">
+                            <i class="bi bi-plus-circle me-1"></i> Agregar Artículos
+                        </button>
+                        <button type="submit" class="btn btn-primary mt-2">
+                            <i class="bi bi-save me-1"></i> Guardar Cambios
+                        </button>
+                    </div>
+                    <div th:if="${orden.estOrd and !orden.extornada}">
+                        <a th:href="@{'/orden/extornar/' + ${orden.idOrd}}" class="btn btn-danger">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i> Extornar Orden
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Columna derecha: Tabla de artículos -->
+        <div class="col-md-7">
+            <h5 class="text-center text-primary mb-2">Artículos en la Orden</h5>
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Descripción</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unitario</th>
+                    <th>Subtotal</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="detalle : ${detalles}" th:if="${#lists.size(detalles) > 0}">
+                    <td th:text="${detalle.articulo.codArt}"></td>
+                    <td th:text="${detalle.articulo.desArt}"></td>
+                    <td th:text="${detalle.cantidad}"></td>
+                    <td th:text="${detalle.cosArt}"></td>
+                    <td th:text="${detalle.cantidad * detalle.cosArt}"></td>
+                </tr>
+                <tr th:unless="${#lists.size(detalles) > 0}">
+                    <td colspan="5" class="text-center text-muted">No hay Artículos agregados</td>
+                </tr>
+                </tbody>
+                <tfoot>
+                <tr>
+                    <td colspan="5">
+                        <div class="card bg-success text-white">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Total Orden:</h5>
+                                <h4 class="mb-0">
+                                    <span th:text="${#numbers.formatDecimal(orden.cosOrd, 1, 'COMMA', 2, 'POINT')}"></span>
+                                </h4>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                </tfoot>
+            </table>
+
+            <div class="text-center mt-3" th:if="${!orden.estOrd}">
+                <form th:action="@{/orden/{id}/cerrar(id=${orden.idOrd})}" method="post">
+                    <button type="submit" class="btn btn-danger"
+                            th:disabled="${#lists.isEmpty(detalles)}">
+                        <i class="bi bi-lock-fill me-1"></i> Cerrar Orden
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Panel lateral (Offcanvas) para agregar artículos -->
+<div th:replace="@{/fragmentos/offcanvas-articulos}"></div>
+
+<!-- Pie de página -->
+<div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"></div>
+
+<!-- Inyección de tipTd -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const TIPTD = /*[[${orden.tipoDocumento.tipTd}]]*/ true;
+    /*]]>*/
+</script>
+
+<!-- Script principal -->
+<script src="/js/orden.js" defer></script>
+</body>
+</html>

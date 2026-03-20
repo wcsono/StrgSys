@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="detalle-orden-seccion">
+    <h5 class="text-primary text-center mb-3">Detalle de la Orden</h5>
+
+    <form id="formDetalleOrden" th:object="${ordenVer}">
+        <div class="row g-3">
+
+            <!-- Nro. Orden -->
+            <div class="col-md-6">
+                <div class="form-floating">
+                    <input type="text" th:value="*{numOrd}" class="form-control" id="numOrd" placeholder="Nro. Orden" readonly>
+                    <label for="numOrd">Nro. Orden</label>
+                </div>
+            </div>
+
+            <!-- Tipo Documento -->
+            <div class="col-md-6">
+                <div class="form-floating">
+                    <input type="text" th:value="*{tipoDocumento.codTd}" class="form-control" id="codTd" placeholder="Tipo Documento" readonly>
+                    <label for="codTd">Tipo Documento</label>
+                </div>
+            </div>
+
+            <!-- Cliente/Proveedor -->
+            <div class="col-12">
+                <div class="form-floating">
+                    <input type="text" th:value="*{nomOrd}" class="form-control" id="nomOrd" placeholder="Cliente/Proveedor" readonly>
+                    <label for="nomOrd">Cliente/Proveedor</label>
+                </div>
+            </div>
+
+            <!-- Fecha Registro -->
+            <div class="col-md-6">
+                <div class="form-floating">
+                    <input type="text"
+                           th:value="${ordenVer.fecOrd != null ? #temporals.format(ordenVer.fecOrd, 'dd/MM/yyyy') : ''}"
+                           class="form-control" id="fecOrd" placeholder="Fecha Registro" readonly>
+                    <label for="fecOrd">Fecha Registro</label>
+                </div>
+            </div>
+
+            <!-- Documento Referencia -->
+            <div class="col-md-6">
+                <div class="form-floating">
+                    <input type="text" th:value="*{ndocRef}" class="form-control" id="ndocRef" placeholder="Doc. Ref." readonly>
+                    <label for="ndocRef">Doc. Ref.</label>
+                </div>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+</body>
+</html>

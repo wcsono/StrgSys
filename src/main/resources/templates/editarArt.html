@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/cabecero::cabecero-seccion(titulo='Editar Articulo')}"></head>
+<body>
+<!--Menu de Navegacion-->
+<div th:replace="~{fragmentos/navegacion-principal::navegacion-principal-seccion}"></div>
+
+<div class="container">
+    <div class="row text-center" style="margin:30px">
+        <div class="col-6">
+            <h3>Editar Articulo</h3>
+            <div class="container" style="margin:30px">
+                <form action="/guardarEditarArt" th:object="${artEditar}" method="post">
+                    <!-- ID oculto -->
+                    <input type="hidden" th:field="*{idArt}"/>
+
+                    <!-- Código -->
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Código</span>
+                        <input type="text" th:field="*{codArt}" id="codArt" class="form-control" aria-label="codigo" autocomplete="on" onfocus="this.select()" style="text-transform: uppercase;"  oninput="this.value = this.value.toUpperCase();">
+                    </div>
+
+                    <!-- Descripción -->
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Descripción</span>
+                        <input type="text" th:field="*{desArt}" id="desArt" class="form-control" aria-label="descripcion" autocomplete="on" onfocus="this.select()" style="text-transform: uppercase;"  oninput="this.value = this.value.toUpperCase();">
+                    </div>
+                    <!-- U.D.M. -->
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">U.D.M.</span>
+                        <input type="text" th:field="*{udm}" id="udm" class="form-control" aria-label="UnidadMedida" autocomplete="on" onfocus="this.select()" style="text-transform: uppercase;"  oninput="this.value = this.value.toUpperCase();">
+                    </div>
+                    <!-- Costo -->
+                    <input type="number" th:field="*{costo}" id="costo"
+                           class="form-control"
+                           aria-label="costo"
+                           autocomplete="on"
+                           onfocus="this.select()"
+                           inputmode="decimal"
+                           step="0.01">
+                    <!-- stk -->
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Stock</span>
+                        <input type="number" th:field="*{stk}" id="stk" class="form-control" aria-label="Stock" autocomplete="on" onfocus="this.select()" style="text-transform: uppercase;"  oninput="this.value = this.value.toUpperCase();">
+                    </div>
+
+
+
+
+                    <!-- Estatus -->
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Estatus</span>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" th:field="*{estArt}" id="activo" value="true"  />
+                            <label class="form-check-label fw-bold" for="activo">Activo</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" th:field="*{estArt}" id="inactivo" value="false"  />
+                            <label class="form-check-label fw-bold" for="inactivo">Inactivo</label>
+                        </div>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="mb-1 d-flex justify-content-center mt-4">
+                        <button type="submit" class="btn btn-primary btn-sm me-4">Guardar</button>
+                        <a href="/articulos" class="btn btn-secondary btn-sm">Regresar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"></div>
+</body>
+</html>

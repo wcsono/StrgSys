@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- Fragmento de mensaje de error -->
+<div th:fragment="mensaje-error(condicion, texto)">
+    <div th:if="${condicion}" class="mt-2">
+        <span class="badge bg-danger" th:text="${texto}"></span>
+    </div>
+</div>
+</body>
+</html>

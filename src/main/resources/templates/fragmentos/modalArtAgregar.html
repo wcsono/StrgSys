@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="modalArtAgregar-seccion" th:remove="tag">
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/agregar}" th:object="${articuloForma}" method="post">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Nuevo Articulo</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="input-group mb-1 d-flex">
+                            <span class="input-group-text">Codigo</span>
+                            <input th:field="*{codArt}" class="form-control" aria-label="Codigo"required>
+                            <span class="input-group-text">U.Medida</span>
+                            <input th:field="*{udm}" class="form-control" aria-label="udm">
+                        </div>
+                        <div class="input-group mb-3 d-flex">
+                            <span class="input-group-text">Descripcion</span>
+                            <input th:field="*{desArt}" class="form-control" aria-label="Descripcion" required>
+                        </div>
+                        <div class="input-group mb-3 d-flex">
+                            <span class="input-group-text">Fecha de Registro</span>
+                            <input th:field="*{fecReg}" type="date" class="form-control" aria-label="FechaRegistro"
+                                   th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}">
+                        </div>
+                        <div class="input-group mb-3 d-flex">
+                            <span class="input-group-text">Stock Inicial</span>
+                            <input th:field="*{stk}" type="number" class="form-control" aria-label="Stock"required>
+                            <span class="input-group-text">Costo</span>
+                            <input th:field="*{costo}" type="number" class="form-control" aria-label="Costo" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+</html>

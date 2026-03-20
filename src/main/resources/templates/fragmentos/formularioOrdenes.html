@@ -1,0 +1,15 @@
+<div class="input-group mb-1">
+  <span class="input-group-text">Fecha Registro</span>
+
+  <!-- Campo editable con calendario -->
+  <input type="date"
+         th:field="*{fecOrd}"
+         class="form-control"
+         onclick="this.select()">
+
+  <!-- Campo adicional solo lectura en formato dd-MM-yyyy -->
+  <input type="text"
+         th:value="${#temporals.format(ordenVer.fecOrd, 'dd-MM-yyyy')}"
+         class="form-control"
+         readonly>
+</div>

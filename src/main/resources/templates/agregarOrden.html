@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/cabecero::cabecero-seccion(titulo='Nueva Orden')}"></head>
+<body>
+
+<!-- Navegación principal -->
+<div th:replace="~{fragmentos/navegacion-principal::navegacion-principal-seccion}" th:remove="tag"></div>
+
+<div class="container">
+    <div class="text-center my-4">
+        <h3>Nueva Orden</h3>
+    </div>
+
+    <!-- Centramos el formulario -->
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <!-- modelAttribute = tdForma -->
+            <form th:action="@{/guardarAgregarOrden}" th:object="${ordenForma}" method="post">
+                <input type="hidden" id="estOrd" name="estTOrd" value="false">
+
+                <!-- numOrd -->
+                <div class="input-group mb-3">
+                    <span class="input-group-text">N.Orden</span>
+                    <input id="numOrd" name="numOrd" class="form-control" aria-label="NOrden" style="text-transform: uppercase;"  oninput="this.value = this.value.toUpperCase();" required >
+                </div>
+
+                <!-- N=nomOrd -->
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Cliente/Proveedor</span>
+                    <input id="nomOrd" name="nomOrd" class="form-control" aria-label="clienteProveedor" style="text-transform: uppercase;"  oninput="this.value = this.value.toUpperCase();" required>
+                </div>
+
+<!--                Codigo Tipos Documentos-->
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Tipo Documento</span>
+                    <select th:field="*{tipoDocumento.idTd}" class="form-select" required>
+                        <option value=""  selected>Seleccione</option>
+                        <option th:each="td : ${tdsAgregarOrden}"
+                                th:value="${td.idTd}"
+                                th:text="${td.codTd}">
+                        </option>
+                    </select>
+                </div>
+
+
+                <!--                Fecha Orden-->
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Fecha Registro</span>
+                    <input type="date" id="fecOrd" name="fecOrd" class="form-control" aria-label="Fecha registro" style="text-transform: uppercase;"  oninput="this.value = this.value.toUpperCase();" required>
+                </div>
+
+                <!-- N= -->
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Documento Referencia</span>
+                    <input id="ndocRef" name="ndocRef" class="form-control" aria-label="Doc.Referencia" style="text-transform: uppercase;"  oninput="this.value = this.value.toUpperCase();">
+                </div>
+                <input type="hidden" name="cosOrd" value="0" />
+
+                <!-- Botones -->
+                <div class="text-center">
+                    <button id="btnAgregar" type="submit" class="btn btn-primary btn-sm me-3" disabled>
+                        <i class="bi bi-database-add me-1"></i>Agregar
+                    </button>
+                    <a th:href="@{/ordenes}" class="btn btn-secondary btn-sm">
+                        <i class="bi bi-arrow-return-left me-1"></i>Regresar
+                    </a>
+                    <!-- Mensaje de validación debajo de los botones -->
+                    <div>
+                        <span id="numOrdError" class="badge bg-danger mt-2 d-none">Error! Número de Orden ya existe</span>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+<script th:src="@{/js/orden.js}"></script>
+
+<div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"></div>
+
+</body>
+</html>

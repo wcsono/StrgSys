@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/cabecero::cabecero-seccion(titulo='Editar Tipo Documento')}"></head>
+<body>
+<!--Menu de Navegacion-->
+<div th:replace="~{fragmentos/navegacion-principal::navegacion-principal-seccion}"></div>
+
+<div class="container">
+    <div class="row text-center" style="margin:30px">
+        <div class="col-6">
+            <h3>Editar T.D.</h3>
+            <div class="container" style="margin:30px">
+                <form action="/guardarEditarTd" th:object="${tdEditar}" method="post">
+                    <!-- ID oculto -->
+                    <input type="hidden" th:field="*{idTd}"/>
+
+                    <!-- Código -->
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Código</span>
+                        <input type="text" th:field="*{codTd}" id="codTd" class="form-control" aria-label="codigo" autocomplete="on" onfocus="this.select()" style="text-transform: uppercase;"  oninput="this.value = this.value.toUpperCase();">
+                    </div>
+
+                    <!-- Descripción -->
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Descripción</span>
+                        <input type="text" th:field="*{desTd}" id="desTd" class="form-control" aria-label="descripcion" autocomplete="on" onfocus="this.select()" style="text-transform: uppercase;"  oninput="this.value = this.value.toUpperCase();">
+                    </div>
+
+                    <!-- Tipo -->
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Tipo</span>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" th:field="*{tipTd}" id="ingreso" value="true"/>
+                            <label class="form-check-label fw-bold" for="ingreso">Ingreso</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" th:field="*{tipTd}" id="salida" value="false"/>
+                            <label class="form-check-label fw-bold" for="salida">Salida</label>
+                        </div>
+                    </div>
+
+                    <!-- Estatus -->
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Estatus</span>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" th:field="*{estTd}" id="activo" value="true"  />
+                            <label class="form-check-label fw-bold" for="activo">Activo</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" th:field="*{estTd}" id="inactivo" value="false"  />
+                            <label class="form-check-label fw-bold" for="inactivo">Inactivo</label>
+                        </div>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="mb-1 d-flex justify-content-center mt-4">
+                        <button type="submit" class="btn btn-primary btn-sm me-4">Guardar</button>
+                        <a href="/tdocumentos" class="btn btn-secondary btn-sm">Regresar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"></div>
+</body>
+</html>

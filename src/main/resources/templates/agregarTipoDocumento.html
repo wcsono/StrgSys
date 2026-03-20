@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/cabecero::cabecero-seccion(titulo='Agregar Tipo Documento')}"></head>
+<body>
+
+<!-- Navegación principal -->
+<div th:replace="~{fragmentos/navegacion-principal::navegacion-principal-seccion}" th:remove="tag"></div>
+
+<div class="container">
+    <div class="text-center my-4">
+        <h3>Agregar Tipo Documento</h3>
+    </div>
+
+    <!-- Centramos el formulario -->
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <!-- modelAttribute = tdForma -->
+            <form th:action="@{/guardarTipoDocumento}" th:object="${tdForma}" method="post">
+                <input type="hidden" id="estTd" name="estTd" value="false">
+
+                <!-- Código -->
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Código</span>
+                    <input id="codTd" name="codTd" class="form-control" aria-label="codigo"
+                           style="text-transform: uppercase;"
+                           oninput="this.value = this.value.toUpperCase();">
+                </div>
+
+                <!-- Descripción -->
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Descripción</span>
+                    <input id="desTd" name="desTd" class="form-control" aria-label="descripcion"
+                           style="text-transform: uppercase;"
+                           oninput="this.value = this.value.toUpperCase();">
+                </div>
+
+                <!-- Tipo T.D. -->
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Tipo T.D.</span>
+                    <div class="form-control d-flex align-items-center">
+                        <div class="form-check form-check-inline mb-0">
+                            <input id="tipTdIngreso" name="tipTd" type="radio" value="true" class="form-check-input">
+                            <label class="form-check-label" for="tipTdIngreso">Ingreso</label>
+                        </div>
+                        <div class="form-check form-check-inline mb-0">
+                            <input id="tipTdSalida" name="tipTd" type="radio" value="false" class="form-check-input">
+                            <label class="form-check-label" for="tipTdSalida">Salida</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <button id="btnAgregarTd" type="submit" class="btn btn-primary btn-sm me-3">
+                        <i class="bi bi-database-add me-1"></i>Agregar
+                    </button>
+                    <a th:href="@{tipoDocumentos}" class="btn btn-secondary btn-sm">
+                        <i class="bi bi-arrow-return-left me-1"></i>Regresar
+                    </a>
+
+                    <!-- Mensaje de error debajo del botón -->
+                    <div id="errorCodigoTd" class="mt-2" style="display:none;"></div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"></div>
+<script th:src="@{/js/td.js}"></script>
+</body>
+</html>

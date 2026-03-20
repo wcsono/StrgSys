@@ -1,0 +1,63 @@
+<div th:fragment="offcanvas-articulos-seccion">
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasArticulos">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title">Agregar Artículos</h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+            <form th:action="@{/orden/{id}/articulos(id=${orden.idOrd})}" method="post">
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Código</span>
+                    <select class="form-select" id="codArt" name="idArt" required>
+                        <option value="">Seleccione</option>
+                        <option th:each="art : ${articulos}"
+                                th:value="${art.idArt}"
+                                th:text="${art.codArt  + ' - ' + art.stk}"
+                                th:data-descripcion="${art.desArt}"
+                                th:data-precio="${art.costo}"
+                                th:data-stock="${art.stk}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Descripción</span>
+                    <select class="form-select" id="desArt" required>
+                        <option value="">Seleccione</option>
+                        <option th:each="art : ${articulos}"
+                                th:value="${art.idArt}"
+                                th:text="${art.desArt}"
+                                th:data-codigo="${art.codArt}"
+                                th:data-precio="${art.costo}"
+                                th:data-stock="${art.stk}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Stock</span>
+                    <input type="number" class="form-control" id="stock" readonly>
+                </div>
+
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Cantidad</span>
+                    <input type="number" class="form-control" id="cantidad" name="cantidad" required onfocus="this.select()">
+                </div>
+
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Precio</span>
+                    <input type="number" step="0.01" class="form-control" id="precio" name="precio" required onfocus="this.select()">
+                </div>
+
+                <!-- Botón con ID corregido -->
+                <button type="submit" class="btn btn-primary" id="btnGuardar">Guardar</button>
+
+                <!-- Mensaje de validación -->
+                <div id="mensajeValidacion" class="text-danger mt-2" style="display:none; font-size:0.85rem;">
+                    Error!!... cantidad ingresada supera el stock disponible.
+                    Corrija la cantidad para poder guardar este artículo.
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

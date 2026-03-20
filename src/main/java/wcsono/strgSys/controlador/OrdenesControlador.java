@@ -1,0 +1,283 @@
+package wcsono.strgSys.controlador;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import wcsono.strgSys.modelo.Orden;
+import wcsono.strgSys.modelo.TipoDocumento;
+import wcsono.strgSys.servicio.ArticuloServicio;
+import wcsono.strgSys.servicio.IOrdenServicio;
+import wcsono.strgSys.servicio.ITipoDocumentoServicio;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.List;
+
+@Controller
+public class OrdenesControlador {
+
+    @Autowired
+    private ArticuloServicio articuloServicio;
+
+    @Autowired
+    private IOrdenServicio ordenServicio;
+
+    @Autowired
+    private ITipoDocumentoServicio tipoDocumentoServicio;
+
+
+    private final Logger logger = LoggerFactory.getLogger(OrdenesControlador.class);
+
+    /**
+     * Listar todas las órdenes (vista Thymeleaf)
+     */
+    @GetMapping("/ordenes")
+    public String mostrarOrdenes(ModelMap modelo,
+                                 @PageableDefault(page = 0, size = 10, sort = "idOrd", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        // Log request pageable para depuración
+        logger.info("Request received for /ordenes -> page={}, size={}, sort={}",
+                pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+
+        Page<Orden> paginaOrdenes = ordenServicio.listarOrdenesConTipoDocumento(pageable);
+
+        // Logs del resultado de la página
+        logger.info("Page result -> totalElements={}, totalPages={}, number={}, size={}",
+                paginaOrdenes.getTotalElements(),
+                paginaOrdenes.getTotalPages(),
+                paginaOrdenes.getNumber(),
+                paginaOrdenes.getSize());
+
+        // Log contenido (nivel DEBUG)
+        paginaOrdenes.forEach(ord -> logger.debug("Orden en page content -> id={}, numOrd={}", ord.getIdOrd(), ord.getNumOrd()));
+
+        // Atributos para la vista
+        modelo.put("paginaOrdenes", paginaOrdenes);
+        modelo.put("listadoOrdenes", paginaOrdenes.getContent());
+
+        return "ordenes";
+    }
+
+    /**
+     * Ver una orden en formato JSON (API REST)
+     */
+    @GetMapping("/verOrd/{id}")
+    @ResponseBody
+    public ResponseEntity<Orden> verOrden(@PathVariable Integer id) {
+        Orden orden = ordenServicio.buscarOrdenConDetalles(id);
+        if (orden == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(orden);
+    }
+
+    /**
+     * Ver detalle de orden en fragmento Thymeleaf
+     */
+    @GetMapping("/detalleOrd/{id}")
+    public String verDetalleOrden(@PathVariable Integer id, ModelMap modelo) {
+        Orden orden = ordenServicio.buscarOrdenConTipoDocumentoYDetalles(id);
+        if (orden == null) {
+            throw new IllegalArgumentException("Orden no encontrada");
+        }
+
+        modelo.put("orden", orden);
+        modelo.put("detalles", orden.getDetalles());
+        modelo.put("articulos", articuloServicio.listarArticulos()); // 🔹 agregar esta línea
+
+        return "fragmentos/detalle-orden :: detalle"; // se mantiene igual
+    }
+    /**
+     * Mostrar formulario para agregar una nueva orden
+     */
+    @GetMapping("/agregarOrden")
+    public String mostrarAgregarOrden(ModelMap modelo) {
+        List<TipoDocumento> tdocs = tipoDocumentoServicio.listarTipoDocumentos();
+        modelo.put("tdsAgregarOrden", tdocs);
+
+        // Inicializar el objeto ordenForma con un TipoDocumento vacío
+        Orden orden = new Orden();
+        orden.setTipoDocumento(new TipoDocumento());
+        modelo.put("ordenForma", orden);
+
+        return "agregarOrden";
+    }
+
+    /**
+     * Guardar nueva orden
+     */
+    @PostMapping("/guardarAgregarOrden")
+    public String guardarOrden(@ModelAttribute("ordenForma") Orden orden) {
+        // Validar que se haya seleccionado un TipoDocumento
+        if (orden.getTipoDocumento() != null && orden.getTipoDocumento().getIdTd() != null) {
+            // Recuperar el TipoDocumento completo desde la BD
+            TipoDocumento td = tipoDocumentoServicio.buscarTdPorId(orden.getTipoDocumento().getIdTd());
+            orden.setTipoDocumento(td);
+        } else {
+            throw new IllegalArgumentException("Debe seleccionar un Tipo de Documento válido");
+        }
+
+        // Guardar la orden con el TipoDocumento ya cargado
+        Orden ordenGuardada = ordenServicio.guardarOrden(orden);
+        return "redirect:/orden/" + ordenGuardada.getIdOrd();
+    }
+
+    /**
+     * Eliminar orden
+     */
+    @GetMapping("/eliminarOrd/{id}")
+    public String eliminarOrden(@PathVariable("id") int idOrd,
+                                RedirectAttributes redirectAttrs) {
+        Orden ordenEliminar = ordenServicio.buscarOrdenPorId(idOrd);
+
+        if (ordenEliminar != null) {
+            if (!ordenEliminar.isEstOrd()) {
+                ordenServicio.eliminarOrden(ordenEliminar);
+                redirectAttrs.addFlashAttribute("mensaje", "Orden eliminada correctamente.");
+            } else {
+                redirectAttrs.addFlashAttribute("error", "Orden con Articulos no se puede eliminar. Proceda con el Extorno desde Editar orden.");
+            }
+        } else {
+            redirectAttrs.addFlashAttribute("error", "La Orden no existe.");
+        }
+
+        return "redirect:/ordenes";
+    }
+
+    @PostMapping("/orden/{id}/cerrar")
+    public String cerrarOrden(@PathVariable Integer id, RedirectAttributes redirectAttrs) {
+        Orden orden = ordenServicio.buscarOrdenConTipoDocumentoYDetalles(id);
+        if (orden == null) {
+            throw new IllegalArgumentException("Orden no encontrada");
+        }
+
+        // Calcular el costo total sumando los artículos con BigDecimal
+        BigDecimal total = orden.getDetalles().stream()
+                .map(det -> det.getCosArt().multiply(BigDecimal.valueOf(det.getCantidad())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
+
+        // Actualizar campos de la orden
+        orden.setCosOrd(total);
+        orden.setEstOrd(true); // true = cerrada
+
+        // Lógica de stock según tipTd
+        boolean esEntrada = orden.getTipoDocumento().isTipTd(); // true = suma, false = resta
+
+        // 🔹 Corrección: usar getDetalles()
+        orden.getDetalles().forEach(det -> {
+            var articulo = det.getArticulo();
+
+            // Stock: suma o resta según tipTd
+            int nuevoStock = esEntrada
+                    ? articulo.getStk() + det.getCantidad()
+                    : articulo.getStk() - det.getCantidad();
+            articulo.setStk(nuevoStock);
+
+            // Actualizar costo con el precio unitario registrado
+            articulo.setCosto(det.getCosArt());
+
+            // estArt siempre true al estar vinculado a una orden
+            articulo.setEstArt(true);
+
+            // Guardar cambios en artículo
+            articuloServicio.guardarArticulo(articulo);
+
+            logger.info("Artículo {} actualizado: stock={}, costo={}, estArt={}",
+                    articulo.getCodArt(), articulo.getStk(), articulo.getCosto(), articulo.isEstArt());
+        });
+
+        // Guardar la orden cerrada
+        ordenServicio.guardarOrden(orden);
+
+        redirectAttrs.addFlashAttribute("mensaje", "Orden cerrada exitosamente y artículos actualizados.");
+        return "redirect:/ordenes";
+    }
+
+    /**
+     * Mostrar formulario de edición de una orden
+     */
+    @GetMapping("/editarOrd/{id}")
+    public String mostrarEdicionOrden(@PathVariable("id") Integer idOrd, ModelMap modelo) {
+        Orden orden = ordenServicio.buscarOrdenConTipoDocumentoYDetalles(idOrd);
+
+        if (orden == null) {
+            throw new IllegalArgumentException("Orden no encontrada");
+        }
+
+        modelo.put("orden", orden);
+        modelo.put("detalles", orden.getDetalles());
+        modelo.put("articulos", articuloServicio.listarArticulos()); // para el offcanvas
+        modelo.put("tds", tipoDocumentoServicio.listarTipoDocumentos()); // 🔹 agregar lista de TipoDocumento
+
+        return "editarOrd";
+    }
+
+    //    procedimiento para guardar los cambion en la orden
+    @PostMapping("/orden/guardarEdicion")
+    public String guardarEdicionOrden(@ModelAttribute Orden orden,
+                                      RedirectAttributes redirectAttrs) {
+        // Buscar la orden existente
+        Orden ordenExistente = ordenServicio.buscarOrdenConTipoDocumentoYDetalles(orden.getIdOrd());
+        if (ordenExistente == null) {
+            throw new IllegalArgumentException("Orden no encontrada");
+        }
+
+        // Actualizar campos editables
+        ordenExistente.setNumOrd(orden.getNumOrd());
+        ordenExistente.setNomOrd(orden.getNomOrd());
+        ordenExistente.setFecOrd(orden.getFecOrd());
+        ordenExistente.setNdocRef(orden.getNdocRef());
+
+        // Recuperar el TipoDocumento completo desde la BD
+        if (orden.getTipoDocumento() != null && orden.getTipoDocumento().getIdTd() != null) {
+            TipoDocumento td = tipoDocumentoServicio.buscarTdPorId(orden.getTipoDocumento().getIdTd());
+            if (td == null) {
+                throw new IllegalArgumentException("Tipo de Documento inválido");
+            }
+            ordenExistente.setTipoDocumento(td);
+        }
+
+        // Guardar cambios
+        ordenServicio.guardarOrden(ordenExistente);
+
+// 🔹 Recargar la orden para asegurar que el TipoDocumento está actualizado
+        Orden ordenRefrescada = ordenServicio.buscarOrdenConTipoDocumentoYDetalles(ordenExistente.getIdOrd());
+
+        redirectAttrs.addFlashAttribute("mensaje", "Orden actualizada correctamente.");
+        return "redirect:/editarOrd/" + ordenRefrescada.getIdOrd();
+    }
+
+//    Extorno de Ordenes
+@GetMapping("/orden/extornar/{id}")
+public String extornarOrden(@PathVariable Integer id, RedirectAttributes redirectAttrs) {
+    try {
+        ordenServicio.extornarOrden(id);
+        redirectAttrs.addFlashAttribute("mensaje", "Orden extornada correctamente. Stock revertido.");
+    } catch (IllegalArgumentException e) {
+        redirectAttrs.addFlashAttribute("error", "Orden no encontrada.");
+    }
+    return "redirect:/ordenes";
+}
+
+//Metodo que carga los Articulos en el fragmento offcanvas-articulos
+@GetMapping("/fragmento/articulos")
+public String cargarFragmentoArticulos(ModelMap modelo) {
+    modelo.put("articulos", articuloServicio.listarArticulos());
+    return "fragmentos/offcanvas-articulos :: offcanvas-articulos-seccion";
+}
+
+@GetMapping("/validarNumOrd")
+@ResponseBody
+public boolean validarNumOrd(@RequestParam String numOrd) {
+return ordenServicio.validarNumOrdUnico(numOrd);
+}
+}

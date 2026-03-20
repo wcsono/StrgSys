@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- Sección del modal como fragmento -->
+<div th:fragment="modalTdAgregar-seccion">
+    <div class="modal fade" id="modalTdAgregar" tabindex="-1" aria-labelledby="modalTdLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Formulario vinculado al objeto tdForma -->
+                <form th:action="@{/tdAgregar}" th:object="${tdForma}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalTdLabel">Agregar Tipo de Documento</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        <!-- Mensaje de error dentro del modal -->
+                        <div th:if="${mensajeError}" class="alert alert-danger mb-2">
+                            <span th:text="${mensajeError}"></span>
+                        </div>
+
+                        <!-- Campo Código (conversión automática a mayúsculas) -->
+                        <div class="input-group mb-2">
+                            <span class="input-group-text">Código</span>
+                            <input th:field="*{codTd}"
+                                   class="form-control"
+                                   id="codTd"
+                                   aria-label="Código"
+                                   style="text-transform: uppercase;"
+                                   oninput="this.value = this.value.toUpperCase()"
+                                   required>
+                        </div>
+                        <div th:if="${#fields.hasErrors('codTd')}" class="text-danger small">
+                            <span th:errors="*{codTd}"></span>
+                        </div>
+
+                        <!-- Campo Descripción -->
+                        <div class="input-group mb-2">
+                            <span class="input-group-text">Descripción</span>
+                            <input th:field="*{desTd}" class="form-control" id="desTd" aria-label="Descripción" required>
+                        </div>
+                        <div th:if="${#fields.hasErrors('desTd')}" class="text-danger small">
+                            <span th:errors="*{desTd}"></span>
+                        </div>
+
+                        <!-- Campo Tipo (Ingreso / Salida en una sola línea) -->
+                        <div class="input-group mb-2">
+                            <span class="input-group-text">Tipo</span>
+                            <div class="form-check form-check-inline ms-2">
+                                <input class="form-check-input" type="radio" th:field="*{ingsal}" value="1" required>
+                                <label class="form-check-label">Ingreso</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" th:field="*{ingsal}" value="0" required>
+                                <label class="form-check-label">Salida</label>
+                            </div>
+                        </div>
+                        <div th:if="${#fields.hasErrors('ingsal')}" class="text-danger small">
+                            <span th:errors="*{ingsal}"></span>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success btn-sm">Guardar</button>
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

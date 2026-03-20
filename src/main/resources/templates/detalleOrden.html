@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/cabecero::cabecero-seccion(titulo='EstaPaginaDesconocida')}"></head>
+<body>
+
+<!-- Navegación principal -->
+<div th:replace="~{fragmentos/navegacion-principal::navegacion-principal-seccion}" th:remove="tag"></div>
+
+<div class="container">
+    <div class="text-center my-4">
+        <h3>Orden registrada</h3>
+    </div>
+
+    <!-- Datos de la orden -->
+    <div class="mb-3">
+        <p><strong>Número:</strong> <span th:text="${orden.numOrd}"></span></p>
+        <p><strong>Cliente/Proveedor:</strong> <span th:text="${orden.nomOrd}"></span></p>
+        <p><strong>Fecha:</strong> <span th:text="${orden.fecOrd}"></span></p>
+    </div>
+
+    <!-- Botón para agregar artículos -->
+    <div class="text-center my-3">
+        <button type="button" class="btn btn-success btn-sm"
+                data-bs-toggle="offcanvas" data-bs-target="#panelArticulos">
+            <i class="bi bi-plus-circle me-1"></i> Agregar Artículos
+        </button>
+    </div>
+
+    <a th:href="@{/ordenes}" class="btn btn-secondary btn-sm">
+        <i class="bi bi-arrow-return-left me-1"></i> Regresar al listado
+    </a>
+</div>
+
+<!-- Panel derecho (offcanvas) -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="panelArticulos">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">Agregar Artículos</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <!-- Formulario para agregar artículo -->
+        <form id="formArticulo">
+            <div class="input-group mb-3">
+                <span class="input-group-text">Código</span>
+                <input type="text" id="codArt" class="form-control" required>
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text">Descripción</span>
+                <input type="text" id="descArt" class="form-control" required>
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text">Cantidad</span>
+                <input type="number" id="cantArt" class="form-control" required>
+            </div>
+            <div class="text-center">
+                <button type="button" class="btn btn-primary btn-sm" onclick="agregarArticulo()">
+                    <i class="bi bi-plus-lg me-1"></i> Guardar
+                </button>
+            </div>
+        </form>
+
+        <!-- Tabla dinámica -->
+        <table class="table table-sm mt-4" id="tablaArticulos">
+            <thead>
+            <tr>
+                <th>Código</th>
+                <th>Descripción</th>
+                <th>Cantidad</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Filas dinámicas -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"></div>
+
+<script>
+    function agregarArticulo() {
+        const cod = document.getElementById("codArt").value;
+        const desc = document.getElementById("descArt").value;
+        const cant = document.getElementById("cantArt").value;
+
+        if (cod && desc && cant) {
+            const tabla = document.getElementById("tablaArticulos").querySelector("tbody");
+            const fila = tabla.insertRow();
+            fila.innerHTML = `<td>${cod}</td><td>${desc}</td><td>${cant}</td>`;
+
+            // limpiar formulario
+            document.getElementById("formArticulo").reset();
+        }
+    }
+</script>
+
+</body>
+</html>

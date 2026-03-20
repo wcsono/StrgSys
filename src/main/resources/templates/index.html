@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/cabecero::cabecero-seccion(titulo='Inicio')}">
+
+</head>
+<body>
+<div class="container text-center mb-5 mt-5">
+    <h1>Storage System</h1>
+</div>
+<div class="container d-flex justify-content-between">
+
+    <a href="/articulos"><div class="card" style="width: 18rem;">
+        <img src="/imgs/articulos.jpg" class="card-img-top" alt="...">
+        <div class="card-body">
+            <h2 class="card-title text-center">Articulos</h2>
+        </div>
+    </div></a>
+
+    <a href="/ordenes"><div class="card" style="width: 18rem;">
+        <img src="/imgs/ordenico.png" class="card-img-top" alt="...">
+        <div class="card-body">
+            <h2 class="card-title text-center">Ordenes</h2>
+        </div>
+    </div></a>
+
+    <a href="#"><div class="card" style="width: 18rem;">
+        <img src="/imgs/inventicono.png" class="card-img-top" alt="...">
+        <div class="card-body">
+            <h2 class="card-title text-center">Inventario</h2>
+        </div>
+    </div></a>
+
+    <a href="/tipoDocumentos"><div class="card" style="width: 18rem;">
+        <img src="/imgs/tdi.jpg" class="card-img-top" alt="...">
+        <div class="card-body">
+            <h2 class="card-title text-center">Tipos Documentos</h2>
+        </div>
+    </div>
+
+</div>
+
+
+<div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"/>
+</body>
+</html></a>

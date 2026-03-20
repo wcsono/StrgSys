@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/cabecero::cabecero-seccion(titulo='Tipos de Documento')}"></head>
+<body>
+
+<!-- Navegación principal -->
+<div th:replace="~{fragmentos/navegacion-principal::navegacion-principal-seccion}" th:remove="tag"></div>
+
+<!-- Contenido principal -->
+<div class="container mt-4">
+
+    <!-- Mensaje de éxito -->
+    <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${mensajeExito}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+
+    <!-- Mensaje de error -->
+    <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${mensajeError}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+
+    <!-- Título -->
+    <div class="row text-primary">
+        <div class="col-8 text-center">
+            <h2>Tipos de Documentos</h2>
+        </div>
+    </div>
+
+    <!-- Tabla de tipos de documento -->
+    <div class="row d-flex mt-3">
+        <div class="col-8 mt-2">
+            <table class="table table-striped">
+                <thead class="table-primary text-center align-items-center">
+                <tr>
+                    <th>ID</th>
+                    <th>Código</th>
+                    <th>Descripción</th>
+                    <th>Ingreso/Salida</th>
+                    <th>
+                        <!-- Botón circular debajo de la tabla, alineado a la derecha -->
+                        <div class="d-flex justify-content-center mt-3">
+                            <a href="/agregarTipoDocumento" class="btn btn-sm btn-primary rounded d-flex align-items-center justify-content-center">
+                                <i class="bi bi-file-earmark-plus me-1"></i>
+                                Agregar T.D.
+                            </a>
+                        </div>
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="td : ${tiposDocumentos}" class="text-center">
+                    <td th:text="${td.idTd}"></td>
+                    <td th:text="${td.codTd}"></td>
+                    <td th:text="${td.desTd}"></td>
+                    <td th:text="${td.tipTd ? 'Ingreso' : 'Salida'}"></td>
+                    <td class="text-center">
+                        <div class="d-flex justify-content-center gap-2">
+                            <a th:href="@{/editarTd/{id}(id=${td.idTd})}"
+                               class="btn btn-dark btn-sm me-2" title="Editar registro">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <a th:href="@{/eliminarTd/{id}(id=${td.idTd})}"
+                               class="btn btn-danger btn-sm" title="Eliminar registro">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/td.js}"></script>
+
+<!-- Inicializar tooltips -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+    });
+</script>
+
+<div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"></div>
+
+</body>
+</html>
