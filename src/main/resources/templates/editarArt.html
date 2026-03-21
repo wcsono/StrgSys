@@ -12,7 +12,7 @@
             <div class="container" style="margin:30px">
                 <form action="/guardarEditarArt" th:object="${artEditar}" method="post">
                     <!-- ID oculto -->
-                    <input type="hidden" th:field="*{idArt}"/>
+                    <input type="hidden" th:field="*{idArt}" id="idArt"/>
 
                     <!-- Código -->
                     <div class="input-group mb-3">
@@ -62,8 +62,11 @@
 
                     <!-- Botones -->
                     <div class="mb-1 d-flex justify-content-center mt-4">
-                        <button type="submit" class="btn btn-primary btn-sm me-4">Guardar</button>
+                        <button type="submit" id="btnGuardar" class="btn btn-primary btn-sm me-4">Guardar</button>
                         <a href="/articulos" class="btn btn-secondary btn-sm">Regresar</a>
+                        <div id="errorCodigoEditar" class="mt-2" style="display:none;">
+                            <span class="badge bg-danger">Error!! Código de Artículo ya registrado</span>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -72,5 +75,7 @@
 </div>
 
 <div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"></div>
+<script th:src="@{/js/articulo.js}"></script>
+
 </body>
 </html>

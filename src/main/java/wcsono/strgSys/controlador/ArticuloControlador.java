@@ -105,7 +105,11 @@ public class ArticuloControlador {
     }
     @GetMapping("/validarCodigoArt")
     @ResponseBody
-    public boolean validarCodigoArt(@RequestParam String codArt) {
-        return articuloServicio.existeCodigo(codArt);
+    public boolean validarCodigoArt(@RequestParam String codArt,
+                                    @RequestParam(required = false) Integer idArt) {
+        return articuloServicio.listarArticulos().stream()
+                .anyMatch(a -> (idArt == null || !a.getIdArt().equals(idArt)) &&
+                        a.getCodArt().equalsIgnoreCase(codArt));
     }
+
 }
