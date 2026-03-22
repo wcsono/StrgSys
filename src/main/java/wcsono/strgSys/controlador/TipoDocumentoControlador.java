@@ -115,7 +115,18 @@ public class TipoDocumentoControlador {
     // Validación AJAX de codTd
     @GetMapping("/validarCodigoTd")
     @ResponseBody
-    public boolean validarCodigoTd(@RequestParam String codTd) {
-        return tipoDocumentoService.existeCodigo(codTd);
+    public boolean validarCodigoTd(@RequestParam String codTd,
+                                   @RequestParam(required = false) Integer idTd) {
+        TipoDocumento actual = tipoDocumentoService.buscarTdPorId(idTd);
+
+        // Si estamos editando y el código es igual al original, no marcar error
+        if (actual != null && actual.getCodTd().equalsIgnoreCase(codTd)) {
+            return false;
+        }
+
+        // Validar contra los demás registros
+        return tipoDocumentoService.listarTipoDocumentos().stream()
+                .anyMatch(td -> !td.getIdTd().equals(idTd) &&
+                        td.getCodTd().equalsIgnoreCase(codTd));
     }
 }

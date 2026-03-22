@@ -10,6 +10,7 @@ import wcsono.strgSys.modelo.Articulo;
 import wcsono.strgSys.servicio.ArticuloServicio;
 
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class ArticuloControlador {
@@ -107,8 +108,19 @@ public class ArticuloControlador {
     @ResponseBody
     public boolean validarCodigoArt(@RequestParam String codArt,
                                     @RequestParam(required = false) Integer idArt) {
+        // Buscar el artículo actual
+        Optional<Articulo> articuloActual = articuloServicio.listarArticulos().stream()
+                .filter(a -> a.getIdArt().equals(idArt))
+                .findFirst();
+
+        // Si estamos editando y el código es igual al original, no validar
+        if (articuloActual.isPresent() && articuloActual.get().getCodArt().equalsIgnoreCase(codArt)) {
+            return false; // No hay error
+        }
+
+        // Validar contra los demás artículos
         return articuloServicio.listarArticulos().stream()
-                .anyMatch(a -> (idArt == null || !a.getIdArt().equals(idArt)) &&
+                .anyMatch(a -> !a.getIdArt().equals(idArt) &&
                         a.getCodArt().equalsIgnoreCase(codArt));
     }
 

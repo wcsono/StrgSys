@@ -12,7 +12,7 @@
             <div class="container" style="margin:30px">
                 <form action="/guardarEditarTd" th:object="${tdEditar}" method="post">
                     <!-- ID oculto -->
-                    <input type="hidden" th:field="*{idTd}"/>
+                    <input type="hidden" th:field="*{idTd}"id="idTd" name="idTd"/>
 
                     <!-- Código -->
                     <div class="input-group mb-3">
@@ -54,9 +54,10 @@
 
                     <!-- Botones -->
                     <div class="mb-1 d-flex justify-content-center mt-4">
-                        <button type="submit" class="btn btn-primary btn-sm me-4">Guardar</button>
-                        <a href="/tdocumentos" class="btn btn-secondary btn-sm">Regresar</a>
+                        <button type="submit"  id="btnGuardarTd" class="btn btn-primary btn-sm me-4">Guardar</button>
+                        <a href="/tipoDocumentos" class="btn btn-secondary btn-sm">Regresar</a>
                     </div>
+                    <div id="errorCodigoTdEditar" style="display:none;"></div>
                 </form>
             </div>
         </div>
@@ -64,5 +65,7 @@
 </div>
 
 <div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"></div>
+<script th:src="@{/js/td.js}"></script>
+
 </body>
 </html>

@@ -1,6 +1,6 @@
 // td.js
 document.addEventListener("DOMContentLoaded", function () {
-    // --- Lógica del modal ---
+    // --- Lógica del modal de agregar ---
     const modalElement = document.getElementById("modalTdAgregar");
 
     const abrirModal = document.body.getAttribute("data-abrir-modal");
@@ -20,7 +20,9 @@ document.addEventListener("DOMContentLoaded", function () {
         console.warn("No se encontró el elemento con id 'modalTdAgregar'");
     }
 
-    // --- Validación de codTd en tiempo real ---
+    // ===============================
+    // Validación de codTd en tiempo real (Agregar)
+    // ===============================
     const codTdInput = document.getElementById("codTd");
     const btnAgregarTd = document.getElementById("btnAgregarTd");
     const errorCodigoTd = document.getElementById("errorCodigoTd");
@@ -47,9 +49,42 @@ document.addEventListener("DOMContentLoaded", function () {
                         errorCodigoTd.style.display = "none";
                     }
                 })
-                .catch(error => console.error("Error en la validación:", error));
+                .catch(error => console.error("Error en la validación (agregar):", error));
         });
-    } else {
-        console.warn("No se encontraron los elementos de validación codTd/btnAgregarTd/errorCodigoTd");
+    }
+
+    // ===============================
+    // Validación de codTd en tiempo real (Editar)
+    // ===============================
+    const btnGuardarTd = document.getElementById("btnGuardarTd");
+    const errorCodigoTdEditar = document.getElementById("errorCodigoTdEditar");
+    const idTdField = document.getElementById("idTd"); // hidden con el ID del tipoDocumento
+
+    if (codTdInput && btnGuardarTd && errorCodigoTdEditar && idTdField) {
+        codTdInput.addEventListener("input", function () {
+            const codTd = codTdInput.value.trim();
+            const idTd = idTdField.value;
+
+            if (codTd.length === 0) {
+                errorCodigoTdEditar.style.display = "none";
+                btnGuardarTd.disabled = false;
+                return;
+            }
+
+            fetch(`/validarCodigoTd?codTd=${encodeURIComponent(codTd)}&idTd=${idTd}`)
+                .then(response => response.json())
+                .then(existe => {
+                    if (existe) {
+                        btnGuardarTd.disabled = true;
+                        errorCodigoTdEditar.innerHTML =
+                            '<span class="badge bg-danger">⚠️ El código ya está registrado</span>';
+                        errorCodigoTdEditar.style.display = "block";
+                    } else {
+                        btnGuardarTd.disabled = false;
+                        errorCodigoTdEditar.style.display = "none";
+                    }
+                })
+                .catch(error => console.error("Error en la validación (editar):", error));
+        });
     }
 });
