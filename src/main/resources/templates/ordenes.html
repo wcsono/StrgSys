@@ -28,12 +28,22 @@
                     <th>Costo</th>
                     <th>
                         <div class="container">
-                            <div class="d-flex justify-content-center mt-3">
+                            <div class="d-flex flex-column align-items-center mt-3 gap-2">
+                                <!-- Botón de búsqueda -->
+                                <button class="btn btn-outline-primary btn-sm d-flex align-items-center justify-content-center"
+                                        type="button" data-bs-toggle="offcanvas" data-bs-target="#filtroOffcanvas">
+                                    <i class="bi bi-binoculars me-1"></i> Buscar
+                                </button>
+
+                                <!-- Botón agregar orden -->
                                 <a href="/agregarOrden" class="btn btn-sm btn-primary rounded d-flex align-items-center justify-content-center">
                                     <i class="bi bi-file-earmark-plus me-1"></i> Agregar Orden
                                 </a>
                             </div>
                         </div>
+
+
+
                     </th>
                 </tr>
                 </thead>
@@ -106,9 +116,49 @@
                 <!-- Aquí se inyecta el detalle con orden.js -->
             </div>
         </div>
-<!--        Aqui creo que ingresare el offcanvas lateral izquierdo para filtrar las ordenes por numOrd y nomOrd-->
     </div>
 </div>
+<!-- Offcanvas lateral izquierdo -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="filtroOffcanvas">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">Filtros de Órdenes</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form th:action="@{/ordenes}" method="get" class="d-flex flex-column gap-3">
+
+            <!-- Filtro por número -->
+            <div>
+                <label for="numOrd" class="form-label">Número de Orden</label>
+                <input type="text" id="numOrd" name="numOrd" class="form-control" placeholder="Ej: 12345">
+            </div>
+
+            <!-- Filtro por cliente/proveedor -->
+            <div>
+                <label for="nomOrd" class="form-label">Cliente/Proveedor</label>
+                <input type="text" id="nomOrd" name="nomOrd" class="form-control" placeholder="Ej: Juan Pérez">
+            </div>
+
+            <!-- Filtro por fecha desde -->
+            <div>
+                <label for="fecOrdDesde" class="form-label">Fecha desde</label>
+                <input type="date" id="fecOrdDesde" name="fecOrdDesde" class="form-control">
+            </div>
+
+            <!-- Filtro por fecha hasta -->
+            <div>
+                <label for="fecOrdHasta" class="form-label">Fecha hasta</label>
+                <input type="date" id="fecOrdHasta" name="fecOrdHasta" class="form-control">
+            </div>
+
+            <!-- Botón aplicar filtros -->
+            <button type="submit" class="btn btn-primary mt-2">
+                <i class="bi bi-search"></i> Aplicar Filtros
+            </button>
+        </form>
+    </div>
+</div>
+
 
 <!-- Scripts -->
 
