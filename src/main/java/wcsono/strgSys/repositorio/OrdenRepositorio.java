@@ -4,13 +4,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import wcsono.strgSys.modelo.Orden;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface OrdenRepositorio extends JpaRepository<Orden, Integer> {
+public interface OrdenRepositorio extends JpaRepository<Orden, Integer>, JpaSpecificationExecutor<Orden> {
 
     /**
      * Consulta paginada explícita + countQuery para evitar discrepancias.
@@ -33,23 +34,11 @@ public interface OrdenRepositorio extends JpaRepository<Orden, Integer> {
     @EntityGraph(attributePaths = {"tipoDocumento", "detalles"})
     Optional<Orden> findWithTipoDocumentoAndDetallesByIdOrd(Integer id);
 
-    // 🔹 Nuevos métodos para manejar extornos
+    // 🔹 Métodos derivados para extornos y estados
 
-    /**
-     * Listar todas las órdenes extornadas.
-     */
     List<Orden> findByExtornadaTrue();
-
-    /**
-     * Listar todas las órdenes no extornadas.
-     */
     List<Orden> findByExtornadaFalse();
-
-    /**
-     * Listar órdenes cerradas y no extornadas.
-     */
     List<Orden> findByEstOrdTrueAndExtornadaFalse();
 
     boolean existsByNumOrd(String numOrd);
-
 }

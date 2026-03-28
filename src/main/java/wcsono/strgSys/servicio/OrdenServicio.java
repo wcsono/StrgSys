@@ -5,11 +5,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import wcsono.strgSys.modelo.Orden;
 import wcsono.strgSys.repositorio.OrdenRepositorio;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -71,7 +73,7 @@ public class OrdenServicio implements IOrdenServicio {
         logger.info("Orden eliminada -> id={}", orden.getIdOrd());
     }
 
-    // 🔹 Nuevo método: Extornar orden
+    // 🔹 Extornar orden
     @Override
     @Transactional
     public void extornarOrden(Integer id) {
@@ -124,4 +126,49 @@ public class OrdenServicio implements IOrdenServicio {
         return !ordenRepositorio.existsByNumOrd(numOrd);
     }
 
+    // 🔹 Filtros combinados
+    @Override
+    public Page<Orden> listarOrdenesFiltradas(
+            String numOrd,
+            String nomOrd,
+            LocalDate fecOrdDesde,
+            LocalDate fecOrdHasta,
+            Boolean estOrd,
+            Pageable pageable) {
+
+        Specification<Orden> spec = (root, query, cb) -> cb.conjunction();
+
+        if (numOrd != null && !numOrd.isEmpty()) {
+            spec = spec.and((root, query, cb) ->
+                    cb.like(cb.lower(root.get("numOrd")), "%" + numOrd.toLowerCase() + "%"));
+        }
+
+        if (nomOrd != null && !nomOrd.isEmpty()) {
+            spec = spec.and((root, query, cb) ->
+                    cb.like(cb.lower(root.get("nomOrd")), "%" + nomOrd.toLowerCase() + "%"));
+        }
+
+        if (fecOrdDesde != null) {
+            spec = spec.and((root, query, cb) ->
+                    cb.greaterThanOrEqualTo(root.get("fecOrd"), fecOrdDesde));
+        }
+
+        if (fecOrdHasta != null) {
+            spec = spec.and((root, query, cb) ->
+                    cb.lessThanOrEqualTo(root.get("fecOrd"), fecOrdHasta));
+        }
+
+        if (estOrd != null) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(root.get("estOrd"), estOrd));
+        }
+
+        Page<Orden> page = ordenRepositorio.findAll(spec, pageable);
+        logger.debug("Filtros aplicados -> numOrd={}, nomOrd={}, fecOrdDesde={}, fecOrdHasta={}, estOrd={}",
+                numOrd, nomOrd, fecOrdDesde, fecOrdHasta, estOrd);
+        logger.debug("Service result -> totalElements={}, totalPages={}, contentSize={}",
+                page.getTotalElements(), page.getTotalPages(), page.getContent().size());
+
+        return page;
+    }
 }

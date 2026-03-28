@@ -1,16 +1,16 @@
 package wcsono.strgSys.modelo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
+import java.time.LocalDate;
 import java.util.ArrayList;
-
-import org.springframework.format.annotation.DateTimeFormat;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import java.util.List;
 
 @Entity
 @Data
@@ -23,9 +23,11 @@ public class Orden {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idOrd;
 
-    @Column(nullable = false, length = 20)
+    @NotBlank
+    @Column(nullable = false, length = 20, unique = true)
     private String numOrd;
 
+    @NotBlank
     @Column(nullable = false, length = 100)
     private String nomOrd;
 
@@ -34,18 +36,23 @@ public class Orden {
     @JoinColumn(name = "idTd", nullable = false)
     private TipoDocumento tipoDocumento;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @NotNull
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @Temporal(TemporalType.DATE)
-    private Date fecOrd;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    @Column(name = "fec_ord", nullable = false)
+    private LocalDate fecOrd;
 
-    @Column(length = 50)
+    @Size(max = 50)
     private String ndocRef;
 
-    private boolean estOrd;
+    @Column(nullable = false)
+    private boolean estOrd = false;
+
+    @Column(nullable = false)
     private boolean extornada = false;   // true = extornada
 
-
+    @NotNull
+    @PositiveOrZero
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal cosOrd;
 

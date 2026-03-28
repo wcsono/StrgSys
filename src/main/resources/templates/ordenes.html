@@ -10,8 +10,7 @@
 <div class="container-fluid mt-4">
 
     <!-- Mensajes de éxito / error -->
-    <div th:replace="fragmentos/alertas :: alertas-seccion"></div>
-
+    <div th:replace="~{fragmentos/alertas :: alertas-seccion}"></div>
     <!-- Paneles -->
     <div class="row">
         <!-- Panel izquierdo: listado de órdenes -->
@@ -55,8 +54,7 @@
                     <td th:text="${orden.idOrd}" class="extornada-cell"></td>
                     <td th:text="${orden.numOrd}" class="extornada-cell"></td>
                     <td th:text="${orden.nomOrd}" class="extornada-cell"></td>
-                    <td th:text="${#dates.format(orden.fecOrd,'dd/MM/yyyy')}" class="extornada-cell"></td>
-
+                    <td th:text="${#temporals.format(orden.fecOrd,'dd/MM/yyyy')}" class="extornada-cell"></td>
                     <td class="extornada-cell">
                         <span th:if="${orden.extornada}" class="badge bg-warning">Extornada</span>
                         <span th:if="${orden.estOrd and !orden.extornada}" class="badge bg-success">Cerrada</span>
@@ -119,7 +117,7 @@
     </div>
 </div>
 <!-- Offcanvas lateral izquierdo -->
-<div class="offcanvas offcanvas-start" tabindex="-1" id="filtroOffcanvas">
+<div class="offcanvas offcanvas-end" tabindex="-1" id="filtroOffcanvas">
     <div class="offcanvas-header">
         <h5 class="offcanvas-title">Filtros de Órdenes</h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>

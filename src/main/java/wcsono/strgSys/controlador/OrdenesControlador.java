@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import wcsono.strgSys.modelo.Orden;
 import wcsono.strgSys.modelo.TipoDocumento;
@@ -20,6 +21,7 @@ import wcsono.strgSys.servicio.ITipoDocumentoServicio;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.time.LocalDate;
 
 @Controller
 public class OrdenesControlador {
@@ -40,32 +42,43 @@ public class OrdenesControlador {
      * Listar todas las órdenes (vista Thymeleaf)
      */
     @GetMapping("/ordenes")
-    public String mostrarOrdenes(ModelMap modelo,
-                                 @PageableDefault(page = 0, size = 10, sort = "idOrd", direction = Sort.Direction.DESC) Pageable pageable) {
+    public String mostrarOrdenes(
+            @RequestParam(required = false) String numOrd,
+            @RequestParam(required = false) String nomOrd,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fecOrdDesde,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fecOrdHasta,
+            @RequestParam(required = false) Boolean estOrd,
+            @PageableDefault(page = 0, size = 10, sort = "fecOrd", direction = Sort.Direction.DESC) Pageable pageable,
+            ModelMap modelo) {
 
-        // Log request pageable para depuración
-        logger.info("Request received for /ordenes -> page={}, size={}, sort={}",
-                pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+        // Log request pageable y filtros para depuración
+        logger.info("Request /ordenes -> page={}, size={}, sort={}, numOrd={}, nomOrd={}, fecOrdDesde={}, fecOrdHasta={}, estOrd={}",
+                pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort(),
+                numOrd, nomOrd, fecOrdDesde, fecOrdHasta, estOrd);
 
-        Page<Orden> paginaOrdenes = ordenServicio.listarOrdenesConTipoDocumento(pageable);
+        Page<Orden> paginaOrdenes = ordenServicio.listarOrdenesFiltradas(
+                numOrd, nomOrd, fecOrdDesde, fecOrdHasta, estOrd, pageable);
 
-        // Logs del resultado de la página
+        // Logs del resultado
         logger.info("Page result -> totalElements={}, totalPages={}, number={}, size={}",
                 paginaOrdenes.getTotalElements(),
                 paginaOrdenes.getTotalPages(),
                 paginaOrdenes.getNumber(),
                 paginaOrdenes.getSize());
 
-        // Log contenido (nivel DEBUG)
-        paginaOrdenes.forEach(ord -> logger.debug("Orden en page content -> id={}, numOrd={}", ord.getIdOrd(), ord.getNumOrd()));
-
         // Atributos para la vista
         modelo.put("paginaOrdenes", paginaOrdenes);
         modelo.put("listadoOrdenes", paginaOrdenes.getContent());
 
+        // Mantener valores de filtros en el modelo
+        modelo.put("numOrd", numOrd);
+        modelo.put("nomOrd", nomOrd);
+        modelo.put("fecOrdDesde", fecOrdDesde);
+        modelo.put("fecOrdHasta", fecOrdHasta);
+        modelo.put("estOrd", estOrd);
+
         return "ordenes";
     }
-
     /**
      * Ver una orden en formato JSON (API REST)
      */
@@ -280,4 +293,6 @@ public String cargarFragmentoArticulos(ModelMap modelo) {
 public boolean validarNumOrd(@RequestParam String numOrd) {
 return ordenServicio.validarNumOrdUnico(numOrd);
 }
+
+
 }

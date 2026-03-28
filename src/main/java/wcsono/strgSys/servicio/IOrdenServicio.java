@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import wcsono.strgSys.modelo.Orden;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface IOrdenServicio {
@@ -45,26 +46,25 @@ public interface IOrdenServicio {
 
     // 🔹 Nuevos métodos para manejar extornos
 
-    /**
-     * Extornar una orden: revertir stock y marcarla como extornada.
-     */
     void extornarOrden(Integer id);
-
-    /**
-     * Listar todas las órdenes extornadas.
-     */
     List<Orden> listarOrdenesExtornadas();
-
-    /**
-     * Listar todas las órdenes no extornadas.
-     */
     List<Orden> listarOrdenesNoExtornadas();
-
-    /**
-     * Listar órdenes cerradas y no extornadas.
-     */
     List<Orden> listarOrdenesCerradasNoExtornadas();
 
     boolean validarNumOrdUnico(String numOrd);
 
+    // 🔹 Nuevo método para filtros combinados
+    /**
+     * Listar órdenes aplicando filtros dinámicos:
+     * - numOrd (parcial)
+     * - nomOrd (parcial)
+     * - rango de fechas (fecOrdDesde, fecOrdHasta)
+     * - estado (estOrd: abierta/cerrada)
+     */
+    Page<Orden> listarOrdenesFiltradas(String numOrd,
+                                       String nomOrd,
+                                       LocalDate fecOrdDesde,
+                                       LocalDate fecOrdHasta,
+                                       Boolean estOrd,
+                                       Pageable pageable);
 }
