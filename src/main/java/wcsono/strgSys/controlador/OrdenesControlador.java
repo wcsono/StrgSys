@@ -294,5 +294,5 @@ public boolean validarNumOrd(@RequestParam String numOrd) {
 return ordenServicio.validarNumOrdUnico(numOrd);
 }
 
-
+//ya se realizo la migracion de la bd
 }
