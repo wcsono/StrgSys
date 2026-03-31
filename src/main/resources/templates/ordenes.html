@@ -125,28 +125,42 @@
     <div class="offcanvas-body">
         <form th:action="@{/ordenes}" method="get" class="d-flex flex-column gap-3">
 
-            <!-- Filtro por número -->
-            <div>
-                <label for="numOrd" class="form-label">Número de Orden</label>
-                <input type="text" id="numOrd" name="numOrd" class="form-control" placeholder="Ej: 12345">
+            <!-- Filtro por número de orden -->
+            <div class="input-group mb-1">
+                <span class="input-group-text">N.Orden</span>
+                <input id="numOrd" name="numOrd" class="form-control" aria-label="NOrden"
+                       style="text-transform: uppercase;"
+                       oninput="this.value = this.value.toUpperCase();">
             </div>
 
             <!-- Filtro por cliente/proveedor -->
-            <div>
-                <label for="nomOrd" class="form-label">Cliente/Proveedor</label>
-                <input type="text" id="nomOrd" name="nomOrd" class="form-control" placeholder="Ej: Juan Pérez">
+            <div class="input-group mb-1">
+                <span class="input-group-text">Cliente/Proveedor</span>
+                <input id="nomOrd" name="nomOrd" class="form-control" aria-label="ClienteProveedor"
+                       style="text-transform: uppercase;"
+                       oninput="this.value = this.value.toUpperCase();">
             </div>
 
             <!-- Filtro por fecha desde -->
-            <div>
-                <label for="fecOrdDesde" class="form-label">Fecha desde</label>
+            <div class="input-group mb-1">
+                <span class="input-group-text">Fecha desde</span>
                 <input type="date" id="fecOrdDesde" name="fecOrdDesde" class="form-control">
             </div>
 
             <!-- Filtro por fecha hasta -->
-            <div>
-                <label for="fecOrdHasta" class="form-label">Fecha hasta</label>
+            <div class="input-group mb-1">
+                <span class="input-group-text">Fecha hasta</span>
                 <input type="date" id="fecOrdHasta" name="fecOrdHasta" class="form-control">
+            </div>
+
+            <!-- Filtro por estado (estOrd) -->
+            <div class="input-group mb-1">
+                <span class="input-group-text">Estado</span>
+                <select id="estOrd" name="estOrd" class="form-select">
+                    <option value="">-- Seleccionar --</option>
+                    <option value="false">Abierta</option>
+                    <option value="true">Cerrada</option>
+                </select>
             </div>
 
             <!-- Botón aplicar filtros -->
