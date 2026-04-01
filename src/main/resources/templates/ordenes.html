@@ -46,7 +46,14 @@
                     </th>
                 </tr>
                 </thead>
-                <tbody>
+                <tbody th:if="${#lists.isEmpty(listadoOrdenes)}">
+                <tr>
+                    <td colspan="7" class="text-center text-muted">
+                        No se encontraron órdenes para los criterios seleccionados.
+                    </td>
+                </tr>
+
+                <tbody th:unless="${#lists.isEmpty(listadoOrdenes)}">
                 <tr th:each="orden : ${listadoOrdenes}"
                     th:classappend="${orden.extornada} ? 'extornada-row' : ''"
                     class="text-center">
@@ -60,9 +67,7 @@
                         <span th:if="${orden.estOrd and !orden.extornada}" class="badge bg-success">Cerrada</span>
                         <span th:if="${!orden.estOrd and !orden.extornada}" class="badge bg-secondary">Abierta</span>
                     </td>
-
-                    <td class="costo extornada-cell" th:attr="data-valor=${orden.cosOrd}"></td>
-
+                    <td class="costo extornada-cell" th:text="${orden.cosOrd}"></td>
                     <td>
                         <div class="d-flex justify-content-center gap-2">
                             <!-- Ver Orden -->
@@ -94,17 +99,45 @@
             <nav>
                 <ul class="pagination justify-content-center">
                     <li class="page-item" th:classappend="${paginaOrdenes.number == 0} ? 'disabled'">
-                        <a class="page-link" th:href="@{/ordenes(page=${paginaOrdenes.number-1})}">Anterior</a>
+                        <a class="page-link"
+                           th:href="@{/ordenes(page=${paginaOrdenes.number-1},
+                                   numOrd=${param.numOrd},
+                                   nomOrd=${param.nomOrd},
+                                   fecOrdDesde=${param.fecOrdDesde},
+                                   fecOrdHasta=${param.fecOrdHasta},
+                                   estOrd=${param.estOrd})}">
+                            Anterior
+                        </a>
                     </li>
-                    <li class="page-item" th:each="i : ${#numbers.sequence(0, paginaOrdenes.totalPages-1)}"
+                    <li class="page-item"
+                        th:each="i : ${#numbers.sequence(0, paginaOrdenes.totalPages-1)}"
                         th:classappend="${i == paginaOrdenes.number} ? 'active'">
-                        <a class="page-link" th:href="@{/ordenes(page=${i})}" th:text="${i+1}"></a>
+                        <a class="page-link"
+                           th:href="@{/ordenes(page=${i},
+                                   numOrd=${param.numOrd},
+                                   nomOrd=${param.nomOrd},
+                                   fecOrdDesde=${param.fecOrdDesde},
+                                   fecOrdHasta=${param.fecOrdHasta},
+                                   estOrd=${param.estOrd})}"
+                           th:text="${i+1}">
+                        </a>
                     </li>
-                    <li class="page-item" th:classappend="${paginaOrdenes.number == paginaOrdenes.totalPages-1} ? 'disabled'">
-                        <a class="page-link" th:href="@{/ordenes(page=${paginaOrdenes.number+1})}">Siguiente</a>
+                    <li class="page-item"
+                        th:classappend="${paginaOrdenes.number == paginaOrdenes.totalPages-1} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/ordenes(page=${paginaOrdenes.number+1},
+                                   numOrd=${param.numOrd},
+                                   nomOrd=${param.nomOrd},
+                                   fecOrdDesde=${param.fecOrdDesde},
+                                   fecOrdHasta=${param.fecOrdHasta},
+                                   estOrd=${param.estOrd})}">
+                            Siguiente
+                        </a>
                     </li>
                 </ul>
             </nav>
+
+
         </div>
 
         <!-- Panel derecho: detalle de la orden -->

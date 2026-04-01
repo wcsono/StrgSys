@@ -1,0 +1,23 @@
+[
+  { "pais": "AR", "idioma": "es", "moneda": "ARS", "simbolo": "$" },
+  { "pais": "BO", "idioma": "es", "moneda": "BOB", "simbolo": "Bs." },
+  { "pais": "CL", "idioma": "es", "moneda": "CLP", "simbolo": "$" },
+  { "pais": "CO", "idioma": "es", "moneda": "COP", "simbolo": "$" },
+  { "pais": "CR", "idioma": "es", "moneda": "CRC", "simbolo": "₡" },
+  { "pais": "CU", "idioma": "es", "moneda": "CUP", "simbolo": "$" },
+  { "pais": "DO", "idioma": "es", "moneda": "DOP", "simbolo": "RD$" },
+  { "pais": "EC", "idioma": "es", "moneda": "USD", "simbolo": "$" },
+  { "pais": "ES", "idioma": "es", "moneda": "EUR", "simbolo": "€" },
+  { "pais": "GT", "idioma": "es", "moneda": "GTQ", "simbolo": "Q" },
+  { "pais": "HN", "idioma": "es", "moneda": "HNL", "simbolo": "L" },
+  { "pais": "MX", "idioma": "es", "moneda": "MXN", "simbolo": "$" },
+  { "pais": "NI", "idioma": "es", "moneda": "NIO", "simbolo": "C$" },
+  { "pais": "PA", "idioma": "es", "moneda": "PAB", "simbolo": "B/." },
+  { "pais": "PY", "idioma": "es", "moneda": "PYG", "simbolo": "₲" },
+  { "pais": "PE", "idioma": "es", "moneda": "PEN", "simbolo": "S/." },
+  { "pais": "PR", "idioma": "es", "moneda": "USD", "simbolo": "$" },
+  { "pais": "SV", "idioma": "es", "moneda": "USD", "simbolo": "$" },
+  { "pais": "UY", "idioma": "es", "moneda": "UYU", "simbolo": "$" },
+  { "pais": "VE", "idioma": "es", "moneda": "VES", "simbolo": "Bs." },
+  { "pais": "US", "idioma": "en", "moneda": "USD", "simbolo": "$" }
+]
