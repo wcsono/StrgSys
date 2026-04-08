@@ -87,3 +87,15 @@ body{
     max-height: none;       /* elimina límite de altura */
     overflow-y: visible;    /* evita scroll interno */
 }
+.sortable {
+  cursor: pointer;
+}
+
+.both::after { content: "▲▼"; font-size: 0.8em; margin-left: 5px; }
+.asc::after  { content: "▼"; font-size: 0.8em; margin-left: 5px; } /* primer clic */
+.desc::after { content: "▲"; font-size: 0.8em; margin-left: 5px; } /* segundo clic */
+
+.active-sort {
+  background-color: #495057 !important;
+  color: #fff !important;
+}
