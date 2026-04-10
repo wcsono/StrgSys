@@ -34,29 +34,29 @@
                     <h3>Inventario Actual</h3>
                 </div>
                 <div class="card-body">
-                    <<table class="table table-striped table-hover table-bordered" id="tablaInventario">
-                    <thead class="table-dark">
-                    <tr>
-                        <th onclick="ordenarPor('codArt')" id="th-codArt" class="sortable" title="Presionar para ordenar">
-                            Código <span id="icon-codArt" class="both"></span>
-                        </th>
-                        <th onclick="ordenarPor('desArt')" id="th-desArt" class="sortable" title="Presionar para ordenar">
-                            Descripción <span id="icon-desArt" class="both"></span>
-                        </th>
-                        <th onclick="ordenarPor('stk')" id="th-stk" class="sortable" title="Presionar para ordenar">
-                            Stock <span id="icon-stk" class="both"></span>
-                        </th>
-                        <th id="th-costo">Costo Unitario</th>
-                        <th>Valor Total</th>
-                    </tr>
-                    </thead>
-                    <tbody id="cuerpoInventario">
+                    <table class="table table-striped table-hover table-bordered" id="tablaInventario">
+                        <thead class="table-dark">
+                        <tr>
+                            <th onclick="ordenarPor('codArt')" id="th-codArt" class="sortable" title="Presionar para ordenar">
+                                Código <span id="icon-codArt" class="both"></span>
+                            </th>
+                            <th onclick="ordenarPor('desArt')" id="th-desArt" class="sortable" title="Presionar para ordenar">
+                                Descripción <span id="icon-desArt" class="both"></span>
+                            </th>
+                            <th onclick="ordenarPor('stk')" id="th-stk" class="sortable" title="Presionar para ordenar">
+                                Stock <span id="icon-stk" class="both"></span>
+                            </th>
+                            <th id="th-costo">Costo Unitario</th>
+                            <th>Valor Total</th>
+                        </tr>
+                        </thead>
+                        <tbody id="cuerpoInventario">
                         <tr th:each="art : ${articulos}">
                             <td th:text="${art.codArt}"></td>
                             <td th:text="${art.desArt}"></td>
                             <td th:text="${art.stk}"></td>
-                            <td th:text="${art.costo}"></td>
-                            <td th:text="${art.stk * art.costo}"></td>
+                            <td th:text="${art.costo}" class="costo"></td>
+                            <td th:text="${art.stk * art.costo}" class="costo"></td>
                         </tr>
                         </tbody>
                     </table>
@@ -66,8 +66,54 @@
 
         <!-- Movimientos -->
         <div class="tab-pane fade" id="movimientos">
-            <div class="alert alert-secondary mt-3">
-                Historial de entradas y salidas por artículo (Kardex).
+            <div class="card shadow">
+                <div class="card-header bg-secondary text-white text-center">
+                    <h3>Kardex Mensual con Indicadores</h3>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped table-hover table-bordered">
+                        <thead class="table-dark">
+                        <tr>
+                            <th>Artículo</th>
+                            <th>Mes</th>
+                            <th>Entradas</th>
+                            <th>Salidas</th>
+                            <th>Saldo Final</th>
+                            <th>Valor Movido</th>
+                            <th>Observación</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr class="table-success">
+                            <td>Mouse inalámbrico</td>
+                            <td>Marzo 2026</td>
+                            <td>50</td>
+                            <td>40</td>
+                            <td>10</td>
+                            <td>S/. 2,000.00</td>
+                            <td>Alta rotación → producto estrella</td>
+                        </tr>
+                        <tr class="table-warning">
+                            <td>Teclado mecánico</td>
+                            <td>Marzo 2026</td>
+                            <td>20</td>
+                            <td>5</td>
+                            <td>15</td>
+                            <td>S/. 600.00</td>
+                            <td>Baja salida → considerar promoción</td>
+                        </tr>
+                        <tr class="table-danger">
+                            <td>Auriculares gamer</td>
+                            <td>Marzo 2026</td>
+                            <td>30</td>
+                            <td>30</td>
+                            <td>0</td>
+                            <td>S/. 1,500.00</td>
+                            <td>Stock agotado → reponer urgente</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 

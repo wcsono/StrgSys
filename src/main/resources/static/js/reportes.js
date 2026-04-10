@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", function() {
     mostrarArticulos(articulos);
 });
 
-// Renderiza el cuerpo de la tabla
+// Renderiza el cuerpo de la tabla con formato de moneda
 function mostrarArticulos(lista) {
     const cuerpo = document.getElementById('cuerpoInventario');
     if (!cuerpo) return;
@@ -18,8 +18,8 @@ function mostrarArticulos(lista) {
                 <td>${art.codArt}</td>
                 <td>${art.desArt}</td>
                 <td>${art.stk}</td>
-                <td>${art.costo}</td>
-                <td>${art.stk * art.costo}</td>
+                <td>${window.formatoMoneda(art.costo)}</td>
+                <td>${window.formatoMoneda(art.stk * art.costo)}</td>
             </tr>`;
         cuerpo.insertAdjacentHTML('beforeend', fila);
     });

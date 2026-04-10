@@ -1,56 +1,8 @@
 // orden.js
-document.addEventListener("DOMContentLoaded", async function () {
+document.addEventListener("DOMContentLoaded", function () {
   console.log("cargando orden.js");
 
   const detalle = document.getElementById("detalleContenido");
-
-  // --- Detectar país del navegador ---
-  function detectarPais() {
-    const locale = navigator.language || "es-PE"; // ej: "es-MX", "es-419"
-    const parts = locale.split("-");
-    const pais = parts.length > 1 ? parts[1].toUpperCase() : "PE";
-
-    // Normalizar casos especiales
-    if (pais === "419") return "PE"; // Latinoamérica genérico → Perú por defecto
-    return pais;
-  }
-
-  // --- Obtener símbolo desde monedas.json ---
-  async function obtenerSimbolo() {
-    const pais = detectarPais();
-    try {
-      // Ajuste de ruta: tu archivo está en static/js
-      const response = await fetch("/js/monedas.json");
-      const data = await response.json();
-      const registro = data.find(item => item.pais === pais);
-      if (registro) return registro.simbolo;
-
-      // Fallback especial para Perú
-      if (pais === "PE") return "S/.";
-      return "$";
-    } catch (err) {
-      console.error("Error cargando monedas.json:", err);
-      return "S/.";
-    }
-  }
-
-  // --- Inicializar símbolo global ---
-  let simboloGlobal = await obtenerSimbolo();
-
-  // --- Función global para formatear moneda ---
-  function formatoMoneda(valor) {
-    const num = Number(valor);
-
-    if (valor === null || valor === undefined || valor === "" || isNaN(num)) {
-      return "—";
-    }
-
-    if (num === 0) {
-      return `${simboloGlobal} -`;
-    }
-
-    return `${simboloGlobal} ${num.toFixed(2)}`;
-  }
 
   // --- Función para renderizar detalle de orden ---
   function renderOrden(data, detalle) {
@@ -67,7 +19,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             <span><strong>Estado:</strong> ${data.extornada ? "Extornada" : (data.estOrd ? "Cerrada" : "Abierta")}</span>
           </div>
           <div class="d-flex justify-content-between">
-            <span><strong>Costo Total:</strong> ${formatoMoneda(data.cosOrd)}</span>
+            <span><strong>Costo Total:</strong> ${window.formatoMoneda(data.cosOrd)}</span>
             <span><strong>Documento:</strong> ${data.tipoDocumento?.desTd || "—"}</span>
           </div>
         </div>
@@ -102,15 +54,15 @@ document.addEventListener("DOMContentLoaded", async function () {
               <tr>
                 <td>${d.articulo?.desArt || "—"}</td>
                 <td>${d.cantidad ?? "—"}</td>
-                <td>${formatoMoneda(d.cosArt)}</td>
-                <td>${formatoMoneda(d.subtotal)}</td>
+                <td>${window.formatoMoneda(d.cosArt)}</td>
+                <td>${window.formatoMoneda(d.subtotal)}</td>
               </tr>
             `).join("")}
           </tbody>
           <tfoot>
             <tr class="table-primary">
               <td colspan="3" class="text-end"><strong>Total de la Orden:</strong></td>
-              <td><strong>${formatoMoneda(total)}</strong></td>
+              <td><strong>${window.formatoMoneda(total)}</strong></td>
             </tr>
           </tfoot>
         </table>
@@ -151,7 +103,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             fecOrd: "2026-03-20",
             estOrd: false,
             extornada: false,
-            cosOrd: 0, // prueba con 0
+            cosOrd: 0,
             tipoDocumento: { desTd: "Factura" },
             detalles: [
               { articulo: { desArt: "Laptop Lenovo ThinkPad" }, cantidad: 2, cosArt: 3500, subtotal: 7000 },
@@ -163,11 +115,5 @@ document.addEventListener("DOMContentLoaded", async function () {
           detalle.classList.add("show");
         });
     });
-  });
-
-  // --- Formatear costos en la tabla principal ---
-  document.querySelectorAll("td.costo").forEach(td => {
-    const valor = td.textContent.trim() || td.getAttribute("data-valor");
-    td.textContent = formatoMoneda(valor);
   });
 });
