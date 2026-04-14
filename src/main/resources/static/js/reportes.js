@@ -1,13 +1,13 @@
-// Variables globales
+// =======================
+// Sección Inventario
+// =======================
 let sortDir = '';
 let sortField = '';
 
-// Al cargar la página, dibujamos la tabla con los artículos que Thymeleaf inyectó
 document.addEventListener("DOMContentLoaded", function() {
-    mostrarArticulos(articulos);
+    console.log("Reportes cargado. La tabla inicial la pinta Thymeleaf.");
 });
 
-// Renderiza el cuerpo de la tabla con formato de moneda
 function mostrarArticulos(lista) {
     const cuerpo = document.getElementById('cuerpoInventario');
     if (!cuerpo) return;
@@ -25,9 +25,7 @@ function mostrarArticulos(lista) {
     });
 }
 
-// Ordena por el campo indicado
 function ordenarPor(campo) {
-    // Si cambiamos de columna, reiniciamos dirección
     if (sortField !== campo) {
         sortDir = 'asc';
         sortField = campo;
@@ -35,40 +33,109 @@ function ordenarPor(campo) {
         sortDir = sortDir === 'asc' ? 'desc' : 'asc';
     }
 
-    // Ordenamiento genérico
     articulos.sort((a, b) => {
         let valA = a[campo];
         let valB = b[campo];
 
-        // Normalizar strings
-        if (typeof valA === 'string') valA = valA.toLowerCase();
-        if (typeof valB === 'string') valB = valB.toLowerCase();
+        if (!isNaN(valA) && !isNaN(valB)) {
+            valA = Number(valA);
+            valB = Number(valB);
+        } else {
+            if (typeof valA === 'string') valA = valA.toLowerCase();
+            if (typeof valB === 'string') valB = valB.toLowerCase();
+        }
 
         if (valA < valB) return sortDir === 'asc' ? -1 : 1;
         if (valA > valB) return sortDir === 'asc' ? 1 : -1;
         return 0;
     });
 
-    // Redibujar tabla y actualizar iconos
     mostrarArticulos(articulos);
     actualizarIconos(campo, sortDir);
 }
 
-// Actualiza iconos y tooltips dinámicamente
 function actualizarIconos(campo, dir) {
-    // Todas las columnas vuelven al estado inicial
     document.querySelectorAll('thead span').forEach(span => span.className = 'both');
     document.querySelectorAll('thead th').forEach(th => {
         th.classList.remove('active-sort');
         th.title = "Presionar para ordenar";
+        th.removeAttribute("aria-sort");
     });
 
-    // Solo la columna activa cambia dinámicamente
     const icon = document.getElementById('icon-' + campo);
     const th = document.getElementById('th-' + campo);
     if (icon) icon.className = dir;
     if (th) {
         th.classList.add('active-sort');
         th.title = dir === 'asc' ? "Orden ascendente" : "Orden descendente";
+        th.setAttribute("aria-sort", dir === 'asc' ? "ascending" : "descending");
     }
 }
+
+// =======================
+// Sección Movimientos
+// =======================
+let todosLosArticulos = [];
+
+document.addEventListener("DOMContentLoaded", () => {
+    cargarTodos();
+});
+
+async function cargarTodos() {
+    try {
+        const response = await fetch("http://localhost:8080/api/kardex/todos");
+        const data = await response.json();
+        console.log("Datos recibidos:", data);
+        todosLosArticulos = data;
+        mostrarMovimientos(data);
+    } catch (error) {
+        console.error("Error cargando movimientos:", error);
+    }
+}
+
+function filtrarMovimientos() {
+    const chk = document.getElementById("chkSoloMovimientos");
+    if (chk.checked) {
+        const filtrados = todosLosArticulos.filter(item => Number(item.entradas) !== 0 || Number(item.salidas) !== 0);
+        mostrarMovimientos(filtrados);
+    } else {
+        mostrarMovimientos(todosLosArticulos);
+    }
+}
+
+function mostrarMovimientos(data) {
+    const tbody = document.getElementById("cuerpoMovimientos");
+    if (!tbody) return;
+    tbody.innerHTML = "";
+
+    data.sort((a, b) => {
+        if (a.articulo < b.articulo) return -1;
+        if (a.articulo > b.articulo) return 1;
+        if (a.anio !== b.anio) return a.anio - b.anio;
+        return a.mes - b.mes;
+    });
+
+    data.forEach(item => {
+        const entradas = Number(item.entradas) || 0;
+        const salidas = Number(item.salidas) || 0;
+        const claseFila = (entradas !== 0 || salidas !== 0) ? "con-movimiento" : "sin-movimiento";
+
+        const fila = `
+            <tr class="${claseFila}">
+                <td>${item.articulo}</td>
+                <td>${item.anio}</td>
+                <td>${item.mes}</td>
+                <td>${entradas}</td>
+                <td>${salidas}</td>
+                <td>${item.saldoFinal}</td>
+                <td>${item.valorMovido}</td>
+            </tr>
+        `;
+        tbody.insertAdjacentHTML('beforeend', fila);
+    });
+}
+
+// =======================
+// Sección Alertas / Gráficos
+// =======================
+// Aquí puedes añadir funciones para manejar alertas o gráficos si lo necesitas.

@@ -99,3 +99,14 @@ body{
   background-color: #495057 !important;
   color: #fff !important;
 }
+/* Colores para la tabla de movimientos */
+#tablaMovimientos tbody tr.sin-movimiento td {
+    background-color: #f8d7da !important; /* rojo claro */
+    color: #000 !important;
+}
+
+#tablaMovimientos tbody tr.con-movimiento td {
+    background-color: #90be6d !important; /* verde claro */
+    color: #000 !important;
+}
+
