@@ -18,10 +18,17 @@ import wcsono.strgSys.modelo.TipoDocumento;
 import wcsono.strgSys.servicio.ArticuloServicio;
 import wcsono.strgSys.servicio.IOrdenServicio;
 import wcsono.strgSys.servicio.ITipoDocumentoServicio;
+import wcsono.strgSys.servicio.MovimientoServicio;
+import wcsono.strgSys.modelo.Movimiento;
+
+
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 
 @Controller
 public class OrdenesControlador {
@@ -34,6 +41,9 @@ public class OrdenesControlador {
 
     @Autowired
     private ITipoDocumentoServicio tipoDocumentoServicio;
+
+    @Autowired
+    MovimientoServicio movimientoServicio;
 
 
     private final Logger logger = LoggerFactory.getLogger(OrdenesControlador.class);
@@ -185,7 +195,7 @@ public class OrdenesControlador {
         // Lógica de stock según tipTd
         boolean esEntrada = orden.getTipoDocumento().isTipTd(); // true = suma, false = resta
 
-        // 🔹 Corrección: usar getDetalles()
+        // Procesar cada detalle de la orden
         orden.getDetalles().forEach(det -> {
             var articulo = det.getArticulo();
 
@@ -206,12 +216,24 @@ public class OrdenesControlador {
 
             logger.info("Artículo {} actualizado: stock={}, costo={}, estArt={}",
                     articulo.getCodArt(), articulo.getStk(), articulo.getCosto(), articulo.isEstArt());
+
+            // 🔹 Registrar movimiento automáticamente con fecha de la orden
+            movimientoServicio.guardarMovimiento(
+                    Movimiento.builder()
+                            .orden(orden)
+                            .articulo(articulo)
+                            .tipoDocumento(orden.getTipoDocumento())
+                            .cantidad(det.getCantidad())
+                            .costoUnitario(det.getCosArt())
+                            .fechaMovimiento(orden.getFecOrd().atStartOfDay()) // usamos fecha de la orden
+                            .build()
+            );
         });
 
         // Guardar la orden cerrada
         ordenServicio.guardarOrden(orden);
 
-        redirectAttrs.addFlashAttribute("mensaje", "Orden cerrada exitosamente y artículos actualizados.");
+        redirectAttrs.addFlashAttribute("mensaje", "Orden cerrada exitosamente, artículos actualizados y movimientos registrados.");
         return "redirect:/ordenes";
     }
 
@@ -270,14 +292,53 @@ public class OrdenesControlador {
     }
 
 //    Extorno de Ordenes
-@GetMapping("/orden/extornar/{id}")
+@PostMapping("/orden/{id}/extornar")
 public String extornarOrden(@PathVariable Integer id, RedirectAttributes redirectAttrs) {
-    try {
-        ordenServicio.extornarOrden(id);
-        redirectAttrs.addFlashAttribute("mensaje", "Orden extornada correctamente. Stock revertido.");
-    } catch (IllegalArgumentException e) {
-        redirectAttrs.addFlashAttribute("error", "Orden no encontrada.");
+    Orden orden = ordenServicio.buscarOrdenConTipoDocumentoYDetalles(id);
+    if (orden == null) {
+        throw new IllegalArgumentException("Orden no encontrada");
     }
+
+    // Lógica de stock inversa según tipTd
+    boolean esEntrada = orden.getTipoDocumento().isTipTd(); // true = suma, false = resta
+
+    orden.getDetalles().forEach(det -> {
+        var articulo = det.getArticulo();
+
+        // 🔹 Invertimos la lógica: si era entrada, ahora restamos; si era salida, ahora sumamos
+        int nuevoStock = esEntrada
+                ? articulo.getStk() - det.getCantidad()
+                : articulo.getStk() + det.getCantidad();
+        articulo.setStk(nuevoStock);
+
+        // El costo se mantiene igual al registrado en el detalle
+        articulo.setCosto(det.getCosArt());
+        articulo.setEstArt(true);
+
+        // Guardar cambios en artículo
+        articuloServicio.guardarArticulo(articulo);
+
+        logger.info("Artículo {} extornado: stock={}, costo={}, estArt={}",
+                articulo.getCodArt(), articulo.getStk(), articulo.getCosto(), articulo.isEstArt());
+
+        // 🔹 Registrar movimiento de extorno con fecha actual
+        movimientoServicio.guardarMovimiento(
+                Movimiento.builder()
+                        .orden(orden)
+                        .articulo(articulo)
+                        .tipoDocumento(orden.getTipoDocumento()) // se mantiene el mismo tipoDocumento
+                        .cantidad(det.getCantidad())
+                        .costoUnitario(det.getCosArt())
+                        .fechaMovimiento(LocalDateTime.now()) // usamos fecha actual para extorno
+                        .build()
+        );
+    });
+
+    // Guardar la orden extornada (puedes marcarla como abierta o con estado especial)
+    orden.setEstOrd(false);
+    ordenServicio.guardarOrden(orden);
+
+    redirectAttrs.addFlashAttribute("mensaje", "Orden extornada exitosamente, stock revertido y movimientos registrados.");
     return "redirect:/ordenes";
 }
 

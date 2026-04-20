@@ -1,112 +1,192 @@
-img{
-    width: 200px;
-    height: 200px;
-}
-body{
-    background-color: info;
+/* ===== Imágenes ===== */
+img {
+  width: 200px;
+  height: 200px;
 }
 
-/* --- Fade-in suave para el contenido del detalle --- */
-.fade-in {
-    opacity: 0;
-    transition: opacity 1s ease-in-out; /* duración y suavidad */
-}
-
-.fade-in.show {
-    opacity: 1;
-}
-
-/* --- Barra de progreso personalizada --- */
-.progress {
-    height: 25px; /* un poco más alta para mejor visibilidad */
-    border-radius: 8px;
-    overflow: hidden;
-    background-color: #f0f0f0;
-}
-
-.progress-bar {
-    font-weight: bold;
-    font-size: 0.85rem;
-    transition: width 0.2s ease; /* suaviza el avance */
-}
-
-/* --- Colores alternativos para estados --- */
-.progress-bar.bg-primary {
-    background: linear-gradient(90deg, #007bff, #3399ff);
-}
-
-.progress-bar.bg-success {
-    background: linear-gradient(90deg, #28a745, #5cd65c);
-}
-
-.progress-bar.bg-danger {
-    background: linear-gradient(90deg, #dc3545, #ff6666);
-}
-
-#detallePanel {
-    max-height: none;       /* elimina límite de altura */
-    overflow-y: visible;    /* evita scroll interno */
-}
-
-#detalleContenido {
-    max-height: none;
-    overflow-y: visible;
-}
 .img-index {
-  width: 50px;          /* mismo tamaño que el texto */
-  height: 50px;         /* mantiene proporción */
-  vertical-align: middle; /* alinea con texto e íconos */
-}
-.col-md-6.tabla-ordenes {
-    max-height: 80vh;   /* ocupa hasta el 80% de la altura de la ventana */
-    overflow-y: auto;   /* scroll vertical independiente */
-    position: sticky;
-    top: 100px;         /* ajusta según la altura de tu cabecera/navegación */
+  width: 50px;
+  height: 50px;
+  vertical-align: middle;
 }
 
+/* ===== Fondo general ===== */
+body {
+  background-color: #f8f9fa;
+}
+
+/* ===== Animaciones ===== */
+.fade-in {
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+.fade-in.show {
+  opacity: 1;
+}
+
+/* ===== Barra de progreso ===== */
+.progress {
+  height: 25px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #f0f0f0;
+}
+.progress-bar {
+  font-weight: bold;
+  font-size: 0.85rem;
+  transition: width 0.2s ease;
+}
+.progress-bar.bg-primary {
+  background: linear-gradient(90deg, #007bff, #3399ff);
+}
+.progress-bar.bg-success {
+  background: linear-gradient(90deg, #28a745, #5cd65c);
+}
+.progress-bar.bg-danger {
+  background: linear-gradient(90deg, #dc3545, #ff6666);
+}
+
+/* ===== Paneles de detalle ===== */
 #detallePanel {
-    min-height: 200px;
+  min-height: 200px;
+  max-height: none;
+  overflow-y: visible;
+}
+#detalleContenido {
+  max-height: none;
+  overflow-y: visible;
 }
 
-/* Reduce fuente en tabla de órdenes */
+/* ===== Tablas ===== */
+.col-md-6.tabla-ordenes {
+  max-height: 80vh;
+  overflow-y: auto;
+  position: sticky;
+  top: 100px;
+}
 .tabla-ordenes th,
 .tabla-ordenes td {
-    font-size: 0.80rem;   /* más pequeño que el default */
-    vertical-align: middle; /* centra verticalmente */
-}
-/* Panel derecho fijo */
-.panel-derecho {
-    position: sticky;   /* lo fija en pantalla */
-    top: 10px;         /* ajusta según la altura de tu cabecera/navegación */
-    height: fit-content;
-    min-height: 200px;  /* asegura altura mínima */
+  font-size: 0.80rem;
+  vertical-align: middle;
 }
 
-/* Contenido dinámico dentro del panel */
-#detalleContenido {
-    max-height: none;       /* elimina límite de altura */
-    overflow-y: visible;    /* evita scroll interno */
+/* ===== Panel derecho fijo ===== */
+.panel-derecho {
+  position: sticky;
+  top: 10px;
+  height: fit-content;
+  min-height: 200px;
 }
+
+/* ===== Ordenamiento de tablas ===== */
 .sortable {
   cursor: pointer;
 }
-
 .both::after { content: "▲▼"; font-size: 0.8em; margin-left: 5px; }
-.asc::after  { content: "▼"; font-size: 0.8em; margin-left: 5px; } /* primer clic */
-.desc::after { content: "▲"; font-size: 0.8em; margin-left: 5px; } /* segundo clic */
-
+.asc::after  { content: "▼"; font-size: 0.8em; margin-left: 5px; }
+.desc::after { content: "▲"; font-size: 0.8em; margin-left: 5px; }
 .active-sort {
   background-color: #495057 !important;
   color: #fff !important;
 }
-/* Colores para la tabla de movimientos */
+
+/* ===== Colores para tabla de movimientos ===== */
 #tablaMovimientos tbody tr.sin-movimiento td {
-    background-color: #f8d7da !important; /* rojo claro */
-    color: #000 !important;
+  background-color: #f8d7da !important;
+  color: #000 !important;
 }
-
 #tablaMovimientos tbody tr.con-movimiento td {
-    background-color: #90be6d !important; /* verde claro */
-    color: #000 !important;
+  background-color: #90be6d !important;
+  color: #000 !important;
 }
 
+/* ===== Ajuste del contenedor principal ===== */
+.container {
+  margin-top: 1rem !important; /* sube el bloque de pestañas */
+}
+
+/* ===== Dashboard ===== */
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 columnas iguales */
+  grid-auto-rows: 1fr;                   /* todas las filas con la misma altura */
+  gap: 20px;
+  align-items: stretch;
+  background: #f0f4f8;
+  padding: 15px; /* más compacto */
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+  min-height: calc(100vh - 120px); /* ocupa pantalla completa menos el título */
+  margin-top: 10px; /* se acerca al título */
+  box-sizing: border-box;
+}
+
+.dashboard .card {
+  padding: 12px;
+  border-radius: 10px;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  box-shadow: 0 6px 10px rgba(0,0,0,0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.dashboard .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 16px rgba(0,0,0,0.3);
+}
+
+.dashboard .card h4 {
+  margin-bottom: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.dashboard .card p {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+/* ===== Ajuste especial para el primer card ===== */
+.dashboard .card-green p {
+  font-size: 4rem; /* el doble de tamaño solo en el primer card */
+}
+
+/* ===== Colores de tarjetas ===== */
+.card-green { background-color: #28a745; }
+.card-blue { background-color: #007bff; }
+.card-yellow { background-color: #ffc107; color: #000; }
+.card-red { background-color: #dc3545; }
+.card-darkgreen { background-color: #006400; }
+.card-light { background-color: #f8f9fa; color: #000; }
+
+/* ===== Gráfico compacto ===== */
+#graficoEntradasVsSalidas {
+  max-height: 120px;
+}
+
+/* ===== Ajuste del título del dashboard ===== */
+.card-header {
+  padding: 6px 10px;
+  margin-bottom: 5px; /* reduce espacio con los cards */
+}
+.card-header h3 {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 992px) {
+  .dashboard {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
+}

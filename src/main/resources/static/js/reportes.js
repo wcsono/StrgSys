@@ -75,19 +75,25 @@ function actualizarIconos(campo, dir) {
 // =======================
 // Sección Movimientos
 // =======================
-let todosLosArticulos = [];
+let todosLosMovimientos = [];
 
 document.addEventListener("DOMContentLoaded", () => {
-    cargarTodos();
+    cargarMovimientos();
 });
 
-async function cargarTodos() {
+async function cargarMovimientos() {
     try {
-        const response = await fetch("http://localhost:8080/api/kardex/todos");
+        // 🔹 Nuevo endpoint con DTO resumido
+        const response = await fetch("http://localhost:8080/api/movimientos/reportes");
         const data = await response.json();
         console.log("Datos recibidos:", data);
-        todosLosArticulos = data;
+        todosLosMovimientos = data;
         mostrarMovimientos(data);
+
+        // Actualizar dashboard dinámico
+        actualizarDashboard();
+        actualizarTopProductos();
+        actualizarUltimosMovimientos();
     } catch (error) {
         console.error("Error cargando movimientos:", error);
     }
@@ -96,10 +102,10 @@ async function cargarTodos() {
 function filtrarMovimientos() {
     const chk = document.getElementById("chkSoloMovimientos");
     if (chk.checked) {
-        const filtrados = todosLosArticulos.filter(item => Number(item.entradas) !== 0 || Number(item.salidas) !== 0);
+        const filtrados = todosLosMovimientos.filter(item => Number(item.entradas) !== 0 || Number(item.salidas) !== 0);
         mostrarMovimientos(filtrados);
     } else {
-        mostrarMovimientos(todosLosArticulos);
+        mostrarMovimientos(todosLosMovimientos);
     }
 }
 
@@ -128,7 +134,7 @@ function mostrarMovimientos(data) {
                 <td>${entradas}</td>
                 <td>${salidas}</td>
                 <td>${item.saldoFinal}</td>
-                <td>${item.valorMovido}</td>
+                <td>${window.formatoMoneda(item.valorMovido)}</td>
             </tr>
         `;
         tbody.insertAdjacentHTML('beforeend', fila);
@@ -136,6 +142,44 @@ function mostrarMovimientos(data) {
 }
 
 // =======================
-// Sección Alertas / Gráficos
+// Dashboard dinámico
 // =======================
-// Aquí puedes añadir funciones para manejar alertas o gráficos si lo necesitas.
+
+function actualizarDashboard() {
+    const totalProductos = articulos.length || 0;
+
+    // ✅ Ahora sumamos valor monetario de los movimientos
+    const movimientosMes = todosLosMovimientos.reduce((acc, item) => {
+        return acc + (Number(item.valorMovido) || 0);
+    }, 0);
+
+    const valorTotal = articulos.reduce((acc, art) => acc + (art.stk * art.costo), 0);
+
+    const cardTotalProductos = document.querySelector('.card-green p');
+    const cardMovimientosMes = document.querySelector('.card-blue p');
+    const cardValorTotal = document.querySelector('.card-darkgreen p');
+
+    if (cardTotalProductos) cardTotalProductos.textContent = totalProductos;
+    if (cardMovimientosMes) cardMovimientosMes.textContent = window.formatoMoneda(movimientosMes);
+    if (cardValorTotal) cardValorTotal.textContent = window.formatoMoneda(valorTotal);
+}
+
+function actualizarTopProductos() {
+    if (!todosLosMovimientos || todosLosMovimientos.length === 0) return;
+
+    const movimientosPorArticulo = {};
+    todosLosMovimientos.forEach(item => {
+        const entradas = Number(item.entradas) || 0;
+        const salidas = Number(item.salidas) || 0;
+        const totalMov = entradas + salidas;
+        movimientosPorArticulo[item.articulo] = (movimientosPorArticulo[item.articulo] || 0) + totalMov;
+    });
+
+    const top = Object.entries(movimientosPorArticulo)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3);
+
+    const lista = document.querySelector('.card-red ol');
+    if (lista) {
+        lista.innerHTML = '';
+        top.forEach(([art
