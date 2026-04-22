@@ -15,7 +15,12 @@ public interface MovimientoRepositorio extends JpaRepository<Movimiento, Integer
     // Listar movimientos por rango de fechas
     List<Movimiento> findByFechaMovimientoBetween(LocalDateTime inicio, LocalDateTime fin);
 
-    // Ejemplo de query personalizada: movimientos de un mes específico
+    // Movimientos de un mes específico
     @Query("SELECT m FROM Movimiento m WHERE MONTH(m.fechaMovimiento) = ?1 AND YEAR(m.fechaMovimiento) = ?2")
     List<Movimiento> findByMesYAño(int mes, int anio);
+
+    // Listar todos los movimientos ordenados por artículo y por mes (del más reciente al más antiguo)
+    @Query("SELECT m FROM Movimiento m " +
+            "ORDER BY m.articulo.desArt ASC, YEAR(m.fechaMovimiento) DESC, MONTH(m.fechaMovimiento) DESC")
+    List<Movimiento> findAllOrdenadosPorArticuloYMes();
 }

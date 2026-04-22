@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import wcsono.strgSys.modelo.Movimiento;
 import wcsono.strgSys.dto.MovimientoReporteDTO;
+import wcsono.strgSys.dto.MovimientoDTO;
 import wcsono.strgSys.servicio.MovimientoServicio;
 
 import java.time.LocalDateTime;
@@ -67,5 +68,14 @@ public class MovimientosControlador {
     public ResponseEntity<List<MovimientoReporteDTO>> listarReporteDTO() {
         List<MovimientoReporteDTO> reporte = movimientoServicio.listarReporteDTO();
         return ResponseEntity.ok(reporte);
+    }
+
+    /**
+     * Listar todos los movimientos ordenados por artículo y mes (DTO)
+     */
+    @GetMapping("/ordenados")
+    public ResponseEntity<List<MovimientoDTO>> listarMovimientosOrdenados() {
+        List<MovimientoDTO> movimientos = movimientoServicio.listarMovimientosOrdenados();
+        return ResponseEntity.ok(movimientos);
     }
 }

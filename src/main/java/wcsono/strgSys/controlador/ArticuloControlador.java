@@ -11,6 +11,7 @@ import wcsono.strgSys.servicio.ArticuloServicio;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Objects;
 
 @Controller
 public class ArticuloControlador {
@@ -30,8 +31,9 @@ public class ArticuloControlador {
         modelo.put("articuloForma", new Articulo());
         return "Articulos";
     }
+
     @GetMapping("/agregarArt")
-    public String abrirAgregar(){
+    public String abrirAgregar() {
         return "agregarArt";
     }
 
@@ -40,7 +42,6 @@ public class ArticuloControlador {
                           RedirectAttributes redirectAttrs) {
         logger.info("Artículo a agregar: {}", articulo);
 
-        // Validar unicidad de codArt
         boolean existe = articuloServicio.listarArticulos().stream()
                 .anyMatch(a -> a.getCodArt().equalsIgnoreCase(articulo.getCodArt()));
 
@@ -63,18 +64,19 @@ public class ArticuloControlador {
             logger.warn("Artículo no encontrado con ID: {}", idArticulo);
             return "fragmentos/error :: mensajeError";
         }
-        modelo.put("artEditar", artEditar); // nombre debe coincidir con th:object
-        return "/editarArt";
+        modelo.put("artEditar", artEditar);
+        return "editarArt"; // sin slash inicial para consistencia
     }
 
     @PostMapping("/guardarEditarArt")
     public String guardarEditar(@ModelAttribute("artEditar") Articulo articulo,
-                         RedirectAttributes redirectAttrs) {
+                                RedirectAttributes redirectAttrs) {
         logger.info("Artículo a editar: {}", articulo);
+        logger.info("ID recibido en edición: {}", articulo.getIdArt());
 
-        // Validar unicidad de codArt (permitiendo el mismo codArt en el mismo artículo)
+
         boolean existe = articuloServicio.listarArticulos().stream()
-                .anyMatch(a -> !a.getIdArt().equals(articulo.getIdArt()) &&
+                .anyMatch(a -> !Objects.equals(a.getIdArt(), articulo.getIdArt()) &&
                         a.getCodArt().equalsIgnoreCase(articulo.getCodArt()));
 
         if (existe) {
@@ -104,24 +106,22 @@ public class ArticuloControlador {
         }
         return "redirect:/articulos";
     }
+
     @GetMapping("/validarCodigoArt")
     @ResponseBody
     public boolean validarCodigoArt(@RequestParam String codArt,
                                     @RequestParam(required = false) Integer idArt) {
-        // Buscar el artículo actual
         Optional<Articulo> articuloActual = articuloServicio.listarArticulos().stream()
-                .filter(a -> a.getIdArt().equals(idArt))
+                .filter(a -> Objects.equals(a.getIdArt(), idArt))
                 .findFirst();
 
-        // Si estamos editando y el código es igual al original, no validar
-        if (articuloActual.isPresent() && articuloActual.get().getCodArt().equalsIgnoreCase(codArt)) {
-            return false; // No hay error
+        if (articuloActual.isPresent() &&
+                articuloActual.get().getCodArt().equalsIgnoreCase(codArt)) {
+            return false; // no hay error, es el mismo artículo
         }
 
-        // Validar contra los demás artículos
         return articuloServicio.listarArticulos().stream()
-                .anyMatch(a -> !a.getIdArt().equals(idArt) &&
+                .anyMatch(a -> !Objects.equals(a.getIdArt(), idArt) &&
                         a.getCodArt().equalsIgnoreCase(codArt));
     }
-
 }

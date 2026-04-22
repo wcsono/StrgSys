@@ -2,6 +2,7 @@ package wcsono.strgSys.servicio;
 
 import org.springframework.stereotype.Service;
 import wcsono.strgSys.dto.MovimientoReporteDTO;
+import wcsono.strgSys.dto.MovimientoDTO;
 import wcsono.strgSys.modelo.Movimiento;
 import wcsono.strgSys.repositorio.MovimientoRepositorio;
 
@@ -52,7 +53,7 @@ public class MovimientoServicio {
                 .map(mov -> {
                     // ✅ Usamos TipoDocumento para determinar entrada/salida
                     int entradas = mov.getTipoDocumento().isTipTd() ? mov.getCantidad() : 0;
-                    int salidas  = !mov.getTipoDocumento().isTipTd() ? mov.getCantidad() : 0;
+                    int salidas = !mov.getTipoDocumento().isTipTd() ? mov.getCantidad() : 0;
 
                     // ✅ Multiplicación segura con BigDecimal
                     BigDecimal valorMovido = BigDecimal.valueOf(mov.getCantidad())
@@ -68,6 +69,33 @@ public class MovimientoServicio {
                             valorMovido.doubleValue()               // valor movido
                     );
                 })
+                .collect(Collectors.toList());
+    }
+
+    // =========================
+    // Método para Movimientos Ordenados DTO
+    // =========================
+
+    public List<MovimientoDTO> listarMovimientosOrdenados() {
+        return movimientoRepositorio.findAll().stream()
+                .sorted((m1, m2) -> {
+                    int cmpArt = m1.getArticulo().getDesArt()
+                            .compareToIgnoreCase(m2.getArticulo().getDesArt());
+                    if (cmpArt != 0) return cmpArt;
+                    int cmpAnio = Integer.compare(m2.getFechaMovimiento().getYear(),
+                            m1.getFechaMovimiento().getYear());
+                    if (cmpAnio != 0) return cmpAnio;
+                    return Integer.compare(m2.getFechaMovimiento().getMonthValue(),
+                            m1.getFechaMovimiento().getMonthValue());
+                })
+                .map(mov -> new MovimientoDTO(
+                        mov.getArticulo().getDesArt(),
+                        mov.getFechaMovimiento().getYear(),
+                        mov.getFechaMovimiento().getMonthValue(),
+                        mov.getTipoDocumento().isTipTd() ? "Entrada" : "Salida",
+                        mov.getCantidad(),
+                        mov.getCostoUnitario().doubleValue()
+                ))
                 .collect(Collectors.toList());
     }
 }
