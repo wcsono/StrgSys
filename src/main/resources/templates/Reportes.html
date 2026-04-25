@@ -110,7 +110,7 @@
                     </div>
 
                     <div class="card card-blue">
-                        <h4>Movimientos este mes</h4>
+                        <h4>Movimientosmes actual</h4>
                         <p>45</p>
                     </div>
 
@@ -120,7 +120,7 @@
                     </div>
 
                     <div class="card card-yellow">
-                        <h4>Últimos movimientos</h4>
+                        <h4>Ingresos Vs Salidas</h4>
                         <ul>
                             <li>Entrada: Producto A (12/04)</li>
                             <li>Salida: Producto B (13/04)</li>
@@ -130,7 +130,7 @@
 
                     <!-- Segunda fila -->
                     <div class="card card-red">
-                        <h4>Top productos más movidos</h4>
+                        <h4>Top 3 productos más movidos</h4>
                         <ol>
                             <li>Producto X</li>
                             <li>Producto Y</li>
@@ -168,6 +168,21 @@
         </div>
     </div>
 </div>
+<!-- Modal Bootstrap -->
+<div class="modal fade" id="cardModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalle del Card</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Aquí se inyecta el contenido del card -->
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"></div>
 

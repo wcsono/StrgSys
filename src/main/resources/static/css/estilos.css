@@ -108,30 +108,30 @@ body {
 /* ===== Dashboard ===== */
 .dashboard {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 4 columnas iguales */
-  grid-auto-rows: 1fr;                   /* todas las filas con la misma altura */
-  gap: 20px;
-  align-items: stretch;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* adaptable */
+  gap: 15px;
+  align-items: start;
   background: #f0f4f8;
-  padding: 15px; /* más compacto */
+  padding: 10px;
   border-radius: 12px;
   box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-  min-height: calc(100vh - 120px); /* ocupa pantalla completa menos el título */
-  margin-top: 10px; /* se acerca al título */
+  margin-top: 10px;
   box-sizing: border-box;
+  min-height: auto; /* evita forzar scroll */
 }
 
 .dashboard .card {
-  padding: 12px;
+  padding: 10px;
   border-radius: 10px;
   color: #fff;
   font-family: Arial, sans-serif;
   text-align: center;
-  box-shadow: 0 6px 10px rgba(0,0,0,0.25);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  min-height: 120px; /* altura controlada */
 }
 
 .dashboard .card:hover {
@@ -146,14 +146,17 @@ body {
 }
 
 .dashboard .card p {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: bold;
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ===== Ajuste especial para el primer card ===== */
 .dashboard .card-green p {
-  font-size: 4rem; /* el doble de tamaño solo en el primer card */
+  font-size: 2rem; /* más grande pero no exagerado */
 }
 
 /* ===== Colores de tarjetas ===== */
@@ -178,15 +181,25 @@ body {
   font-size: 1.1rem;
   margin: 0;
 }
-
-/* ===== Responsive ===== */
-@media (max-width: 992px) {
-  .dashboard {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.modal-content.card-green { background-color: #28a745; color: #fff; }
+.modal-content.card-blue { background-color: #007bff; color: #fff; }
+.modal-content.card-yellow { background-color: #ffc107; color: #000; }
+.modal-content.card-red { background-color: #dc3545; color: #fff; }
+.modal-content.card-darkgreen { background-color: #006400; color: #fff; }
+.modal-content.card-light { background-color: #f8f9fa; color: #000; }
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 }
-@media (max-width: 600px) {
-  .dashboard {
-    grid-template-columns: 1fr;
-  }
+.modal-header {
+  justify-content: center;   /* centra horizontalmente todo el contenido */
+}
+
+.modal-title {
+  text-align: center;        /* asegura que el texto esté centrado */
+  width: 100%;               /* ocupa todo el ancho disponible */
+  font-weight: bold;
 }
