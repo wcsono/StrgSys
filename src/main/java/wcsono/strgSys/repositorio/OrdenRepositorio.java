@@ -35,10 +35,19 @@ public interface OrdenRepositorio extends JpaRepository<Orden, Integer>, JpaSpec
     Optional<Orden> findWithTipoDocumentoAndDetallesByIdOrd(Integer id);
 
     // 🔹 Métodos derivados para extornos y estados
-
     List<Orden> findByExtornadaTrue();
     List<Orden> findByExtornadaFalse();
     List<Orden> findByEstOrdTrueAndExtornadaFalse();
 
     boolean existsByNumOrd(String numOrd);
+
+    // 🔹 Reporte: Entradas vs Salidas por mes (solo órdenes cerradas)
+    @Query("SELECT YEAR(o.fecOrd) as anio, MONTH(o.fecOrd) as mes, " +
+            "SUM(CASE WHEN o.tipoDocumento.tipTd = true THEN d.cantidad ELSE 0 END) as entradas, " +
+            "SUM(CASE WHEN o.tipoDocumento.tipTd = false THEN d.cantidad ELSE 0 END) as salidas " +
+            "FROM Orden o JOIN o.detalles d " +
+            "WHERE o.estOrd = true " + // ✅ solo órdenes cerradas
+            "GROUP BY YEAR(o.fecOrd), MONTH(o.fecOrd) " +
+            "ORDER BY anio, mes")
+    List<Object[]> obtenerEntradasVsSalidasPorMes();
 }

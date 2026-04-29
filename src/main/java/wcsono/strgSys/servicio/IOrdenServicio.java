@@ -44,8 +44,7 @@ public interface IOrdenServicio {
      */
     void eliminarOrden(Orden orden);
 
-    // 🔹 Nuevos métodos para manejar extornos
-
+    // 🔹 Métodos para manejar extornos
     void extornarOrden(Integer id);
     List<Orden> listarOrdenesExtornadas();
     List<Orden> listarOrdenesNoExtornadas();
@@ -53,7 +52,7 @@ public interface IOrdenServicio {
 
     boolean validarNumOrdUnico(String numOrd);
 
-    // 🔹 Nuevo método para filtros combinados
+    // 🔹 Filtros combinados
     /**
      * Listar órdenes aplicando filtros dinámicos:
      * - numOrd (parcial)
@@ -67,4 +66,11 @@ public interface IOrdenServicio {
                                        LocalDate fecOrdHasta,
                                        Boolean estOrd,
                                        Pageable pageable);
+
+    // 🔹 Nuevo método para reportes
+    /**
+     * Reporte: Entradas vs Salidas por mes (solo órdenes cerradas).
+     * Devuelve una lista de arreglos [anio, mes, entradas, salidas].
+     */
+    List<Object[]> obtenerEntradasVsSalidasPorMes();
 }

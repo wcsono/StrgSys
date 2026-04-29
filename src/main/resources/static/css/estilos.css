@@ -181,12 +181,52 @@ body {
   font-size: 1.1rem;
   margin: 0;
 }
+/* ===== Modales ===== */
+.modal-header {
+  justify-content: center;   /* centra horizontalmente el título */
+}
+.modal-title {
+  text-align: center;        /* asegura que el texto esté centrado */
+  width: 100%;
+  font-weight: bold;
+}
+
+/* Colores heredados de los cards SOLO en modales */
 .modal-content.card-green { background-color: #28a745; color: #fff; }
 .modal-content.card-blue { background-color: #007bff; color: #fff; }
-.modal-content.card-yellow { background-color: #ffc107; color: #000; }
+.modal-content.card-yellow { background-color: #ffc107; color: #fff; } /* blanco solo en modal */
 .modal-content.card-red { background-color: #dc3545; color: #fff; }
 .modal-content.card-darkgreen { background-color: #006400; color: #fff; }
 .modal-content.card-light { background-color: #f8f9fa; color: #000; }
+
+.modal-body.card-green { color: #fff; }
+.modal-body.card-blue { color: #fff; }
+.modal-body.card-darkgreen { color: #fff; }
+.modal-body.card-red { color: #fff; }
+.modal-body.card-yellow { color: #fff; } /* blanco solo en modal */
+.modal-body.card-light { color: #000; }
+
+/* Proporciones de texto en modales */
+.modal-body h4 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.modal-body p {
+  font-size: 2rem;     /* mismo tamaño que el número grande del card */
+  font-weight: bold;
+  margin: 0;
+}
+
+/* Listas dentro del modal */
+.modal-body ol li,
+.modal-body ul li {
+  font-size: 1.5rem;   /* más grande que el default */
+  font-weight: bold;
+  margin: 5px 0;
+}
+
+/* Alineación general */
 .modal-body {
   display: flex;
   flex-direction: column;
@@ -194,12 +234,38 @@ body {
   align-items: center;
   text-align: center;
 }
-.modal-header {
-  justify-content: center;   /* centra horizontalmente todo el contenido */
+/* Modales cuadrados adaptables */
+#cardModal .modal-dialog {
+  width: 80vw;          /* ancho relativo */
+  max-width: 600px;     /* límite máximo */
+  margin: auto;         /* centrado */
 }
 
-.modal-title {
-  text-align: center;        /* asegura que el texto esté centrado */
-  width: 100%;               /* ocupa todo el ancho disponible */
-  font-weight: bold;
+#cardModal .modal-content {
+  aspect-ratio: 1 / 1;  /* cuadrado automático */
+  max-height: 90vh;     /* nunca sobrepasar el alto de la pantalla */
+  overflow: auto;       /* permitir scroll si el contenido es mayor */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
+/* Números grandes en modales */
+#cardModal .modal-body .numero-grande {
+  font-size: 5rem;       /* tamaño muy grande */
+  font-weight: bold;     /* negrita */
+  text-align: center;    /* centrado */
+  line-height: 1.2;      /* proporción de línea */
+  color: inherit;        /* hereda el color del card */
+}
+/* Texto grande y centrado en modales */
+#cardModal .modal-body .texto-grande {
+  font-size: 1.5rem;       /* tamaño más grande */
+  line-height: 1.6;        /* espacio entre líneas */
+  text-align: center;      /* centrado horizontal */
+  margin: 10px 0;          /* espacio alrededor */
+  white-space: pre-line;   /* respeta saltos de línea */
+}
+
+
+

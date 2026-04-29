@@ -110,7 +110,7 @@
                     </div>
 
                     <div class="card card-blue">
-                        <h4>Movimientosmes actual</h4>
+                        <h4>Movimientos mes actual</h4>
                         <p>45</p>
                     </div>
 
@@ -169,19 +169,33 @@
     </div>
 </div>
 <!-- Modal Bootstrap -->
-<div class="modal fade" id="cardModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+<!-- Modal general para cards -->
+<div class="modal fade" id="cardModal" tabindex="-1">
+    <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Detalle del Card</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <h5 class="modal-title"></h5>
             </div>
-            <div class="modal-body" id="modal-body">
-                <!-- Aquí se inyecta el contenido del card -->
+            <div class="modal-body" id="modal-body"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal exclusivo para gráfico -->
+<div class="modal fade" id="graficoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Entradas vs Salidas</h5>
+            </div>
+            <div class="modal-body">
+                <canvas id="graficoEntradasVsSalidasModal"></canvas>
             </div>
         </div>
     </div>
 </div>
+
+
 
 
 <div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"></div>
@@ -189,33 +203,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script th:inline="javascript">
     const articulos = /*[[${articulos}]]*/ [];
-
-    // Gráfico ficticio Entradas vs Salidas
-    const ctx = document.getElementById('graficoEntradasVsSalidas').getContext('2d');
-    new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May'],
-        datasets: [
-          {
-            label: 'Entradas',
-            data: [120, 90, 150, 80, 100],
-            backgroundColor: '#28a745'
-          },
-          {
-            label: 'Salidas',
-            data: [100, 110, 130, 95, 120],
-            backgroundColor: '#dc3545'
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { position: 'top' }
-        }
-      }
-    });
 </script>
 <script src="/js/reportesInventario.js"></script>
 <script src="/js/reportesMovimientos.js"></script>

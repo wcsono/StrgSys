@@ -20,6 +20,10 @@ import wcsono.strgSys.servicio.IOrdenServicio;
 import wcsono.strgSys.servicio.ITipoDocumentoServicio;
 import wcsono.strgSys.servicio.MovimientoServicio;
 import wcsono.strgSys.modelo.Movimiento;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
+
 
 
 
@@ -356,4 +360,52 @@ return ordenServicio.validarNumOrdUnico(numOrd);
 }
 
 //ya se realizo la migracion de la bd
+
+// 🔹 Endpoint para el reporte Entradas vs Salidas
+@GetMapping("/reportes/entradas-vs-salidas")
+@ResponseBody
+public Map<String, Object> obtenerEntradasVsSalidas() {
+    List<Object[]> resultados = ordenServicio.obtenerEntradasVsSalidasPorMes();
+
+    List<String> etiquetas = new ArrayList<>();
+    List<Integer> entradas = new ArrayList<>();
+    List<Integer> salidas = new ArrayList<>();
+
+    for (Object[] fila : resultados) {
+        Integer anio = (Integer) fila[0];
+        Integer mes = (Integer) fila[1];
+        Integer totalEntradas = ((Number) fila[2]).intValue();
+        Integer totalSalidas = ((Number) fila[3]).intValue();
+
+        etiquetas.add(mesNombre(mes) + " " + anio);
+        entradas.add(totalEntradas);
+        salidas.add(totalSalidas);
+    }
+
+    Map<String, Object> response = new HashMap<>();
+    response.put("labels", etiquetas);
+    response.put("entradas", entradas);
+    response.put("salidas", salidas);
+
+    return response;
+}
+
+    private String mesNombre(int mes) {
+        return switch (mes) {
+            case 1 -> "Ene";
+            case 2 -> "Feb";
+            case 3 -> "Mar";
+            case 4 -> "Abr";
+            case 5 -> "May";
+            case 6 -> "Jun";
+            case 7 -> "Jul";
+            case 8 -> "Ago";
+            case 9 -> "Sep";
+            case 10 -> "Oct";
+            case 11 -> "Nov";
+            case 12 -> "Dic";
+            default -> "";
+        };
+    }
+
 }

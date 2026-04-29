@@ -171,4 +171,10 @@ public class OrdenServicio implements IOrdenServicio {
 
         return page;
     }
+
+    // 🔹 Reporte: Entradas vs Salidas por mes (solo órdenes cerradas)
+    @Override
+    public List<Object[]> obtenerEntradasVsSalidasPorMes() {
+        return ordenRepositorio.obtenerEntradasVsSalidasPorMes();
+    }
 }

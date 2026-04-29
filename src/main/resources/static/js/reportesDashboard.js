@@ -2,16 +2,19 @@
 // Dashboard dinámico
 // =======================
 
+document.addEventListener("DOMContentLoaded", () => {
+    actualizarDashboard();
+    actualizarTopProductos();
+    actualizarUltimosMovimientos();
+    actualizarGraficoEntradasVsSalidas();
+});
+
 function actualizarDashboard() {
-    console.log("todosLosMovimientos:", todosLosMovimientos);
-
     const totalProductos = articulos.length || 0;
-
     const fecha = new Date();
     const mesActual = fecha.getMonth() + 1;
     const anioActual = fecha.getFullYear();
 
-    // ✅ Sumar el valor monetario movido del mes actual
     const valorMovidoMes = todosLosMovimientos.reduce((acc, item) => {
         if (Number(item.anio) === anioActual && Number(item.mes) === mesActual) {
             acc += (Number(item.valorMovido) || 0);
@@ -21,13 +24,9 @@ function actualizarDashboard() {
 
     const valorTotal = articulos.reduce((acc, art) => acc + (art.stk * art.costo), 0);
 
-    const cardTotalProductos = document.querySelector('.card-green p');
-    const cardMovimientosMes = document.querySelector('.card-blue p');
-    const cardValorTotal = document.querySelector('.card-darkgreen p');
-
-    if (cardTotalProductos) cardTotalProductos.textContent = totalProductos;
-    if (cardMovimientosMes) cardMovimientosMes.textContent = window.formatoMoneda(valorMovidoMes);
-    if (cardValorTotal) cardValorTotal.textContent = window.formatoMoneda(valorTotal);
+    document.querySelector('.card-green p').textContent = totalProductos;
+    document.querySelector('.card-blue p').textContent = window.formatoMoneda(valorMovidoMes);
+    document.querySelector('.card-darkgreen p').textContent = window.formatoMoneda(valorTotal);
 }
 
 function actualizarTopProductos() {
@@ -46,13 +45,10 @@ function actualizarTopProductos() {
         .slice(0, 3);
 
     const lista = document.querySelector('.card-red ol');
-    if (lista) {
-        lista.innerHTML = '';
-        top.forEach(([articulo, total]) => {
-            const li = `<li>${articulo}: ${total} movimientos</li>`;
-            lista.insertAdjacentHTML('beforeend', li);
-        });
-    }
+    lista.innerHTML = '';
+    top.forEach(([articulo, total]) => {
+        lista.insertAdjacentHTML('beforeend', `<li>${articulo}: ${total} movimientos</li>`);
+    });
 }
 
 function actualizarUltimosMovimientos() {
@@ -77,64 +73,107 @@ function actualizarUltimosMovimientos() {
     });
 
     const lista = document.querySelector('.card-yellow ul');
-    if (lista) {
-        lista.innerHTML = '';
-        const liIngresos = `<li><strong>Ingresos:</strong> ${window.formatoMoneda(ingresos)}</li>`;
-        const liSalidas = `<li><strong>Salidas:</strong> ${window.formatoMoneda(salidas)}</li>`;
-        const liBalance = `<li><strong>Balance:</strong> ${window.formatoMoneda(ingresos - salidas)}</li>`;
-        lista.insertAdjacentHTML('beforeend', liIngresos);
-        lista.insertAdjacentHTML('beforeend', liSalidas);
-        lista.insertAdjacentHTML('beforeend', liBalance);
+    lista.innerHTML = '';
+    lista.insertAdjacentHTML('beforeend', `<li><strong>Ingresos:</strong> ${window.formatoMoneda(ingresos)}</li>`);
+    lista.insertAdjacentHTML('beforeend', `<li><strong>Salidas:</strong> ${window.formatoMoneda(salidas)}</li>`);
+    lista.insertAdjacentHTML('beforeend', `<li><strong>Balance:</strong> ${window.formatoMoneda(ingresos - salidas)}</li>`);
+}
+
+async function actualizarGraficoEntradasVsSalidas() {
+    const canvas = document.getElementById('graficoEntradasVsSalidas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    try {
+        const response = await fetch("/reportes/entradas-vs-salidas");
+        const data = await response.json();
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: [
+                    { label: 'Entradas', data: data.entradas, backgroundColor: '#28a745' },
+                    { label: 'Salidas', data: data.salidas, backgroundColor: '#dc3545' }
+                ]
+            },
+            options: { responsive: true, plugins: { legend: { position: 'top' } } }
+        });
+    } catch (error) {
+        console.error("No se pudo cargar el gráfico Entradas vs Salidas:", error);
     }
 }
 
-
-function actualizarGraficoEntradasVsSalidas() {
-    const ctx = document.getElementById('graficoEntradasVsSalidas').getContext('2d');
-    const fecha = new Date();
-    const anioActual = fecha.getFullYear();
-
-    const entradasPorMes = Array(12).fill(0);
-    const salidasPorMes = Array(12).fill(0);
-
-    todosLosMovimientos.forEach(item => {
-        if (Number(item.anio) === anioActual) {
-            const idx = Number(item.mes) - 1;
-            entradasPorMes[idx] += Number(item.entradas) || 0;
-            salidasPorMes[idx] += Number(item.salidas) || 0;
-        }
-    });
-
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],
-            datasets: [
-                { label: 'Entradas', data: entradasPorMes, backgroundColor: '#28a745' },
-                { label: 'Salidas', data: salidasPorMes, backgroundColor: '#dc3545' }
-            ]
-        },
-        options: { responsive: true, plugins: { legend: { position: 'top' } } }
-    });
-}
 //_____________________________________
-// Modal de los cards del Dashbboard
+// Modales separados
 //_____________________________________
-const modalBody = document.getElementById("modal-body");
-const modalTitle = document.querySelector("#cardModal .modal-title");
-const cardModal = new bootstrap.Modal(document.getElementById("cardModal"));
 
 document.querySelectorAll('.dashboard .card').forEach(card => {
   card.addEventListener('click', () => {
     const header = card.querySelector('h4')?.textContent || "Detalle";
-    const contenido = card.innerHTML.replace(/<h4[^>]*>.*?<\/h4>/, "");
 
-    modalTitle.textContent = header;
-    modalBody.innerHTML = contenido;
+    if (header.includes("Entradas vs Salidas")) {
+      // 🔹 Modal exclusivo del gráfico
+      const graficoModalEl = document.getElementById("graficoModal");
+      const graficoModal = new bootstrap.Modal(graficoModalEl);
+      graficoModal.show();
 
-    const modalContent = document.querySelector("#cardModal .modal-content");
-    modalContent.className = "modal-content " + card.className.replace("card", "").trim();
+      const ctx = document.getElementById("graficoEntradasVsSalidasModal").getContext("2d");
 
-    cardModal.show();
+      fetch("/reportes/entradas-vs-salidas")
+        .then(resp => resp.json())
+        .then(data => {
+          new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: data.labels,
+              datasets: [
+                { label: 'Entradas', data: data.entradas, backgroundColor: '#28a745' },
+                { label: 'Salidas', data: data.salidas, backgroundColor: '#dc3545' }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { position: 'top' },
+                title: { display: true, text: 'Entradas vs Salidas (Órdenes cerradas)' }
+              }
+            }
+          });
+        })
+        .catch(err => console.error("Error cargando gráfico en modal:", err));
+    } else {
+      // 🔹 Modal general para números y texto
+      const cardModalEl = document.getElementById("cardModal");
+      const cardModal = new bootstrap.Modal(cardModalEl);
+      const modalTitle = cardModalEl.querySelector(".modal-title");
+      const modalBody = cardModalEl.querySelector("#modal-body");
+      const modalContent = cardModalEl.querySelector(".modal-content");
+
+      modalTitle.textContent = header;
+
+      const contenidoClonado = card.cloneNode(true);
+      const h4 = contenidoClonado.querySelector("h4");
+      if (h4) h4.remove();
+
+      contenidoClonado.querySelectorAll("p").forEach(p => {
+        if (!isNaN(p.textContent.replace(/[^0-9]/g, ""))) {
+          p.classList.add("numero-grande");
+        } else {
+          p.classList.add("texto-grande");
+        }
+      });
+
+      contenidoClonado.querySelectorAll("ul, ol, li").forEach(el => {
+        el.classList.add("texto-grande");
+      });
+
+      // 🔹 aplicar las clases del card al modal-content para que todo el modal herede el color
+      modalContent.className = "modal-content " + card.className.replace("card", "").trim();
+
+      modalBody.innerHTML = contenidoClonado.innerHTML;
+      cardModal.show();
+    }
   });
 });
