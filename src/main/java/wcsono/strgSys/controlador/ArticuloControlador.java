@@ -10,8 +10,8 @@ import wcsono.strgSys.modelo.Articulo;
 import wcsono.strgSys.servicio.ArticuloServicio;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Objects;
+import java.util.Optional;
 
 @Controller
 public class ArticuloControlador {
@@ -24,9 +24,14 @@ public class ArticuloControlador {
         this.articuloServicio = articuloServicio;
     }
 
+    // Listado de artículos con filtros
     @GetMapping("/articulos")
-    public String iniciar(ModelMap modelo) {
-        List<Articulo> articulos = articuloServicio.listarArticulos();
+    public String iniciar(@RequestParam(required = false) String codArt,
+                          @RequestParam(required = false) String desArt,
+                          ModelMap modelo) {
+
+        List<Articulo> articulos = articuloServicio.buscarPorFiltros(codArt, desArt);
+
         modelo.put("articulos", articulos);
         modelo.put("articuloForma", new Articulo());
         return "Articulos";
@@ -42,18 +47,17 @@ public class ArticuloControlador {
                           RedirectAttributes redirectAttrs) {
         logger.info("Artículo a agregar: {}", articulo);
 
-        boolean existe = articuloServicio.listarArticulos().stream()
-                .anyMatch(a -> a.getCodArt().equalsIgnoreCase(articulo.getCodArt()));
+        boolean existe = articuloServicio.existeCodigo(articulo.getCodArt());
 
         if (existe) {
             logger.warn("Ya existe un artículo con codArt: {}", articulo.getCodArt());
-            redirectAttrs.addFlashAttribute("mensajeError",
+            redirectAttrs.addFlashAttribute("error",
                     "El código de artículo '" + articulo.getCodArt() + "' ya está registrado.");
             return "redirect:/articulos";
         }
 
         articuloServicio.guardarArticulo(articulo);
-        redirectAttrs.addFlashAttribute("mensajeExito", "Artículo agregado correctamente.");
+        redirectAttrs.addFlashAttribute("mensaje", "Artículo agregado correctamente.");
         return "redirect:/articulos";
     }
 
@@ -65,7 +69,7 @@ public class ArticuloControlador {
             return "fragmentos/error :: mensajeError";
         }
         modelo.put("artEditar", artEditar);
-        return "editarArt"; // sin slash inicial para consistencia
+        return "editarArt";
     }
 
     @PostMapping("/guardarEditarArt")
@@ -74,20 +78,19 @@ public class ArticuloControlador {
         logger.info("Artículo a editar: {}", articulo);
         logger.info("ID recibido en edición: {}", articulo.getIdArt());
 
-
         boolean existe = articuloServicio.listarArticulos().stream()
                 .anyMatch(a -> !Objects.equals(a.getIdArt(), articulo.getIdArt()) &&
                         a.getCodArt().equalsIgnoreCase(articulo.getCodArt()));
 
         if (existe) {
             logger.warn("Intento de duplicar codArt en edición: {}", articulo.getCodArt());
-            redirectAttrs.addFlashAttribute("mensajeError",
+            redirectAttrs.addFlashAttribute("error",
                     "El código de artículo '" + articulo.getCodArt() + "' ya está registrado en otro artículo.");
             return "redirect:/articulos";
         }
 
         articuloServicio.guardarArticulo(articulo);
-        redirectAttrs.addFlashAttribute("mensajeExito", "Artículo editado correctamente.");
+        redirectAttrs.addFlashAttribute("mensaje", "Artículo editado correctamente.");
         return "redirect:/articulos";
     }
 
@@ -95,14 +98,14 @@ public class ArticuloControlador {
     public String eliminarArticulo(@PathVariable("id") int idArticulo,
                                    RedirectAttributes redirectAttrs) {
         Articulo articulo = articuloServicio.buscarArticuloPorId(idArticulo);
-        if (articulo != null && articulo.getStk() == 0) {
+        if (articulo != null && articulo.getStk() <= 0 && !articulo.isEstArt()) {
             articuloServicio.eliminarArticulo(articulo);
             logger.info("Artículo eliminado: {}", articulo);
-            redirectAttrs.addFlashAttribute("mensajeExito", "Artículo eliminado correctamente.");
+            redirectAttrs.addFlashAttribute("mensaje", "Artículo eliminado correctamente.");
         } else {
-            logger.warn("No se puede eliminar el artículo con stock > 0: {}", idArticulo);
-            redirectAttrs.addFlashAttribute("mensajeError",
-                    "No se puede eliminar el artículo mientras el stock sea mayor a 0.");
+            logger.warn("No se puede eliminar el artículo con stock > 0 o referenciado en otras tablas: {}", idArticulo);
+            redirectAttrs.addFlashAttribute("error",
+                    "No se puede eliminar el artículo mientras el stock sea mayor a 0 o esté referenciado en órdenes/movimientos.");
         }
         return "redirect:/articulos";
     }

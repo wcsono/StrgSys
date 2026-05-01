@@ -32,9 +32,15 @@ public class ArticuloServicio implements IArticuloServicio {
     public void eliminarArticulo(Articulo articulo) {
         articuloRepositorio.delete(articulo);
     }
+
     @Override
     public boolean existeCodigo(String codArt) {
         return articuloRepositorio.existsByCodArt(codArt.toUpperCase());
     }
 
+    // 👇 Nuevo método: búsqueda con filtros
+    @Override
+    public List<Articulo> buscarPorFiltros(String codArt, String desArt) {
+        return articuloRepositorio.findByFiltros(codArt, desArt);
+    }
 }

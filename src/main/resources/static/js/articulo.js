@@ -60,6 +60,49 @@ function cargarModal(idArt) {
 }
 
 // ===============================
+// Mostrar artículos en tabla con mensaje si no hay coincidencias
+// ===============================
+function mostrarArticulos(articulos) {
+    const tablaBody = document.querySelector("table tbody");
+    tablaBody.innerHTML = "";
+
+    if (!articulos || articulos.length === 0) {
+        const fila = document.createElement("tr");
+        const celda = document.createElement("td");
+        celda.colSpan = 6; // número de columnas de la tabla
+        celda.className = "text-center text-muted";
+        celda.textContent = "No se encontraron artículos para los criterios seleccionados.";
+        fila.appendChild(celda);
+        tablaBody.appendChild(fila);
+        return;
+    }
+
+    articulos.forEach(articulo => {
+        const fila = document.createElement("tr");
+        fila.className = "text-center";
+
+        fila.innerHTML = `
+            <td>${articulo.idArt}</td>
+            <td>${articulo.codArt}</td>
+            <td>${articulo.desArt}</td>
+            <td>${articulo.udm}</td>
+            <td>${articulo.stk}</td>
+            <td>
+                <div class="d-flex justify-content-center gap-2">
+                    <a href="/editarArt/${articulo.idArt}" class="btn btn-dark btn-sm" title="Editar">
+                        <i class="bi bi-pencil-square"></i>
+                    </a>
+                    <a href="/eliminar/${articulo.idArt}" class="btn btn-danger btn-sm" title="Eliminar">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </div>
+            </td>
+        `;
+        tablaBody.appendChild(fila);
+    });
+}
+
+// ===============================
 // Validación de codArt en tiempo real
 // ===============================
 document.addEventListener("DOMContentLoaded", function() {
