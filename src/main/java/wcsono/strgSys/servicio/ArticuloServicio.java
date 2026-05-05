@@ -38,9 +38,9 @@ public class ArticuloServicio implements IArticuloServicio {
         return articuloRepositorio.existsByCodArt(codArt.toUpperCase());
     }
 
-    // 👇 Nuevo método: búsqueda con filtros
+    // 👇 Nuevo método: búsqueda con filtros (Código, Descripción y Ubicación)
     @Override
-    public List<Articulo> buscarPorFiltros(String codArt, String desArt) {
-        return articuloRepositorio.findByFiltros(codArt, desArt);
+    public List<Articulo> buscarPorFiltros(String codArt, String desArt, String ubiArt) {
+        return articuloRepositorio.findByFiltros(codArt, desArt, ubiArt);
     }
 }

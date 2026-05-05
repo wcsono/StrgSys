@@ -13,6 +13,7 @@ function mostrarArticulos(lista) {
             <tr>
                 <td>${art.codArt}</td>
                 <td>${art.desArt}</td>
+                <td>${art.ubiArt}</td> <!-- 👈 aquí estaba faltando -->
                 <td>${art.stk}</td>
                 <td>${window.formatoMoneda(art.costo)}</td>
                 <td>${window.formatoMoneda(art.stk * art.costo)}</td>
@@ -20,6 +21,7 @@ function mostrarArticulos(lista) {
         cuerpo.insertAdjacentHTML('beforeend', fila);
     });
 }
+
 
 function ordenarPor(campo) {
     if (sortField !== campo) {
