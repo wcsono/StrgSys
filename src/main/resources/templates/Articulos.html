@@ -23,6 +23,7 @@
                     <th>ID</th>
                     <th>Código</th>
                     <th>Descripción</th>
+                    <th>Ubicación</th>
                     <th>U.D.M.</th>
                     <th>Stock</th>
                     <th>
@@ -56,6 +57,7 @@
                     <td th:text="${articulo.idArt}"></td>
                     <td th:text="${articulo.codArt}"></td>
                     <td th:text="${articulo.desArt}"></td>
+                    <td th:text="${articulo.ubiArt}"></td>
                     <td th:text="${articulo.udm}"></td>
                     <td th:text="${articulo.stk}"></td>
                     <td>
@@ -111,6 +113,14 @@
                        style="text-transform: uppercase;"
                        oninput="this.value = this.value.toUpperCase();">
             </div>
+            <!-- Filtro por ubicación -->
+            <div class="input-group mb-1">
+                <span class="input-group-text">Ubicación</span>
+                <input id="ubiArt" name="ubiArt" class="form-control" aria-label="Ubicación"
+                       style="text-transform: uppercase;"
+                       oninput="this.value = this.value.toUpperCase();">
+            </div>
+
 
             <!-- Botón aplicar filtros -->
             <button type="submit" class="btn btn-primary mt-2">

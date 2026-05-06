@@ -20,16 +20,12 @@ import wcsono.strgSys.servicio.IOrdenServicio;
 import wcsono.strgSys.servicio.ITipoDocumentoServicio;
 import wcsono.strgSys.servicio.MovimientoServicio;
 import wcsono.strgSys.modelo.Movimiento;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.ArrayList;
 
-
+import java.util.*;
 
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.List;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -366,6 +362,10 @@ return ordenServicio.validarNumOrdUnico(numOrd);
 @ResponseBody
 public Map<String, Object> obtenerEntradasVsSalidas() {
     List<Object[]> resultados = ordenServicio.obtenerEntradasVsSalidasPorMes();
+    System.out.println("Resultados reporte: " + resultados.size());
+    for (Object[] fila : resultados) {
+        System.out.println(Arrays.toString(fila));
+    }
 
     List<String> etiquetas = new ArrayList<>();
     List<Integer> entradas = new ArrayList<>();

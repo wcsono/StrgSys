@@ -42,6 +42,9 @@
                             <th id="th-desArt" class="sortable" onclick="ordenarPor('desArt')">
                                 Descripción <span id="icon-desArt" class="both"></span>
                             </th>
+                            <th id="th-ubiArt" class="sortable" onclick="ordenarPor('ubiArt')">
+                                Ubicación <span id="icon-ubiArt" class="both"></span>
+                            </th>
                             <th id="th-stk" class="sortable" onclick="ordenarPor('stk')">
                                 Stock <span id="icon-stk" class="both"></span>
                             </th>
@@ -53,6 +56,7 @@
                         <tr th:each="art : ${articulos}">
                             <td th:text="${art.codArt}"></td>
                             <td th:text="${art.desArt}"></td>
+                            <td th:text="${art.ubiArt}"></td>
                             <td th:text="${art.stk}"></td>
                             <td th:text="${art.costo}" class="costo"></td>
                             <td th:text="${art.stk * art.costo}" class="costo"></td>

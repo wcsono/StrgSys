@@ -131,6 +131,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
+    cursor: pointer;
   min-height: 120px; /* altura controlada */
 }
 
@@ -166,6 +167,11 @@ body {
 .card-red { background-color: #dc3545; }
 .card-darkgreen { background-color: #006400; }
 .card-light { background-color: #f8f9fa; color: #000; }
+.dashboard .card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
 
 /* ===== Gráfico compacto ===== */
 #graficoEntradasVsSalidas {
