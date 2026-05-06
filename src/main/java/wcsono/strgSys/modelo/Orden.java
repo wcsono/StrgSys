@@ -23,18 +23,24 @@ public class Orden {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idOrd;
 
-    @NotBlank
-    @Column(nullable = false, length = 20, unique = true)
+    // Número de orden calculado (ej: 1000 + idOrd)
+    @Column(nullable = false, unique = true, length = 20)
     private String numOrd;
-
-    @NotBlank
-    @Column(nullable = false, length = 100)
-    private String nomOrd;
 
     // Relación con TipoDocumento
     @ManyToOne(optional = false)
     @JoinColumn(name = "idTd", nullable = false)
     private TipoDocumento tipoDocumento;
+
+    // Relación con Usuario
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "idUsuario", nullable = false)
+    private Usuario usuario;
+
+    // Relación con Cliente
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "idCli", nullable = false)
+    private Cliente cliente;
 
     @NotNull
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -45,16 +51,19 @@ public class Orden {
     @Size(max = 50)
     private String ndocRef;
 
+    // Estado de la orden (0–8)
+    @NotNull
     @Column(nullable = false)
-    private boolean estOrd = false;
-
-    @Column(nullable = false)
-    private boolean extornada = false;   // true = extornada
+    private Integer estOrd;
 
     @NotNull
     @PositiveOrZero
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal cosOrd;
+
+    // Documento de venta asociado
+    @Column(length = 50)
+    private String docVenta;
 
     // Relación con DetalleOrden (lado padre)
     @OneToMany(mappedBy = "orden", cascade = CascadeType.ALL, orphanRemoval = true)

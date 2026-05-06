@@ -20,6 +20,6 @@ public interface IArticuloServicio {
     // Validar existencia de un código de artículo
     boolean existeCodigo(String codArt);
 
-    // 👇 Nuevo método: búsqueda con filtros
-    List<Articulo> buscarPorFiltros(String codArt, String desArt);
+    // 👇 Nuevo método: búsqueda con filtros (Código, Descripción y Ubicación)
+    List<Articulo> buscarPorFiltros(String codArt, String desArt, String ubiArt);
 }

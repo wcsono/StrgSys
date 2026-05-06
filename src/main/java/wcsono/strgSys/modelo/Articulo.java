@@ -45,6 +45,9 @@ public class Articulo {
 
     private boolean estArt;
 
+    @Column(length = 50)
+    private String ubiArt;
+
     @OneToMany(mappedBy = "articulo", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore // 👈 evita que Jackson serialice detalleOrdenes dentro de Articulo
     private List<DetalleOrden> detalleOrdenes = new ArrayList<>();

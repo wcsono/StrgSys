@@ -28,14 +28,17 @@ public class ArticuloControlador {
     @GetMapping("/articulos")
     public String iniciar(@RequestParam(required = false) String codArt,
                           @RequestParam(required = false) String desArt,
+                          @RequestParam(required = false) String ubiArt,
                           ModelMap modelo) {
 
-        List<Articulo> articulos = articuloServicio.buscarPorFiltros(codArt, desArt);
+        // 👉 ahora pasamos también ubiArt al servicio
+        List<Articulo> articulos = articuloServicio.buscarPorFiltros(codArt, desArt, ubiArt);
 
         modelo.put("articulos", articulos);
         modelo.put("articuloForma", new Articulo());
-        return "Articulos";
+        return "Articulos"; // asegúrate que coincida con el nombre del template
     }
+
 
     @GetMapping("/agregarArt")
     public String abrirAgregar() {

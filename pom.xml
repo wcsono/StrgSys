@@ -9,13 +9,13 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>wcsono</groupId>
-	<artifactId>strgSys</artifactId>
+	<artifactId>strgSys-plasticos</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>strgSys</name>
-	<description>Storage System</description>
+	<name>StrgSys Plasticos</name>
+	<description>Sistema de gestión para empresa de plásticos</description>
 	<url/>
 	<licenses>
-		<license/>
+	<license/>
 	</licenses>
 	<developers>
 		<developer/>
