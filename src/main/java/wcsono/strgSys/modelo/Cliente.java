@@ -26,6 +26,7 @@ public class Cliente {
     @Column(length = 100)
     private String emailCli;
 
-    // Control de estado: true = activo, false = no se puede eliminar si está en uso
-    private boolean estCliente = true;
+    @Column(nullable = false)
+    private Integer estCliente = 1; // 1=activo, 0=inactivo
+
 }

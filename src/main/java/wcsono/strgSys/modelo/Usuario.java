@@ -26,6 +26,12 @@ public class Usuario {
     @Column(length = 100)
     private String email;
 
-    // Control de estado: true = activo, false = no se puede usar/eliminar
-    private boolean estUsuario = true;
+    @Column(nullable = false)
+    private Integer nivelAcceso;
+// 1 = Administrador, 2 = Operador, 3 = Almacén
+
+    @Column(nullable = false)
+    private Integer estUsuario = 1;
+    // 1=activo, 0=inactivo
+
 }

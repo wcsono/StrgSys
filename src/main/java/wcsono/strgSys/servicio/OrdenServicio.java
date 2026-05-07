@@ -27,22 +27,12 @@ public class OrdenServicio implements IOrdenServicio {
 
     @Override
     public Page<Orden> listarOrdenesConTipoDocumento(Pageable pageable) {
-        logger.debug("Service: listarOrdenesConTipoDocumento -> page={}, size={}, sort={}",
-                pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
-        Page<Orden> page = ordenRepositorio.listarConTipoDocumento(pageable);
-        logger.debug("Service result -> totalElements={}, totalPages={}, contentSize={}",
-                page.getTotalElements(), page.getTotalPages(), page.getContent().size());
-        return page;
+        return ordenRepositorio.listarConTipoDocumento(pageable);
     }
 
     @Override
     public Page<Orden> listarOrdenes(Pageable pageable) {
-        logger.debug("Service: listarOrdenes -> page={}, size={}, sort={}",
-                pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
-        Page<Orden> page = ordenRepositorio.findAll(pageable);
-        logger.debug("Service result -> totalElements={}, totalPages={}, contentSize={}",
-                page.getTotalElements(), page.getTotalPages(), page.getContent().size());
-        return page;
+        return ordenRepositorio.findAll(pageable);
     }
 
     @Override
@@ -52,28 +42,39 @@ public class OrdenServicio implements IOrdenServicio {
 
     @Override
     public Orden buscarOrdenConDetalles(Integer id) {
-        return ordenRepositorio.findByIdOrd(id).orElse(null);
+        return ordenRepositorio.findByIdOrd(id);
     }
 
     @Override
     public Orden buscarOrdenConTipoDocumentoYDetalles(Integer id) {
-        return ordenRepositorio.findWithTipoDocumentoAndDetallesByIdOrd(id).orElse(null);
+        return ordenRepositorio.findWithTipoDocumentoAndDetallesByIdOrd(id);
     }
 
     @Override
+    @Transactional
     public Orden guardarOrden(Orden orden) {
         Orden saved = ordenRepositorio.save(orden);
-        logger.info("Orden guardada -> id={}, numOrd={}", saved.getIdOrd(), saved.getNumOrd());
+
+        // Generar numOrd automáticamente si no existe
+        if (saved.getNumOrd() == null || saved.getNumOrd().isEmpty()) {
+            saved.setNumOrd(String.valueOf(1000 + saved.getIdOrd()));
+            saved = ordenRepositorio.save(saved);
+        }
+
+        logger.info("Orden guardada -> id={}, numOrd={}, estOrd={}",
+                saved.getIdOrd(), saved.getNumOrd(), saved.getEstOrd());
         return saved;
     }
 
     @Override
     public void eliminarOrden(Orden orden) {
+        if (orden.getCliente() != null || orden.getUsuario() != null) {
+            throw new IllegalStateException("No se puede eliminar una orden vinculada a Cliente/Usuario");
+        }
         ordenRepositorio.delete(orden);
         logger.info("Orden eliminada -> id={}", orden.getIdOrd());
     }
 
-    // 🔹 Extornar orden
     @Override
     @Transactional
     public void extornarOrden(Integer id) {
@@ -86,39 +87,17 @@ public class OrdenServicio implements IOrdenServicio {
 
         orden.getDetalles().forEach(det -> {
             var articulo = det.getArticulo();
-
             int nuevoStock = esEntrada
-                    ? articulo.getStk() - det.getCantidad() // inverso de entrada
-                    : articulo.getStk() + det.getCantidad(); // inverso de salida
-
+                    ? articulo.getStk() - det.getCantidad()
+                    : articulo.getStk() + det.getCantidad();
             articulo.setStk(nuevoStock);
             articuloServicio.guardarArticulo(articulo);
-
-            logger.info("Artículo {} extornado: stock={}, costo={}",
-                    articulo.getCodArt(), articulo.getStk(), articulo.getCosto());
         });
 
-        orden.setExtornada(true);
-        orden.setEstOrd(false);
-
+        orden.setEstOrd(8); // Estado = Extornado
         guardarOrden(orden);
+
         logger.info("Orden extornada -> id={}, numOrd={}", orden.getIdOrd(), orden.getNumOrd());
-    }
-
-    // 🔹 Consultas adicionales
-    @Override
-    public List<Orden> listarOrdenesExtornadas() {
-        return ordenRepositorio.findByExtornadaTrue();
-    }
-
-    @Override
-    public List<Orden> listarOrdenesNoExtornadas() {
-        return ordenRepositorio.findByExtornadaFalse();
-    }
-
-    @Override
-    public List<Orden> listarOrdenesCerradasNoExtornadas() {
-        return ordenRepositorio.findByEstOrdTrueAndExtornadaFalse();
     }
 
     @Override
@@ -126,55 +105,70 @@ public class OrdenServicio implements IOrdenServicio {
         return !ordenRepositorio.existsByNumOrd(numOrd);
     }
 
-    // 🔹 Filtros combinados
     @Override
-    public Page<Orden> listarOrdenesFiltradas(
-            String numOrd,
-            String nomOrd,
-            LocalDate fecOrdDesde,
-            LocalDate fecOrdHasta,
-            Boolean estOrd,
-            Pageable pageable) {
-
-        Specification<Orden> spec = (root, query, cb) -> cb.conjunction();
-
-        if (numOrd != null && !numOrd.isEmpty()) {
-            spec = spec.and((root, query, cb) ->
-                    cb.like(cb.lower(root.get("numOrd")), "%" + numOrd.toLowerCase() + "%"));
-        }
-
-        if (nomOrd != null && !nomOrd.isEmpty()) {
-            spec = spec.and((root, query, cb) ->
-                    cb.like(cb.lower(root.get("nomOrd")), "%" + nomOrd.toLowerCase() + "%"));
-        }
-
-        if (fecOrdDesde != null) {
-            spec = spec.and((root, query, cb) ->
-                    cb.greaterThanOrEqualTo(root.get("fecOrd"), fecOrdDesde));
-        }
-
-        if (fecOrdHasta != null) {
-            spec = spec.and((root, query, cb) ->
-                    cb.lessThanOrEqualTo(root.get("fecOrd"), fecOrdHasta));
-        }
-
-        if (estOrd != null) {
-            spec = spec.and((root, query, cb) ->
-                    cb.equal(root.get("estOrd"), estOrd));
-        }
-
-        Page<Orden> page = ordenRepositorio.findAll(spec, pageable);
-        logger.debug("Filtros aplicados -> numOrd={}, nomOrd={}, fecOrdDesde={}, fecOrdHasta={}, estOrd={}",
-                numOrd, nomOrd, fecOrdDesde, fecOrdHasta, estOrd);
-        logger.debug("Service result -> totalElements={}, totalPages={}, contentSize={}",
-                page.getTotalElements(), page.getTotalPages(), page.getContent().size());
-
-        return page;
+    public List<Orden> listarOrdenesPorEstado(Integer estOrd) {
+        return ordenRepositorio.findByEstOrd(estOrd);
     }
 
-    // 🔹 Reporte: Entradas vs Salidas por mes (solo órdenes cerradas)
+    @Override
+    public List<Orden> listarOrdenesPorEstados(List<Integer> estados) {
+        return ordenRepositorio.findByEstOrdIn(estados);
+    }
+
+    @Override
+    public List<Orden> listarOrdenesPorCliente(Integer idCliente) {
+        return ordenRepositorio.findByCliente_IdCliente(idCliente);
+    }
+
+    @Override
+    public List<Orden> listarOrdenesPorUsuario(Integer idUsuario) {
+        return ordenRepositorio.findByUsuario_IdUsuario(idUsuario);
+    }
+
     @Override
     public List<Object[]> obtenerEntradasVsSalidasPorMes() {
         return ordenRepositorio.obtenerEntradasVsSalidasPorMes();
+    }
+
+    @Override
+    public Page<Orden> listarOrdenesFiltradas(
+            String numOrd,
+            Integer idCliente,
+            LocalDate fecOrdDesde,
+            LocalDate fecOrdHasta,
+            Integer estOrd,
+            Pageable pageable) {
+
+        Specification<Orden> spec = (root, query, cb) -> {
+            var predicates = cb.conjunction();
+
+            if (numOrd != null && !numOrd.isEmpty()) {
+                predicates = cb.and(predicates,
+                        cb.like(root.get("numOrd"), "%" + numOrd + "%"));
+            }
+
+            if (idCliente != null) {
+                predicates = cb.and(predicates,
+                        cb.equal(root.get("cliente").get("idCliente"), idCliente));
+            }
+
+            if (fecOrdDesde != null) {
+                predicates = cb.and(predicates,
+                        cb.greaterThanOrEqualTo(root.get("fecOrd"), fecOrdDesde));
+            }
+            if (fecOrdHasta != null) {
+                predicates = cb.and(predicates,
+                        cb.lessThanOrEqualTo(root.get("fecOrd"), fecOrdHasta));
+            }
+
+            if (estOrd != null) {
+                predicates = cb.and(predicates,
+                        cb.equal(root.get("estOrd"), estOrd));
+            }
+
+            return predicates;
+        };
+
+        return ordenRepositorio.findAll(spec, pageable);
     }
 }

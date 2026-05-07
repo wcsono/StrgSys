@@ -9,68 +9,41 @@ import java.util.List;
 
 public interface IOrdenServicio {
 
-    /**
-     * Listar órdenes con su TipoDocumento (consulta paginada).
-     */
     Page<Orden> listarOrdenesConTipoDocumento(Pageable pageable);
 
-    /**
-     * Listar órdenes sin joins adicionales (consulta paginada).
-     */
     Page<Orden> listarOrdenes(Pageable pageable);
 
-    /**
-     * Buscar una orden por su ID.
-     */
     Orden buscarOrdenPorId(Integer id);
 
-    /**
-     * Buscar una orden y traer sus detalles.
-     */
     Orden buscarOrdenConDetalles(Integer id);
 
-    /**
-     * Buscar una orden y traer TipoDocumento + detalles.
-     */
     Orden buscarOrdenConTipoDocumentoYDetalles(Integer id);
 
-    /**
-     * Guardar o actualizar una orden.
-     */
     Orden guardarOrden(Orden orden);
 
-    /**
-     * Eliminar una orden.
-     */
     void eliminarOrden(Orden orden);
 
-    // 🔹 Métodos para manejar extornos
-    void extornarOrden(Integer id);
-    List<Orden> listarOrdenesExtornadas();
-    List<Orden> listarOrdenesNoExtornadas();
-    List<Orden> listarOrdenesCerradasNoExtornadas();
+    // 🔹 Métodos para estados
+    List<Orden> listarOrdenesPorEstado(Integer estOrd);
+    List<Orden> listarOrdenesPorEstados(List<Integer> estados);
+
+    // 🔹 Métodos para Cliente y Usuario
+    List<Orden> listarOrdenesPorCliente(Integer idCliente);
+    List<Orden> listarOrdenesPorUsuario(Integer idUsuario);
 
     boolean validarNumOrdUnico(String numOrd);
 
-    // 🔹 Filtros combinados
-    /**
-     * Listar órdenes aplicando filtros dinámicos:
-     * - numOrd (parcial)
-     * - nomOrd (parcial)
-     * - rango de fechas (fecOrdDesde, fecOrdHasta)
-     * - estado (estOrd: abierta/cerrada)
-     */
+    // 🔹 Filtros combinados (ajustados)
     Page<Orden> listarOrdenesFiltradas(String numOrd,
-                                       String nomOrd,
+                                       Integer idCliente,
                                        LocalDate fecOrdDesde,
                                        LocalDate fecOrdHasta,
-                                       Boolean estOrd,
+                                       Integer estOrd,
                                        Pageable pageable);
 
-    // 🔹 Nuevo método para reportes
-    /**
-     * Reporte: Entradas vs Salidas por mes (solo órdenes cerradas).
-     * Devuelve una lista de arreglos [anio, mes, entradas, salidas].
-     */
+    // 🔹 Reporte: Entradas vs Salidas por mes
     List<Object[]> obtenerEntradasVsSalidasPorMes();
+
+    void extornarOrden(Integer id);
+
 }
