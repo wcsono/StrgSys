@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/cabecero::cabecero-seccion(titulo='Login')}"></head>
+<body class="bg-light">
+
+<div class="d-flex justify-content-center align-items-center vh-100">
+    <div class="card shadow" style="width: 350px;">
+        <div class="card-body">
+            <h4 class="card-title text-center mb-4">Acceso al Sistema</h4>
+
+            <form th:action="@{/login}" method="post">
+                <div class="mb-3">
+                    <label for="user" class="form-label">Usuario</label>
+                    <input type="text" id="user" name="user" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <input type="password" id="password" name="password" class="form-control" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+            </form>
+
+            <!-- Mensajes dinámicos -->
+            <div th:if="${error}" class="alert alert-danger mt-3" th:text="${error}"></div>
+            <div th:if="${mensaje}" class="alert alert-success mt-3" th:text="${mensaje}"></div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"></div>
+
+</body>
+</html>

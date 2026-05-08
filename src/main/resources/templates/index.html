@@ -1,45 +1,61 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragmentos/cabecero::cabecero-seccion(titulo='Inicio')}">
-
-</head>
+<head th:replace="~{fragmentos/cabecero::cabecero-seccion(titulo='Inicio')}"></head>
 <body>
 <div class="container text-center mb-5 mt-5">
     <h1>Storage System</h1>
 </div>
+
+<!-- Botón de logout en esquina superior derecha -->
+<div class="position-absolute top-0 end-0 m-3">
+    <a th:href="@{/logout}" class="btn btn-danger">Cerrar Sesión</a>
+</div>
+
 <div class="container d-flex justify-content-between">
 
-    <a href="/articulos"><div class="card" style="width: 18rem;">
-        <img src="/imgs/articulos.jpg" class="card-img-top" alt="...">
-        <div class="card-body">
-            <h2 class="card-title text-center">Articulos</h2>
+    <a href="/articulos">
+        <div class="card" style="width: 18rem;">
+            <img src="/imgs/articulos.jpg" class="card-img-top" alt="...">
+            <div class="card-body">
+                <h2 class="card-title text-center">Artículos</h2>
+            </div>
         </div>
-    </div></a>
+    </a>
 
-    <a href="/ordenes"><div class="card" style="width: 18rem;">
-        <img src="/imgs/ordenico.png" class="card-img-top" alt="...">
-        <div class="card-body">
-            <h2 class="card-title text-center">Ordenes</h2>
+    <a href="/ordenes">
+        <div class="card" style="width: 18rem;">
+            <img src="/imgs/ordenico.png" class="card-img-top" alt="...">
+            <div class="card-body">
+                <h2 class="card-title text-center">Órdenes</h2>
+            </div>
         </div>
-    </div></a>
+    </a>
 
-    <a href="/reportes"><div class="card" style="width: 18rem;">
-        <img src="/imgs/inventicono.png" class="card-img-top" alt="...">
-        <div class="card-body">
-            <h2 class="card-title text-center">Reportes</h2>
+    <a href="/reportes">
+        <div class="card" style="width: 18rem;">
+            <img src="/imgs/inventicono.png" class="card-img-top" alt="...">
+            <div class="card-body">
+                <h2 class="card-title text-center">Reportes</h2>
+            </div>
         </div>
-    </div></a>
+    </a>
 
-    <a href="/tipoDocumentos"><div class="card" style="width: 18rem;">
-        <img src="/imgs/tdi.jpg" class="card-img-top" alt="...">
-        <div class="card-body">
-            <h2 class="card-title text-center">Tipos Documentos</h2>
+    <a href="/tipoDocumentos">
+        <div class="card" style="width: 18rem;">
+            <img src="/imgs/tdi.jpg" class="card-img-top" alt="...">
+            <div class="card-body">
+                <h2 class="card-title text-center">Tipos Documentos</h2>
+            </div>
         </div>
-    </div>
+    </a>
 
 </div>
 
+<!-- Nombre del usuario en esquina inferior derecha -->
+<div class="position-absolute bottom-0 end-0 m-3 text-muted">
+    Usuario activo: <span th:text="${usuarioSesion.nombre}"></span>
+</div>
 
-<div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"/>
+<div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"></div>
 </body>
-</html></a>
+</html>
