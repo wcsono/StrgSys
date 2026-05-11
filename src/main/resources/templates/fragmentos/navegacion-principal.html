@@ -1,43 +1,67 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 
 <div th:fragment="navegacion-principal-seccion" th:remove="tag">
-<!--    Nueva barra de Navegacion-->
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <!-- Barra de Navegación principal -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="/">StgrSys</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <!-- Logo -->
+            <a class="navbar-brand" href="/index">STGRSYS</a>
+
+            <!-- Botón responsive -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown"
+                    aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
+
+            <!-- Menú -->
+            <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                    <!-- Inicio -->
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="/"><i class="bi bi-house-door"></i> Inicio</a>
+                        <a class="nav-link" href="/index"><i class="bi bi-house-door"></i> Inicio</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/articulos">
-                            <i class="bi bi-boxes"></i>
-                             Articulos
+
+                    <!-- Dropdown Sistema -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="sistemaDropdown"
+                           role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-gear"></i> Sistema
                         </a>
+                        <ul class="dropdown-menu" aria-labelledby="sistemaDropdown">
+                            <li><a class="dropdown-item" href="/tipoDocumentos"><i class="bi bi-stickies"></i> Tipos Documentos</a></li>
+                            <li><a class="dropdown-item" href="/usuarios"><i class="bi bi-person-badge"></i> Usuarios</a></li>
+                            <li><a class="dropdown-item" href="/clientes"><i class="bi bi-people"></i> Clientes</a></li>
+                        </ul>
                     </li>
+
+                    <!-- Artículos -->
                     <li class="nav-item">
-                        <a class="nav-link" href="/ordenes">
-                            <i class="bi bi-journal-plus"></i>
-                            Ordenes</a>
+                        <a class="nav-link" href="/articulos"><i class="bi bi-boxes"></i> Artículos</a>
                     </li>
+
+                    <!-- Órdenes -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/ordenes"><i class="bi bi-journal-plus"></i> Órdenes</a>
+                    </li>
+
+                    <!-- Reportes -->
                     <li class="nav-item">
                         <a class="nav-link" href="/reportes"><i class="bi bi-building-check"></i> Reportes</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/tipoDocumentos">
-                            <i class="bi bi-stickies"></i>
-                            Tipos Documentos</a>
-                    </li>
                 </ul>
+
+                <!-- Usuario activo y botón de cerrar sesión -->
+                <div class="d-flex align-items-center">
+                    <span class="text-light me-3">Usuario: <span th:text="${usuarioSesion.nombre}"></span></span>
+                    <a th:href="@{/logout}" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
-
-<!--    fin Nueva Barra de Navegacion-->
-
+    <!-- Fin Barra de Navegación -->
 </div>

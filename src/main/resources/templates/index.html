@@ -1,61 +1,47 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragmentos/cabecero::cabecero-seccion(titulo='Inicio')}"></head>
+<link rel="stylesheet" th:href="@{/css/estilosIndex.css}">
+
 <body>
-<div class="container text-center mb-5 mt-5">
-    <h1>Storage System</h1>
+
+<!-- Inserción del fragmento de navegación -->
+<div th:replace="~{fragmentos/navegacion-principal::navegacion-principal-seccion}"></div>
+
+<!-- Barra de accesos directos (solo Index) -->
+<div class="bg-light py-1 border-bottom">
+    <div class="container-sm d-flex justify-content-between align-items-center">
+
+        <!-- Botones a la izquierda -->
+        <div class="d-flex gap-3">
+            <a href="/ordenes" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-receipt"></i> Órdenes
+            </a>
+            <a href="/articulos" class="btn btn-outline-success btn-sm">
+                <i class="bi bi-box-seam"></i> Artículos
+            </a>
+            <a href="/clientes" class="btn btn-outline-info btn-sm">
+                <i class="bi bi-people"></i> Clientes
+            </a>
+        </div>
+
+        <
+
+    </div>
 </div>
 
-<!-- Botón de logout en esquina superior derecha -->
-<div class="position-absolute top-0 end-0 m-3">
-    <a th:href="@{/logout}" class="btn btn-danger">Cerrar Sesión</a>
+<!-- Contenido principal -->
+<div class="container mt-4">
+    <div class="content-box">
+        <h1>Bienvenido a STGRSYS</h1>
+        <p>Este es tu sistema de gestión de inventarios, órdenes y reportes. Usa el menú superior o los accesos directos para entrar a los módulos.</p>
+    </div>
 </div>
 
-<div class="container d-flex justify-content-between">
 
-    <a href="/articulos">
-        <div class="card" style="width: 18rem;">
-            <img src="/imgs/articulos.jpg" class="card-img-top" alt="...">
-            <div class="card-body">
-                <h2 class="card-title text-center">Artículos</h2>
-            </div>
-        </div>
-    </a>
 
-    <a href="/ordenes">
-        <div class="card" style="width: 18rem;">
-            <img src="/imgs/ordenico.png" class="card-img-top" alt="...">
-            <div class="card-body">
-                <h2 class="card-title text-center">Órdenes</h2>
-            </div>
-        </div>
-    </a>
-
-    <a href="/reportes">
-        <div class="card" style="width: 18rem;">
-            <img src="/imgs/inventicono.png" class="card-img-top" alt="...">
-            <div class="card-body">
-                <h2 class="card-title text-center">Reportes</h2>
-            </div>
-        </div>
-    </a>
-
-    <a href="/tipoDocumentos">
-        <div class="card" style="width: 18rem;">
-            <img src="/imgs/tdi.jpg" class="card-img-top" alt="...">
-            <div class="card-body">
-                <h2 class="card-title text-center">Tipos Documentos</h2>
-            </div>
-        </div>
-    </a>
-
-</div>
-
-<!-- Nombre del usuario en esquina inferior derecha -->
-<div class="position-absolute bottom-0 end-0 m-3 text-muted">
-    Usuario activo: <span th:text="${usuarioSesion.nombre}"></span>
-</div>
-
+<!-- Pie de página -->
 <div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"></div>
+
 </body>
 </html>
