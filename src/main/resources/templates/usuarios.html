@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/cabecero::cabecero-seccion(titulo='Usuarios')}"></head>
+<body>
+
+<!-- Navegación principal -->
+<div th:replace="~{fragmentos/navegacion-principal::navegacion-principal-seccion}" th:remove="tag"></div>
+
+<!-- Contenido principal -->
+<div class="container mt-4">
+
+    <!-- Mensaje de éxito -->
+    <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${mensajeExito}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+
+    <!-- Mensaje de error -->
+    <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${mensajeError}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+
+    <!-- Título y botón -->
+    <div class="row text-primary mb-2">
+        <div class="col-10 mx-auto text-center">
+            <h2>Usuarios Registrados</h2>
+            <!-- Botón minimalista -->
+        </div>
+    </div>
+
+    <!-- Tabla de usuarios -->
+    <div class="row d-flex mt-3">
+        <div class="col-10 mx-auto mt-2">
+            <div class="table-responsive">
+                <table class="table table-striped table-sm">
+                    <thead class="table-primary text-center align-items-center">
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuario</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Nivel de Acceso</th>
+                        <th>Estado</th>
+                        <th>
+                            <div class="text-center text-white ">
+                                <a href="/agregarUsuario" class="btn btn-sm btn-primary rounded">
+                                    <i class="bi bi-person-plus"></i>Agregar
+                                </a>
+
+                        </div></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <!-- Mostrar mensaje si no hay usuarios -->
+                    <tr th:if="${#lists.isEmpty(usuarios)}">
+                        <td colspan="7" class="text-center text-muted">
+                            No hay usuarios registrados para mostrar.
+                        </td>
+                    </tr>
+                    <!-- Iterar usuarios si existen -->
+                    <tr th:each="usr : ${usuarios}" class="text-center" th:unless="${#lists.isEmpty(usuarios)}">
+                        <td th:text="${usr.idUsuario}"></td>
+                        <td th:text="${usr.user}"></td>
+                        <td th:text="${usr.nombre}"></td>
+                        <td th:text="${usr.email}"></td>
+                        <td th:text="${usr.nivelAcceso == 1 ? 'Administrador' : (usr.nivelAcceso == 2 ? 'Operador' : 'Almacén')}"></td>
+                        <td th:text="${usr.estUsuario == 1 ? 'Activo' : 'Inactivo'}"></td>
+                        <td class="text-center">
+                            <div class="d-flex justify-content-center gap-2">
+                                <a th:href="@{/editarUsuario/{id}(id=${usr.idUsuario})}"
+                                   class="btn btn-dark btn-sm me-2"
+                                   title="Editar usuario"
+                                   data-bs-toggle="tooltip" data-bs-placement="top">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <a th:href="@{/eliminarUsuario/{id}(id=${usr.idUsuario})}"
+                                   class="btn btn-danger btn-sm"
+                                   title="Eliminar usuario"
+                                   data-bs-toggle="tooltip" data-bs-placement="top">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script th:src="@{/js/usuarios.js}"></script>
+
+<!-- Inicializar tooltips -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+    });
+</script>
+
+<div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"></div>
+
+</body>
+</html>

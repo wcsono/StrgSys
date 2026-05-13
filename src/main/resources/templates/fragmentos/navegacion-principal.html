@@ -55,7 +55,8 @@
 
                 <!-- Usuario activo y botón de cerrar sesión -->
                 <div class="d-flex align-items-center">
-                    <span class="text-light me-3">Usuario: <span th:text="${usuarioSesion.nombre}"></span></span>
+                    <span class="text-light me-3">Usuario: <span th:if="${usuarioSesion != null}" th:text="${usuarioSesion.nombre}"></span>
+
                     <a th:href="@{/logout}" class="btn btn-outline-danger btn-sm">
                         <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
                     </a>
