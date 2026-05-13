@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder; // 🔹 Import necesario
 import wcsono.strgSys.modelo.Usuario;
 import wcsono.strgSys.servicio.IUsuarioServicio;
 
@@ -36,18 +37,24 @@ public class LoginControlador {
                                 RedirectAttributes redirectAttrs) {
         Usuario usuario = usuarioServicio.obtenerUsuarioPorUser(user);
 
-        if (usuario != null
-                && usuario.getPassword().equals(password)
-                && usuario.getEstUsuario() != null
-                && usuario.getEstUsuario() == 1) {
+        if (usuario != null) {
+            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-            // Guardar usuario en sesión
-            session.setAttribute("usuarioSesion", usuario);
+            // 🔹 Validar: texto plano (solo para pruebas) o encriptado
+            boolean passwordValida = usuario.getPassword().equals(password)
+                    || encoder.matches(password, usuario.getPassword());
 
-            redirectAttrs.addFlashAttribute("mensaje", "Bienvenido " + usuario.getNombre());
-            return "redirect:/index"; // menú principal
+            if (passwordValida) {
+                // Guardar usuario en sesión
+                session.setAttribute("usuarioSesion", usuario);
+                redirectAttrs.addFlashAttribute("mensaje", "Bienvenido " + usuario.getNombre());
+                return "redirect:/index"; // menú principal
+            } else {
+                redirectAttrs.addFlashAttribute("error", "Contraseña incorrecta.");
+                return "redirect:/login";
+            }
         } else {
-            redirectAttrs.addFlashAttribute("error", "Usuario o contraseña inválidos");
+            redirectAttrs.addFlashAttribute("error", "Usuario no encontrado.");
             return "redirect:/login";
         }
     }

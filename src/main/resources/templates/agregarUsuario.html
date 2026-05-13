@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/cabecero::cabecero-seccion(titulo='Agregar Usuario')}"></head>
+<body>
+
+<!-- Navegación principal -->
+<div th:replace="~{fragmentos/navegacion-principal::navegacion-principal-seccion}" th:remove="tag"></div>
+
+<div class="container">
+    <div class="text-center my-4">
+        <h3>Agregar Usuario</h3>
+    </div>
+
+    <!-- Centramos el formulario -->
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <!-- modelAttribute = usuarioForma -->
+            <form th:action="@{/guardarUsuario}" th:object="${usuarioForma}" method="post">
+
+                <!-- Estado oculto por defecto -->
+                <input type="hidden" id="estUsuario" name="estUsuario" value="0">
+
+                <!-- Usuario -->
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Usuario</span>
+                    <input id="user" name="user" class="form-control" aria-label="usuario">
+                </div>
+
+                <!-- Password -->
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Password</span>
+                    <input id="password" name="password" type="password" class="form-control" aria-label="password">
+                </div>
+
+                <!-- Nombre -->
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Nombre</span>
+                    <input id="nombre" name="nombre" class="form-control" aria-label="nombre">
+                </div>
+
+                <!-- Email -->
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Email</span>
+                    <input id="email" name="email" type="email" class="form-control" aria-label="email">
+                    >
+                </div>
+
+                <!-- Nivel de Acceso -->
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Nivel Acceso</span>
+                    <select id="nivelAcceso" name="nivelAcceso" class="form-select" aria-label="nivelAcceso">
+                        <option selected disabled>Seleccione</option>
+                        <option value="1">Administrador</option>
+                        <option value="2">Operador</option>
+                        <option value="3">Usuario</option>
+                    </select>
+                </div>
+
+                <!-- Botones -->
+                <div class="text-center">
+                    <button id="btnAgregarUsuario" type="submit" class="btn btn-primary btn-sm me-3">
+                        <i class="bi bi-person-plus me-1"></i>Agregar
+                    </button>
+                    <a th:href="@{/usuarios}" class="btn btn-secondary btn-sm">
+                        <i class="bi bi-arrow-return-left me-1"></i>Regresar
+                    </a>
+
+                    <!-- Mensaje de error debajo del botón -->
+                    <div id="errorUsuario" class="mt-2" style="display:none;"></div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"></div>
+<script th:src="@{/js/usuarios.js}"></script>
+</body>
+</html>
