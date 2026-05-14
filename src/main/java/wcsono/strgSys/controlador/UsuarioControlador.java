@@ -78,4 +78,39 @@ public class UsuarioControlador {
 
         return "redirect:/usuarios";
     }
+    // 🔹 Mostrar formulario de edición
+        @GetMapping("/editarUsuario/{id}")
+        public String mostrarEditarUsuario(@PathVariable("id") Integer idUsuario,
+                                           Model model,
+                                           RedirectAttributes redirectAttrs) {
+            Usuario usuarioEditar = usuarioServicio.obtenerUsuarioPorId(idUsuario);
+
+            if (usuarioEditar != null) {
+                model.addAttribute("usuarioEditar", usuarioEditar);
+                return "editarUsuario"; // vista Thymeleaf
+            } else {
+                redirectAttrs.addFlashAttribute("mensajeError", "Usuario no encontrado.");
+                return "redirect:/usuarios";
+            }
+        }
+
+        // 🔹 Guardar cambios de edición
+        @PostMapping("/guardarEditarUsuario")
+        public String guardarEditarUsuario(@ModelAttribute Usuario usuario,
+                                           RedirectAttributes redirectAttrs) {
+            try {
+                // Encriptar contraseña nuevamente antes de guardar
+                BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+                usuario.setPassword(encoder.encode(usuario.getPassword()));
+
+                usuarioServicio.guardarUsuario(usuario);
+                redirectAttrs.addFlashAttribute("mensajeExito", "Usuario actualizado correctamente.");
+            } catch (Exception e) {
+                redirectAttrs.addFlashAttribute("mensajeError", "Error al actualizar usuario: " + e.getMessage());
+            }
+
+            return "redirect:/usuarios";
+        }
+
+
 }
