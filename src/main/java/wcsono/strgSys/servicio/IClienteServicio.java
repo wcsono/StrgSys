@@ -4,9 +4,9 @@ import wcsono.strgSys.modelo.Cliente;
 import java.util.List;
 
 public interface IClienteServicio {
-    Cliente guardarCliente(Cliente cliente);
-    Cliente obtenerClientePorId(Integer idCliente);
-    Cliente obtenerClientePorCodCli(String codCli);
     List<Cliente> listarClientes();
+    Cliente obtenerClientePorId(Integer idCliente);
+    Cliente obtenerClientePorCodigo(String codCli);
+    void guardarCliente(Cliente cliente);
     void eliminarCliente(Integer idCliente);
 }

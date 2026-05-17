@@ -1,0 +1,74 @@
+<!-- fragmentos/agregarClienteModal.html -->
+<div th:fragment="modalAgregarCliente">
+
+    <!-- Modal de Alerta -->
+    <div class="modal fade" id="modalClienteNoEncontrado" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Cliente no encontrado</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p>Código mal ingresado o cliente no registrado. ¿Desea registrar?</p>
+                </div>
+
+                <div class="modal-footer">
+                    <button id="btnAceptarRegistrar" type="button" class="btn btn-primary">Aceptar</button>
+                    <a th:href="@{/ordenes}" class="btn btn-secondary">Cancelar</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Agregar Cliente -->
+    <div class="modal fade" id="modalAgregarCliente" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Registrar Nuevo Cliente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <form id="formAgregarCliente" th:action="@{/guardarCliente}" th:object="${clienteForma}" method="post">
+                        <input type="hidden" th:field="*{estCliente}" value="0">
+
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">Código (DNI/RUC)</span>
+                            <input th:field="*{codCli}" class="form-control" required>
+                        </div>
+
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">Nombre</span>
+                            <input th:field="*{nomCli}" class="form-control" required>
+                        </div>
+
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">Dirección</span>
+                            <input th:field="*{dirCli}" class="form-control" required>
+                        </div>
+
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">Email</span>
+                            <input th:field="*{emailCli}" type="email" class="form-control">
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-sm me-3">
+                                <i class="bi bi-person-plus me-1"></i>Guardar Cliente
+                            </button>
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/cabecero::cabecero-seccion(titulo='Agregar Cliente')}"></head>
+<body>
+
+<!-- Navegación principal -->
+<div th:replace="~{fragmentos/navegacion-principal::navegacion-principal-seccion}" th:remove="tag"></div>
+
+<div class="container">
+    <div class="text-center my-4">
+        <h3>Agregar Cliente</h3>
+    </div>
+
+    <!-- Centramos el formulario -->
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <!-- modelAttribute = clienteForma -->
+            <form th:action="@{/guardarCliente}" th:object="${clienteForma}" method="post">
+
+                <!-- Estado oculto por defecto -->
+                <input type="hidden" id="estCliente" name="estCliente" value="0">
+
+                <!-- Código Cliente -->
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Código</span>
+                    <input id="codCli" name="codCli" class="form-control" aria-label="código cliente"
+                           style="text-transform: uppercase;"
+                           oninput="this.value = this.value.toUpperCase();">
+                </div>
+
+                <!-- Nombre Cliente -->
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Nombre</span>
+                    <input id="nomCli" name="nomCli" class="form-control" aria-label="nombre cliente"
+                           style="text-transform: uppercase;"
+                           oninput="this.value = this.value.toUpperCase();">
+                </div>
+
+                <!-- Dirección -->
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Dirección</span>
+                    <input id="dirCli" name="dirCli" class="form-control" aria-label="dirección cliente"
+                           style="text-transform: uppercase;"
+                           oninput="this.value = this.value.toUpperCase();">
+                </div>
+
+                <!-- Email -->
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Email</span>
+                    <input id="emailCli" name="emailCli" type="email" class="form-control" aria-label="email cliente">
+                </div>
+
+                <!-- Botones -->
+                <div class="text-center">
+                    <button id="btnAgregarCliente" type="submit" class="btn btn-primary btn-sm me-3">
+                        <i class="bi bi-person-plus me-1"></i>Agregar
+                    </button>
+                    <a th:href="@{/clientes}" class="btn btn-secondary btn-sm">
+                        <i class="bi bi-arrow-return-left me-1"></i>Regresar
+                    </a>
+
+                    <!-- Mensaje de error debajo del botón -->
+                    <div id="errorCliente" class="mt-2" style="display:none;"></div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"></div>
+<script th:src="@{/js/clientes.js}"></script>
+</body>
+</html>

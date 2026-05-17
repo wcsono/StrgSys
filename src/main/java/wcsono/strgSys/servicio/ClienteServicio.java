@@ -15,8 +15,8 @@ public class ClienteServicio implements IClienteServicio {
     private ClienteRepositorio clienteRepositorio;
 
     @Override
-    public Cliente guardarCliente(Cliente cliente) {
-        return clienteRepositorio.save(cliente);
+    public List<Cliente> listarClientes() {
+        return clienteRepositorio.findAll();
     }
 
     @Override
@@ -25,13 +25,21 @@ public class ClienteServicio implements IClienteServicio {
     }
 
     @Override
-    public Cliente obtenerClientePorCodCli(String codCli) {
-        return clienteRepositorio.findByCodCli(codCli);
+    public Cliente obtenerClientePorCodigo(String codCli) {
+        // Aquí depende de cómo definiste el repositorio:
+        // Si tu método devuelve Cliente directamente:
+        // return clienteRepositorio.findByCodCli(codCli);
+        //
+        // Si tu método devuelve Optional<Cliente>:
+        return clienteRepositorio.findByCodCli(codCli).orElse(null);
     }
 
     @Override
-    public List<Cliente> listarClientes() {
-        return clienteRepositorio.findAll();
+    public void guardarCliente(Cliente cliente) {
+        if (cliente.getEstCliente() == null) {
+            cliente.setEstCliente(0); // por defecto inactivo
+        }
+        clienteRepositorio.save(cliente);
     }
 
     @Override
@@ -39,14 +47,14 @@ public class ClienteServicio implements IClienteServicio {
         Optional<Cliente> clienteOpt = clienteRepositorio.findById(idCliente);
         if (clienteOpt.isPresent()) {
             Cliente cliente = clienteOpt.get();
-            // Validación: si tiene órdenes asociadas, marcar inactivo en lugar de eliminar
             if (cliente.getEstCliente() != null && cliente.getEstCliente() == 0) {
-                // cliente inactivo
+                // Si ya está inactivo, eliminar físicamente
+                clienteRepositorio.delete(cliente);
             } else {
-                cliente.setEstCliente(0); // marcar como inactivo
+                // Si está activo, marcar como inactivo
+                cliente.setEstCliente(0);
                 clienteRepositorio.save(cliente);
             }
-
         }
     }
 }

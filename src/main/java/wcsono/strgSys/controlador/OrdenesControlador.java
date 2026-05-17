@@ -7,25 +7,19 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import wcsono.strgSys.modelo.Orden;
-import wcsono.strgSys.modelo.TipoDocumento;
+import wcsono.strgSys.modelo.Cliente;
 import wcsono.strgSys.servicio.ArticuloServicio;
 import wcsono.strgSys.servicio.IOrdenServicio;
 import wcsono.strgSys.servicio.ITipoDocumentoServicio;
 import wcsono.strgSys.servicio.MovimientoServicio;
-import wcsono.strgSys.modelo.Movimiento;
 
-import java.util.*;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Controller
 public class OrdenesControlador {
@@ -40,7 +34,7 @@ public class OrdenesControlador {
     private ITipoDocumentoServicio tipoDocumentoServicio;
 
     @Autowired
-    MovimientoServicio movimientoServicio;
+    private MovimientoServicio movimientoServicio;
 
     private final Logger logger = LoggerFactory.getLogger(OrdenesControlador.class);
 
@@ -60,10 +54,20 @@ public class OrdenesControlador {
         Page<Orden> paginaOrdenes = ordenServicio.listarOrdenesFiltradas(
                 numOrd, idCliente, fecOrdDesde, fecOrdHasta, estOrd, pageable);
 
-        // ✅ Línea completa
         modelo.put("paginaOrdenes", paginaOrdenes);
 
         return "ordenes"; // nombre de la vista Thymeleaf
     }
 
+    /**
+     * Mostrar formulario para agregar una nueva orden
+     */
+    @GetMapping("/agregarOrden")
+    public String mostrarAgregarOrden(Model model) {
+        model.addAttribute("ordenForma", new Orden());
+        model.addAttribute("clienteForma", new Cliente()); // 🔹 necesario para el fragmento del modal
+        model.addAttribute("tdsAgregarOrden", tipoDocumentoServicio.listarTipoDocumentos()); // lista de tipos de documento
+        logger.info("✅ Preparando formulario de nueva orden con objetos ordenForma y clienteForma");
+        return "agregarOrden";
+    }
 }
