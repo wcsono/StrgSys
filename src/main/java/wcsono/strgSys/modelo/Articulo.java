@@ -38,7 +38,7 @@ public class Articulo {
     private Date fecReg;
 
     @Column(nullable = false)
-    private Integer stk;
+    private Integer stk = 0;
 
     @Column(nullable = false)
     private BigDecimal costo;

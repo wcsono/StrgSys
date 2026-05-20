@@ -36,7 +36,7 @@ public class ClienteControlador {
         return "agregarCliente";
     }
 
-    // Guardar cliente nuevo
+    // Guardar cliente nuevo (vista tradicional)
     @PostMapping("/guardarCliente")
     public String guardarCliente(@ModelAttribute("clienteForma") Cliente cliente, Model model) {
         try {
@@ -46,6 +46,22 @@ public class ClienteControlador {
             model.addAttribute("mensajeError", "Error al agregar cliente: " + e.getMessage());
         }
         return "redirect:/clientes";
+    }
+
+    // Guardar cliente nuevo desde modal (AJAX)
+    @PostMapping("/guardarClienteAjax")
+    @ResponseBody
+    public ResponseEntity<?> guardarClienteAjax(@RequestBody Cliente cliente) {
+        try {
+            clienteServicio.guardarCliente(cliente);
+            logger.info("✅ Cliente registrado desde modal: {}", cliente);
+            return ResponseEntity.ok(cliente); // devuelve el objeto completo en JSON
+        } catch (Exception e) {
+            logger.error("❌ Error al registrar cliente desde modal: {}", e.getMessage());
+            Map<String, String> error = new HashMap<>();
+            error.put("mensajeError", "Error al agregar cliente: " + e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
     }
 
     // Mostrar formulario para editar cliente
@@ -80,7 +96,6 @@ public class ClienteControlador {
         Cliente cliente = clienteServicio.obtenerClientePorCodigo(codCli);
 
         if (cliente != null) {
-            // Log del objeto completo
             logger.info("✅ Cliente encontrado: {}", cliente);
 
             Map<String, String> datos = new HashMap<>();

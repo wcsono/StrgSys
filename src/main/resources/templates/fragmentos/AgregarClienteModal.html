@@ -35,7 +35,8 @@
                 </div>
 
                 <div class="modal-body">
-                    <form id="formAgregarCliente" th:action="@{/guardarCliente}" th:object="${clienteForma}" method="post">
+                    <!-- 🔹 Sin th:action, el JS intercepta el submit -->
+                    <form id="formAgregarCliente" th:object="${clienteForma}" method="post" autocomplete="off">
                         <input type="hidden" th:field="*{estCliente}" value="0">
 
                         <div class="input-group mb-3">
@@ -45,12 +46,14 @@
 
                         <div class="input-group mb-3">
                             <span class="input-group-text">Nombre</span>
-                            <input th:field="*{nomCli}" class="form-control" required>
+                            <input th:field="*{nomCli}" class="form-control" required
+                                   oninput="this.value = this.value.toUpperCase();">
                         </div>
 
                         <div class="input-group mb-3">
                             <span class="input-group-text">Dirección</span>
-                            <input th:field="*{dirCli}" class="form-control" required>
+                            <input th:field="*{dirCli}" class="form-control" required
+                                   oninput="this.value = this.value.toUpperCase();">
                         </div>
 
                         <div class="input-group mb-3">
@@ -67,6 +70,18 @@
                     </form>
                 </div>
 
+            </div>
+        </div>
+    </div>
+
+    <!-- 🔹 Toast de confirmación -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="toastClienteGuardado" class="toast align-items-center text-bg-success border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    ✅ Cliente registrado correctamente.
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
         </div>
     </div>

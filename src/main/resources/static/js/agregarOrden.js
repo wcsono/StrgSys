@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const nomCliInput = document.getElementById("nomCli");
   const dirCliInput = document.getElementById("dirCli");
 
+  // 🔹 Buscar cliente por código al presionar Enter
   if (codCliInput) {
     codCliInput.addEventListener("keydown", function (e) {
       console.log("🔹 Tecla presionada:", e.key);
@@ -48,6 +49,46 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         }
       }
+    });
+  }
+
+  // 🔹 Interceptar el submit del formulario del modal
+  const formAgregarCliente = document.getElementById("formAgregarCliente");
+  if (formAgregarCliente) {
+    formAgregarCliente.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(formAgregarCliente);
+      const cliente = Object.fromEntries(formData.entries());
+
+      console.log("📤 Enviando cliente desde modal:", cliente);
+
+      fetch("/guardarClienteAjax", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(cliente)
+      })
+        .then(response => {
+          console.log("📡 Respuesta guardarClienteAjax:", response.status);
+          if (!response.ok) throw new Error("Error al registrar cliente");
+          return response.json();
+        })
+        .then(data => {
+          console.log("✅ Cliente registrado:", data);
+
+          // Rellenar campos en agregarOrden.html
+          if (codCliInput) codCliInput.value = data.codCli;
+          if (nomCliInput) nomCliInput.value = data.nomCli;
+          if (dirCliInput) dirCliInput.value = data.dirCli;
+
+          // Cerrar modal
+          const modalAgregar = bootstrap.Modal.getInstance(document.getElementById("modalAgregarCliente"));
+          if (modalAgregar) modalAgregar.hide();
+        })
+        .catch(err => {
+          console.error("❌ Error al registrar cliente:", err.message);
+          alert("Error al registrar cliente: " + err.message);
+        });
     });
   }
 });

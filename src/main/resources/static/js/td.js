@@ -46,7 +46,9 @@ document.addEventListener("DOMContentLoaded", function () {
                         errorCodigoTd.style.display = "block";
                     } else {
                         btnAgregarTd.disabled = false;
-                        errorCodigoTd.style.display = "none";
+                        errorCodigoTd.innerHTML =
+                            '<span class="badge bg-success">✔️ Código disponible</span>';
+                        errorCodigoTd.style.display = "block";
                     }
                 })
                 .catch(error => console.error("Error en la validación (agregar):", error));
@@ -81,7 +83,9 @@ document.addEventListener("DOMContentLoaded", function () {
                         errorCodigoTdEditar.style.display = "block";
                     } else {
                         btnGuardarTd.disabled = false;
-                        errorCodigoTdEditar.style.display = "none";
+                        errorCodigoTdEditar.innerHTML =
+                            '<span class="badge bg-success">✔️ Código disponible</span>';
+                        errorCodigoTdEditar.style.display = "block";
                     }
                 })
                 .catch(error => console.error("Error en la validación (editar):", error));
