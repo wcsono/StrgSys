@@ -2,6 +2,9 @@ package wcsono.strgSys.controlador;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -9,7 +12,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import wcsono.strgSys.modelo.Articulo;
 import wcsono.strgSys.servicio.ArticuloServicio;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -24,21 +26,24 @@ public class ArticuloControlador {
         this.articuloServicio = articuloServicio;
     }
 
-    // Listado de artículos con filtros
+    // Listado de artículos con filtros y paginación
     @GetMapping("/articulos")
     public String iniciar(@RequestParam(required = false) String codArt,
                           @RequestParam(required = false) String desArt,
                           @RequestParam(required = false) String ubiArt,
+                          @RequestParam(defaultValue = "0") int page,
                           ModelMap modelo) {
 
-        // 👉 ahora pasamos también ubiArt al servicio
-        List<Articulo> articulos = articuloServicio.buscarPorFiltros(codArt, desArt, ubiArt);
+        Pageable pageable = PageRequest.of(page, 8); // 👈 8 registros por página
+        Page<Articulo> articulosPage = articuloServicio.buscarPorFiltros(codArt, desArt, ubiArt, pageable);
 
-        modelo.put("articulos", articulos);
+        modelo.put("articulosPage", articulosPage);
         modelo.put("articuloForma", new Articulo());
-        return "Articulos"; // asegúrate que coincida con el nombre del template
+        modelo.put("codArt", codArt);
+        modelo.put("desArt", desArt);
+        modelo.put("ubiArt", ubiArt);
+        return "articulos";
     }
-
 
     @GetMapping("/agregarArt")
     public String abrirAgregar() {

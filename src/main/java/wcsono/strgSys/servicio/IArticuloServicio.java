@@ -1,5 +1,7 @@
 package wcsono.strgSys.servicio;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import wcsono.strgSys.modelo.Articulo;
 import java.util.List;
 
@@ -20,6 +22,6 @@ public interface IArticuloServicio {
     // Validar existencia de un código de artículo
     boolean existeCodigo(String codArt);
 
-    // 👇 Nuevo método: búsqueda con filtros (Código, Descripción y Ubicación)
-    List<Articulo> buscarPorFiltros(String codArt, String desArt, String ubiArt);
+    // 👇 Nuevo método: búsqueda con filtros (Código, Descripción y Ubicación) con paginación
+    Page<Articulo> buscarPorFiltros(String codArt, String desArt, String ubiArt, Pageable pageable);
 }

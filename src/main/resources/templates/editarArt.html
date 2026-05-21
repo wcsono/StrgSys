@@ -33,8 +33,21 @@
                     <!-- U.D.M. -->
                     <div class="input-group mb-3">
                         <span class="input-group-text">U.D.M.</span>
-                        <input type="text" th:field="*{udm}" id="udm" class="form-control" aria-label="UnidadMedida" autocomplete="on" onfocus="this.select()" style="text-transform: uppercase;"  oninput="this.value = this.value.toUpperCase();">
+                        <select th:field="*{udm}" id="udm" class="form-select" aria-label="unidadDeMedida" required>
+                            <option value="">Seleccione</option>
+                            <option value="und">Unidad</option>
+                            <option value="pzs">Piezas</option>
+                            <option value="btl">Botella</option>
+                            <option value="cjs">Caja</option>
+                            <option value="pkt">Pack</option>
+                            <option value="kg">Kilogramo</option>
+                            <option value="gr">Gramo</option>
+                            <option value="lt">Litro</option>
+                            <option value="par">Par</option>
+                            <option value="rol">Rollo</option>
+                        </select>
                     </div>
+
                     <!-- Costo -->
                     <input type="number" th:field="*{costo}" id="costo"
                            class="form-control"
