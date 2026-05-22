@@ -26,6 +26,10 @@ public class Cliente {
     @Column(length = 100)
     private String emailCli;
 
+    @Column(length = 20)
+    private String telCli;
+
+
     @Column(nullable = false)
     private Integer estCliente = 1; // 1=activo, 0=inactivo
 
