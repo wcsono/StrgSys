@@ -18,7 +18,7 @@
             <table class="table table-bordered">
                 <tr><th>ID Orden</th><td th:text="${orden.idOrd}"></td></tr>
                 <tr><th>Número Orden</th><td th:text="${orden.numOrd}"></td></tr>
-                <tr><th>Cliente/Proveedor</th><td th:text="${orden.nomOrd}"></td></tr>
+                <tr><th>Cliente/Proveedor</th><td th:text="${orden.cliente.nomCli}"></td></tr>
                 <tr><th>Tipo Documento</th><td th:text="${orden.tipoDocumento.desTd}"></td></tr>
                 <tr><th>Fecha Registro</th><td th:text="${orden.fecOrd}"></td></tr>
                 <tr><th>Documento Referencia</th><td th:text="${orden.ndocRef}"></td></tr>
@@ -94,22 +94,3 @@
 <!-- Fragmento de offcanvas-articulos -->
 <div th:replace="fragmentos/offcanvas-articulos :: offcanvas-articulos-seccion"></div>
 <!-- Pie de página -->
-<div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"></div>
-
-<!-- Scripts externos -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
-
-<!-- Inyección de tipTd -->
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    const TIPTD = /*[[${orden.tipoDocumento.tipTd}]]*/ true;
-    /*]]>*/
-</script>
-
-<!-- Script principal -->
-<script src="/js/offcanvas-articulos.js" defer></script>
-
-</body>
-</html>

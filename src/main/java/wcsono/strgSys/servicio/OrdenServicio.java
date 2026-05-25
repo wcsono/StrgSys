@@ -8,9 +8,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import wcsono.strgSys.modelo.Cliente;
 import wcsono.strgSys.modelo.Orden;
+import wcsono.strgSys.modelo.Usuario;
+import wcsono.strgSys.repositorio.ClienteRepositorio;
 import wcsono.strgSys.repositorio.OrdenRepositorio;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -21,6 +25,9 @@ public class OrdenServicio implements IOrdenServicio {
 
     @Autowired
     private OrdenRepositorio ordenRepositorio;
+
+    @Autowired
+    private ClienteRepositorio clienteRepositorio;
 
     @Autowired
     private ArticuloServicio articuloServicio;
@@ -50,19 +57,40 @@ public class OrdenServicio implements IOrdenServicio {
         return ordenRepositorio.findWithTipoDocumentoAndDetallesByIdOrd(id);
     }
 
+    /**
+     * Guardar una nueva orden con cliente y usuario activo.
+     * Estado inicial = 0 (Orden Creada), costo inicial = 0.
+     */
     @Override
     @Transactional
-    public Orden guardarOrden(Orden orden) {
+    public Orden guardarOrden(Orden orden, Cliente cliente, Usuario usuario) {
+        // Guardar cliente si es nuevo
+        if (cliente.getIdCliente() == null) {
+            cliente = clienteRepositorio.save(cliente);
+        }
+        orden.setCliente(cliente);
+
+        // Asociar usuario activo
+        orden.setUsuario(usuario);
+
+        // Estado inicial = 0 (Orden Creada)
+        orden.setEstOrd(0);
+
+        // Costo inicial = 0
+        orden.setCosOrd(BigDecimal.ZERO);
+
+        // Guardar orden para obtener id
+        orden = ordenRepositorio.save(orden);
+
+        // Generar numOrd automático
+        orden.setNumOrd(String.valueOf(1000 + orden.getIdOrd()));
+
         Orden saved = ordenRepositorio.save(orden);
 
-        // Generar numOrd automáticamente si no existe
-        if (saved.getNumOrd() == null || saved.getNumOrd().isEmpty()) {
-            saved.setNumOrd(String.valueOf(1000 + saved.getIdOrd()));
-            saved = ordenRepositorio.save(saved);
-        }
+        logger.info("Orden guardada -> id={}, numOrd={}, estOrd={}, cliente={}, usuario={}",
+                saved.getIdOrd(), saved.getNumOrd(), saved.getEstOrd(),
+                saved.getCliente().getNomCli(), saved.getUsuario().getNombre());
 
-        logger.info("Orden guardada -> id={}, numOrd={}, estOrd={}",
-                saved.getIdOrd(), saved.getNumOrd(), saved.getEstOrd());
         return saved;
     }
 
@@ -95,7 +123,7 @@ public class OrdenServicio implements IOrdenServicio {
         });
 
         orden.setEstOrd(8); // Estado = Extornado
-        guardarOrden(orden);
+        guardarOrden(orden, orden.getCliente(), orden.getUsuario());
 
         logger.info("Orden extornada -> id={}, numOrd={}", orden.getIdOrd(), orden.getNumOrd());
     }

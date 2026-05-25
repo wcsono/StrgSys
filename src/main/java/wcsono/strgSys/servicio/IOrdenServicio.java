@@ -3,6 +3,8 @@ package wcsono.strgSys.servicio;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import wcsono.strgSys.modelo.Orden;
+import wcsono.strgSys.modelo.Cliente;
+import wcsono.strgSys.modelo.Usuario;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,7 +21,11 @@ public interface IOrdenServicio {
 
     Orden buscarOrdenConTipoDocumentoYDetalles(Integer id);
 
-    Orden guardarOrden(Orden orden);
+    /**
+     * Guardar una nueva orden asociando cliente y usuario activo.
+     * Estado inicial = 0 (Orden Creada), costo inicial = 0.
+     */
+    Orden guardarOrden(Orden orden, Cliente cliente, Usuario usuario);
 
     void eliminarOrden(Orden orden);
 
@@ -45,5 +51,4 @@ public interface IOrdenServicio {
     List<Object[]> obtenerEntradasVsSalidasPorMes();
 
     void extornarOrden(Integer id);
-
 }

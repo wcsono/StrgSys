@@ -7,12 +7,16 @@ import org.springframework.web.bind.annotation.*;
 import wcsono.strgSys.modelo.Orden;
 import wcsono.strgSys.modelo.Articulo;
 import wcsono.strgSys.modelo.DetalleOrden;
+import wcsono.strgSys.modelo.Cliente;
+import wcsono.strgSys.modelo.Usuario;
 import wcsono.strgSys.servicio.OrdenServicio;
 import wcsono.strgSys.servicio.ArticuloServicio;
 import wcsono.strgSys.servicio.DetalleOrdenServicio;
+import wcsono.strgSys.servicio.UsuarioServicio;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.security.Principal;
 import java.util.List;
 
 @Controller
@@ -27,6 +31,9 @@ public class OrdenDetalleControlador {
 
     @Autowired
     private DetalleOrdenServicio detalleOrdenServicio;
+
+    @Autowired
+    private UsuarioServicio usuarioServicio;
 
     /**
      * Mostrar detalle de la orden
@@ -59,7 +66,8 @@ public class OrdenDetalleControlador {
     public String agregarArticulo(@PathVariable Integer id,
                                   @RequestParam Integer idArt,
                                   @RequestParam Integer cantidad,
-                                  @RequestParam BigDecimal precio) {
+                                  @RequestParam BigDecimal precio,
+                                  Principal principal) {
 
         Orden orden = ordenServicio.buscarOrdenPorId(id);
         Articulo articulo = articuloServicio.buscarArticuloPorId(idArt);
@@ -85,7 +93,14 @@ public class OrdenDetalleControlador {
             orden.setCosOrd(orden.getCosOrd().add(nuevoSubtotal));
         }
 
-        ordenServicio.guardarOrden(orden);
+        // obtener usuario activo con el método correcto
+        Usuario usuarioActivo = usuarioServicio.obtenerUsuarioPorUser(principal.getName());
+
+        // obtener cliente asociado a la orden
+        Cliente cliente = orden.getCliente();
+
+        // guardar orden con cliente y usuario
+        ordenServicio.guardarOrden(orden, cliente, usuarioActivo);
 
         return "redirect:/orden/" + id;
     }

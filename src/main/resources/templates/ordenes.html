@@ -11,7 +11,7 @@
 
     <!-- Mensajes de éxito / error -->
     <div th:replace="~{fragmentos/alertas :: alertas-seccion}"></div>
-    <!-- Paneles -->
+
     <div class="row">
         <!-- Panel izquierdo: listado de órdenes -->
         <div class="col-md-7 tabla-ordenes">
@@ -21,70 +21,48 @@
                 <tr>
                     <th>ID</th>
                     <th>Número</th>
-                    <th>Cliente/Proveedor</th>
+                    <th>Cliente</th>
+                    <th>Usuario</th>
                     <th>Fecha</th>
                     <th>Estado</th>
                     <th>Costo</th>
-                    <th>
-                        <div class="container">
-                            <div class="d-flex flex-column align-items-center mt-3 gap-2">
-                                <!-- Botón de búsqueda -->
-                                <button class="btn btn-outline-primary btn-sm d-flex align-items-center justify-content-center"
-                                        type="button" data-bs-toggle="offcanvas" data-bs-target="#filtroOffcanvas">
-                                    <i class="bi bi-binoculars me-1"></i> Buscar
-                                </button>
-
-                                <!-- Botón agregar orden -->
-                                <a href="/agregarOrden" class="btn btn-sm btn-primary rounded d-flex align-items-center justify-content-center">
-                                    <i class="bi bi-file-earmark-plus me-1"></i> Agregar Orden
-                                </a>
-                            </div>
-                        </div>
-
-
-
-                    </th>
+                    <th>Acciones</th>
                 </tr>
                 </thead>
+
+                <!-- Si no hay órdenes -->
                 <tbody th:if="${#lists.isEmpty(listadoOrdenes)}">
                 <tr>
-                    <td colspan="7" class="text-center text-muted">
-                        No se encontraron órdenes para los criterios seleccionados.
+                    <td colspan="8" class="text-center text-muted">
+                        No se encontraron órdenes.
                     </td>
                 </tr>
+                </tbody>
 
+                <!-- Si hay órdenes -->
                 <tbody th:unless="${#lists.isEmpty(listadoOrdenes)}">
-                <tr th:each="orden : ${listadoOrdenes}"
-                    th:classappend="${orden.extornada} ? 'extornada-row' : ''"
-                    class="text-center">
-
-                    <td th:text="${orden.idOrd}" class="extornada-cell"></td>
-                    <td th:text="${orden.numOrd}" class="extornada-cell"></td>
-                    <td th:text="${orden.nomOrd}" class="extornada-cell"></td>
-                    <td th:text="${#temporals.format(orden.fecOrd,'dd/MM/yyyy')}" class="extornada-cell"></td>
-                    <td class="extornada-cell">
-                        <span th:if="${orden.extornada}" class="badge bg-warning">Extornada</span>
-                        <span th:if="${orden.estOrd and !orden.extornada}" class="badge bg-success">Cerrada</span>
-                        <span th:if="${!orden.estOrd and !orden.extornada}" class="badge bg-secondary">Abierta</span>
+                <tr th:each="orden : ${listadoOrdenes}" class="text-center">
+                    <td th:text="${orden.idOrd}"></td>
+                    <td th:text="${orden.numOrd}"></td>
+                    <td th:text="${orden.cliente.nomCli}"></td>
+                    <td th:text="${orden.usuario.nombre}"></td>
+                    <td th:text="${#temporals.format(orden.fecOrd,'dd/MM/yyyy')}"></td>
+                    <td>
+                        <span th:if="${orden.estOrd == 8}" class="badge bg-warning">Extornada</span>
+                        <span th:if="${orden.estOrd == 1}" class="badge bg-success">Cerrada</span>
+                        <span th:if="${orden.estOrd == 0}" class="badge bg-secondary">Abierta</span>
                     </td>
-                    <td class="costo extornada-cell" th:text="${orden.cosOrd}"></td>
+                    <td th:text="${orden.cosOrd}"></td>
                     <td>
                         <div class="d-flex justify-content-center gap-2">
-                            <!-- Ver Orden -->
-                            <button id="btnVerOrden"
-                                    class="btn btn-info btn-sm ver-orden"
-                                    th:attr="data-id=${orden.idOrd}"
-                                    title="Ver Orden">
+                            <button class="btn btn-info btn-sm ver-orden"
+                                    th:attr="data-id=${orden.idOrd}" title="Ver">
                                 <i class="bi bi-eye"></i>
                             </button>
-
-                            <!-- Editar -->
                             <a th:href="@{/editarOrd/{id}(id=${orden.idOrd})}"
                                class="btn btn-dark btn-sm" title="Editar">
                                 <i class="bi bi-pencil-square"></i>
                             </a>
-
-                            <!-- Eliminar -->
                             <a th:href="@{/eliminarOrd/{id}(id=${orden.idOrd})}"
                                class="btn btn-danger btn-sm" title="Eliminar">
                                 <i class="bi bi-trash"></i>
@@ -100,44 +78,21 @@
                 <ul class="pagination justify-content-center">
                     <li class="page-item" th:classappend="${paginaOrdenes.number == 0} ? 'disabled'">
                         <a class="page-link"
-                           th:href="@{/ordenes(page=${paginaOrdenes.number-1},
-                                   numOrd=${param.numOrd},
-                                   nomOrd=${param.nomOrd},
-                                   fecOrdDesde=${param.fecOrdDesde},
-                                   fecOrdHasta=${param.fecOrdHasta},
-                                   estOrd=${param.estOrd})}">
-                            Anterior
-                        </a>
+                           th:href="@{/ordenes(page=${paginaOrdenes.number-1})}">Anterior</a>
                     </li>
                     <li class="page-item"
                         th:each="i : ${#numbers.sequence(0, paginaOrdenes.totalPages-1)}"
                         th:classappend="${i == paginaOrdenes.number} ? 'active'">
                         <a class="page-link"
-                           th:href="@{/ordenes(page=${i},
-                                   numOrd=${param.numOrd},
-                                   nomOrd=${param.nomOrd},
-                                   fecOrdDesde=${param.fecOrdDesde},
-                                   fecOrdHasta=${param.fecOrdHasta},
-                                   estOrd=${param.estOrd})}"
-                           th:text="${i+1}">
-                        </a>
+                           th:href="@{/ordenes(page=${i})}" th:text="${i+1}"></a>
                     </li>
                     <li class="page-item"
                         th:classappend="${paginaOrdenes.number == paginaOrdenes.totalPages-1} ? 'disabled'">
                         <a class="page-link"
-                           th:href="@{/ordenes(page=${paginaOrdenes.number+1},
-                                   numOrd=${param.numOrd},
-                                   nomOrd=${param.nomOrd},
-                                   fecOrdDesde=${param.fecOrdDesde},
-                                   fecOrdHasta=${param.fecOrdHasta},
-                                   estOrd=${param.estOrd})}">
-                            Siguiente
-                        </a>
+                           th:href="@{/ordenes(page=${paginaOrdenes.number+1})}">Siguiente</a>
                     </li>
                 </ul>
             </nav>
-
-
         </div>
 
         <!-- Panel derecho: detalle de la orden -->
@@ -148,8 +103,9 @@
             </div>
         </div>
     </div>
-</div>
-<!-- Offcanvas lateral izquierdo -->
+</div> <!-- cierre container-fluid -->
+
+<!-- Offcanvas lateral derecho -->
 <div class="offcanvas offcanvas-end" tabindex="-1" id="filtroOffcanvas">
     <div class="offcanvas-header">
         <h5 class="offcanvas-title">Filtros de Órdenes</h5>
@@ -157,46 +113,31 @@
     </div>
     <div class="offcanvas-body">
         <form th:action="@{/ordenes}" method="get" class="d-flex flex-column gap-3">
-
-            <!-- Filtro por número de orden -->
             <div class="input-group mb-1">
                 <span class="input-group-text">N.Orden</span>
-                <input id="numOrd" name="numOrd" class="form-control" aria-label="NOrden"
-                       style="text-transform: uppercase;"
-                       oninput="this.value = this.value.toUpperCase();">
+                <input id="numOrd" name="numOrd" class="form-control">
             </div>
-
-            <!-- Filtro por cliente/proveedor -->
             <div class="input-group mb-1">
-                <span class="input-group-text">Cliente/Proveedor</span>
-                <input id="nomOrd" name="nomOrd" class="form-control" aria-label="ClienteProveedor"
-                       style="text-transform: uppercase;"
-                       oninput="this.value = this.value.toUpperCase();">
+                <span class="input-group-text">ID Cliente</span>
+                <input id="idCliente" name="idCliente" class="form-control" type="number">
             </div>
-
-            <!-- Filtro por fecha desde -->
             <div class="input-group mb-1">
                 <span class="input-group-text">Fecha desde</span>
                 <input type="date" id="fecOrdDesde" name="fecOrdDesde" class="form-control">
             </div>
-
-            <!-- Filtro por fecha hasta -->
             <div class="input-group mb-1">
                 <span class="input-group-text">Fecha hasta</span>
                 <input type="date" id="fecOrdHasta" name="fecOrdHasta" class="form-control">
             </div>
-
-            <!-- Filtro por estado (estOrd) -->
             <div class="input-group mb-1">
                 <span class="input-group-text">Estado</span>
                 <select id="estOrd" name="estOrd" class="form-select">
                     <option value="">-- Seleccionar --</option>
-                    <option value="false">Abierta</option>
-                    <option value="true">Cerrada</option>
+                    <option value="0">Abierta</option>
+                    <option value="1">Cerrada</option>
+                    <option value="8">Extornada</option>
                 </select>
             </div>
-
-            <!-- Botón aplicar filtros -->
             <button type="submit" class="btn btn-primary mt-2">
                 <i class="bi bi-search"></i> Aplicar Filtros
             </button>
@@ -204,10 +145,10 @@
     </div>
 </div>
 
+<!-- Pie de página -->
+<div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"></div>
 
 <!-- Scripts -->
-
-<div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"/>
 <script th:src="@{/js/orden.js}"></script>
 </body>
 </html>

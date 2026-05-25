@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface ClienteRepositorio extends JpaRepository<Cliente, Integer> {
-    Optional<Cliente> findByCodCli(String codCli);
+    Optional<Cliente> findByCodCli(String codCli); // ✅ método para buscar por código
 }

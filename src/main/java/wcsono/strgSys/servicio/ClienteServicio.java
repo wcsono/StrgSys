@@ -6,7 +6,6 @@ import wcsono.strgSys.modelo.Cliente;
 import wcsono.strgSys.repositorio.ClienteRepositorio;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ClienteServicio implements IClienteServicio {
@@ -26,35 +25,16 @@ public class ClienteServicio implements IClienteServicio {
 
     @Override
     public Cliente obtenerClientePorCodigo(String codCli) {
-        // Aquí depende de cómo definiste el repositorio:
-        // Si tu método devuelve Cliente directamente:
-        // return clienteRepositorio.findByCodCli(codCli);
-        //
-        // Si tu método devuelve Optional<Cliente>:
-        return clienteRepositorio.findByCodCli(codCli).orElse(null);
+        return clienteRepositorio.findByCodCli(codCli).orElse(null); // ✅ implementación
     }
 
     @Override
-    public void guardarCliente(Cliente cliente) {
-        if (cliente.getEstCliente() == null) {
-            cliente.setEstCliente(0); // por defecto inactivo
-        }
-        clienteRepositorio.save(cliente);
+    public Cliente guardarCliente(Cliente cliente) {
+        return clienteRepositorio.save(cliente); // ✅ devuelve el cliente guardado
     }
 
     @Override
     public void eliminarCliente(Integer idCliente) {
-        Optional<Cliente> clienteOpt = clienteRepositorio.findById(idCliente);
-        if (clienteOpt.isPresent()) {
-            Cliente cliente = clienteOpt.get();
-            if (cliente.getEstCliente() != null && cliente.getEstCliente() == 0) {
-                // Si ya está inactivo, eliminar físicamente
-                clienteRepositorio.delete(cliente);
-            } else {
-                // Si está activo, marcar como inactivo
-                cliente.setEstCliente(0);
-                clienteRepositorio.save(cliente);
-            }
-        }
+        clienteRepositorio.deleteById(idCliente);
     }
 }
