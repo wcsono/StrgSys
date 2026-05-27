@@ -4,6 +4,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const detalle = document.getElementById("detalleContenido");
 
+  // --- Función para mapear estado de orden ---
+  function estadoOrden(estOrd, extornada) {
+    if (extornada) return "Extornada";
+    switch (estOrd) {
+      case 1: return "Cerrada";
+      case 0: return "Abierta";
+      case 8: return "Extornada";
+      default: return "—";
+    }
+  }
+
   // --- Función para renderizar detalle de orden ---
   function renderOrden(data, detalle) {
     let html = `
@@ -16,7 +27,7 @@ document.addEventListener("DOMContentLoaded", function () {
           <p><strong>Cliente/Proveedor:</strong> ${data.nomOrd}</p>
           <div class="d-flex justify-content-between">
             <span><strong>Fecha:</strong> ${data.fecOrd}</span>
-            <span><strong>Estado:</strong> ${data.extornada ? "Extornada" : (data.estOrd ? "Cerrada" : "Abierta")}</span>
+            <span><strong>Estado:</strong> ${estadoOrden(data.estOrd, data.extornada)}</span>
           </div>
           <div class="d-flex justify-content-between">
             <span><strong>Costo Total:</strong> ${window.formatoMoneda(data.cosOrd)}</span>
@@ -101,7 +112,7 @@ document.addEventListener("DOMContentLoaded", function () {
             numOrd: id,
             nomOrd: "Distribuidora Andina SAC",
             fecOrd: "2026-03-20",
-            estOrd: false,
+            estOrd: 0,
             extornada: false,
             cosOrd: 0,
             tipoDocumento: { desTd: "Factura" },
