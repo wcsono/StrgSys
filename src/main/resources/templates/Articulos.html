@@ -17,6 +17,9 @@
         <!-- Panel izquierdo: listado de artículos -->
         <div class="col-md-7 tabla-articulos">
             <h3 class="text-primary text-center">Listado de Artículos</h3>
+
+
+
             <table class="table table-striped align-middle">
                 <thead class="table-primary text-center">
                 <tr>
@@ -26,51 +29,52 @@
                     <th>Ubicación</th>
                     <th>U.D.M.</th>
                     <th>Stock</th>
+                    <th>Costo</th>
+                    <th>Precio Venta</th>
                     <th>
-                        <div class="container">
-                            <div class="d-flex flex-column align-items-center mt-3 gap-2">
-                                <!-- Botón de búsqueda -->
-                                <button class="btn btn-outline-primary btn-sm d-flex align-items-center justify-content-center"
-                                        type="button" data-bs-toggle="offcanvas" data-bs-target="#filtroArticulosOffcanvas">
-                                    <i class="bi bi-binoculars me-1"></i> Buscar
-                                </button>
-
-                                <!-- Botón agregar artículo -->
-                                <a href="/agregarArt"
-                                   class="btn btn-sm btn-primary rounded d-flex align-items-center justify-content-center"
-                                   style="white-space: nowrap;">
-                                    <i class="bi bi-file-earmark-plus me-1"></i> Agregar Artículo
-                                </a>
-                            </div>
+                        <!-- Botones de búsqueda y agregar -->
+                        <div class="d-flex flex-column align-items-center gap-2">
+                            <button class="btn btn-outline-primary btn-sm d-flex align-items-center justify-content-center"
+                                    type="button" data-bs-toggle="offcanvas" data-bs-target="#filtroArticulosOffcanvas">
+                                <i class="bi bi-binoculars me-1"></i> Buscar
+                            </button>
+                            <a href="/agregarArt"
+                               class="btn btn-sm btn-primary rounded d-flex align-items-center justify-content-center"
+                               style="white-space: nowrap;">
+                                <i class="bi bi-file-earmark-plus me-1"></i> Agregar Artículo
+                            </a>
                         </div>
                     </th>
                 </tr>
                 </thead>
+
+                <!-- Mensaje cuando no hay artículos -->
                 <tbody th:if="${#lists.isEmpty(articulosPage.content)}">
                 <tr>
-                    <td colspan="7" class="text-center text-muted">
+                    <td colspan="9" class="text-center text-muted">
                         No se encontraron artículos para los criterios seleccionados.
                     </td>
                 </tr>
                 </tbody>
+
+                <!-- Listado de artículos -->
                 <tbody th:unless="${#lists.isEmpty(articulosPage.content)}">
                 <tr th:each="articulo : ${articulosPage.content}" class="text-center">
                     <td th:text="${articulo.idArt}"></td>
                     <td th:text="${articulo.codArt}"></td>
-                    <td th:text="${articulo.desArt}"
-                        th:title="${articulo.desArt}"
+                    <td th:text="${articulo.desArt}" th:title="${articulo.desArt}"
                         style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;"></td>
                     <td th:text="${articulo.ubiArt}"></td>
                     <td th:text="${articulo.udm}"></td>
                     <td th:text="${articulo.stk}"></td>
+                    <td th:text="${#numbers.formatDecimal(articulo.costo,1,'POINT',2,'COMMA')}"></td>
+                    <td th:text="${#numbers.formatDecimal(articulo.precioVenta,1,'POINT',2,'COMMA')}"></td>
                     <td>
                         <div class="d-flex justify-content-center gap-2">
-                            <!-- Editar -->
                             <a th:href="@{/editarArt/{id}(id=${articulo.idArt})}"
                                class="btn btn-dark btn-sm" title="Editar">
                                 <i class="bi bi-pencil-square"></i>
                             </a>
-                            <!-- Eliminar -->
                             <a th:href="@{/eliminar/{id}(id=${articulo.idArt})}"
                                class="btn btn-danger btn-sm" title="Eliminar">
                                 <i class="bi bi-trash"></i>

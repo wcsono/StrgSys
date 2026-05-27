@@ -48,6 +48,10 @@ public class Articulo {
     @Column(length = 50)
     private String ubiArt;
 
+    @Column(nullable = true) // 👈 permite que sea nulo en la inserción inicial
+    private BigDecimal precioVenta;
+
+
     @OneToMany(mappedBy = "articulo", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore // 👈 evita que Jackson serialice detalleOrdenes dentro de Articulo
     private List<DetalleOrden> detalleOrdenes = new ArrayList<>();

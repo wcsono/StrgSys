@@ -49,17 +49,30 @@
                     </div>
 
                     <!-- Costo -->
-                    <input type="number" th:field="*{costo}" id="costo"
-                           class="form-control"
-                           aria-label="costo"
-                           autocomplete="on"
-                           onfocus="this.select()"
-                           inputmode="decimal"
-                           step="0.01">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Costo Unitario</span>
+                        <input type="number" th:field="*{costo}" id="costo"
+                               class="form-control"
+                               aria-label="costo"
+                               autocomplete="on"
+                               onfocus="this.select()"
+                               inputmode="decimal"
+                               step="0.01">
+                    </div>
 
 
 
-
+                    <!-- PrecioVenta -->
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"> Precio de Venta</span>
+                        <input type="number" th:field="*{precioVenta}" id="precioVenta"
+                               class="form-control"
+                               aria-label="precioVenta"
+                               autocomplete="on"
+                               onfocus="this.select()"
+                               inputmode="decimal"
+                               step="0.01">
+                    </div>
 
                     <!-- Estatus -->
                     <div class="input-group mb-3">
