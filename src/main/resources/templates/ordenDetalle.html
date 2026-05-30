@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragmentos/cabecero::cabecero-seccion(titulo='Detalle*Orden')}"></head>
+<head th:replace="~{fragmentos/cabecero::cabecero-seccion(titulo='Detalle Orden')}"></head>
 <body>
 
 <!-- Navegación principal -->
@@ -12,7 +12,7 @@
     </div>
 
     <div class="row">
-        <!-- Columna izquierda: Datos de la orden + botón -->
+        <!-- Columna izquierda: Datos de la orden -->
         <div class="col-md-5">
             <h5>Datos de la Orden</h5>
             <table class="table table-bordered">
@@ -20,16 +20,23 @@
                 <tr><th>Número Orden</th><td th:text="${orden.numOrd}"></td></tr>
                 <tr><th>Cliente/Proveedor</th><td th:text="${orden.cliente.nomCli}"></td></tr>
                 <tr><th>Tipo Documento</th><td th:text="${orden.tipoDocumento.desTd}"></td></tr>
-                <tr><th>Fecha Registro</th><td th:text="${orden.fecOrd}"></td></tr>
+                <tr><th>Fecha Registro</th><td th:text="${#temporals.format(orden.fecOrd,'dd/MM/yyyy')}"></td></tr>
                 <tr><th>Documento Referencia</th><td th:text="${orden.ndocRef}"></td></tr>
             </table>
 
-            <!-- Botón debajo de los datos -->
-            <div class="text-center mt-3">
+            <!-- Botones debajo de los datos -->
+            <div class="d-flex justify-content-center gap-3 mt-3">
+                <!-- Botón agregar artículos -->
                 <button class="btn btn-success" type="button"
-                        data-bs-toggle="offcanvas" data-bs-target="#offcanvasArticulos">
-                    <i class="bi bi-plus-circle me-1"></i> Agregar Artículos a la Orden
+                        data-bs-toggle="offcanvas" data-bs-target="#offcanvasArticulos"
+                        th:disabled="${orden.estOrd != 0}">
+                    <i class="bi bi-plus-circle me-1"></i> Agregar Artículos
                 </button>
+
+                <!-- Botón regresar al listado -->
+                <a th:href="@{/ordenes}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-return-left me-1"></i> Regresar al listado
+                </a>
             </div>
         </div>
 
@@ -93,4 +100,9 @@
 
 <!-- Fragmento de offcanvas-articulos -->
 <div th:replace="fragmentos/offcanvas-articulos :: offcanvas-articulos-seccion"></div>
+
 <!-- Pie de página -->
+<div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"></div>
+
+</body>
+</html>
