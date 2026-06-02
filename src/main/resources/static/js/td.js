@@ -1,25 +1,5 @@
 // td.js
 document.addEventListener("DOMContentLoaded", function () {
-    // --- Lógica del modal de agregar ---
-    const modalElement = document.getElementById("modalTdAgregar");
-
-    const abrirModal = document.body.getAttribute("data-abrir-modal");
-    if (abrirModal === "true" && modalElement) {
-        const modal = new bootstrap.Modal(modalElement);
-        modal.show();
-    }
-
-    if (modalElement) {
-        modalElement.addEventListener("hidden.bs.modal", function () {
-            const errorDiv = modalElement.querySelector(".alert-danger");
-            if (errorDiv) {
-                errorDiv.remove();
-            }
-        });
-    } else {
-        console.warn("No se encontró el elemento con id 'modalTdAgregar'");
-    }
-
     // ===============================
     // Validación de codTd en tiempo real (Agregar)
     // ===============================

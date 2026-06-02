@@ -16,6 +16,7 @@
         <div class="col-md-6">
             <!-- modelAttribute = tdForma -->
             <form th:action="@{/guardarTipoDocumento}" th:object="${tdForma}" method="post">
+                <!-- Estado oculto por defecto -->
                 <input type="hidden" id="estTd" name="estTd" value="false">
 
                 <!-- Código -->
@@ -23,7 +24,7 @@
                     <span class="input-group-text">Código</span>
                     <input id="codTd" name="codTd" class="form-control" aria-label="codigo"
                            style="text-transform: uppercase;"
-                           oninput="this.value = this.value.toUpperCase();">
+                           oninput="this.value = this.value.toUpperCase();" required>
                 </div>
 
                 <!-- Descripción -->
@@ -31,22 +32,29 @@
                     <span class="input-group-text">Descripción</span>
                     <input id="desTd" name="desTd" class="form-control" aria-label="descripcion"
                            style="text-transform: uppercase;"
-                           oninput="this.value = this.value.toUpperCase();">
+                           oninput="this.value = this.value.toUpperCase();" required>
                 </div>
 
-                <!-- Tipo T.D. -->
+                <!-- Tipo Movimiento -->
                 <div class="input-group mb-3">
-                    <span class="input-group-text">Tipo T.D.</span>
-                    <div class="form-control d-flex align-items-center">
-                        <div class="form-check form-check-inline mb-0">
-                            <input id="tipTdIngreso" name="tipTd" type="radio" value="true" class="form-check-input">
-                            <label class="form-check-label" for="tipTdIngreso">Ingreso</label>
-                        </div>
-                        <div class="form-check form-check-inline mb-0">
-                            <input id="tipTdSalida" name="tipTd" type="radio" value="false" class="form-check-input">
-                            <label class="form-check-label" for="tipTdSalida">Salida</label>
-                        </div>
-                    </div>
+                    <span class="input-group-text">Tipo Movimiento</span>
+                    <select id="tipoMovimiento" name="tipoMovimiento" class="form-select" required>
+                        <option value="" selected>Seleccione</option>
+                        <option value="INGRESO">Ingreso</option>
+                        <option value="SALIDA">Salida</option>
+                    </select>
+                </div>
+
+                <!-- Subtipo Movimiento -->
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Subtipo</span>
+                    <select id="subTipoMovimiento" name="subTipoMovimiento" class="form-select" required>
+                        <option value="" selected>Seleccione</option>
+                        <option value="COMPRA">Compra</option>
+                        <option value="VENTA">Venta</option>
+                        <option value="DEVOLUCION">Devolución</option>
+                        <!-- Agrega aquí los subtipos que definiste en tu enum -->
+                    </select>
                 </div>
 
                 <div class="text-center">

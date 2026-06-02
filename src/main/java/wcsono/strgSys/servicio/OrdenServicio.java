@@ -13,6 +13,8 @@ import wcsono.strgSys.modelo.Orden;
 import wcsono.strgSys.modelo.Usuario;
 import wcsono.strgSys.repositorio.ClienteRepositorio;
 import wcsono.strgSys.repositorio.OrdenRepositorio;
+import wcsono.strgSys.modelo.TipoMovimiento;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -111,7 +113,7 @@ public class OrdenServicio implements IOrdenServicio {
             throw new IllegalArgumentException("Orden no encontrada");
         }
 
-        boolean esEntrada = orden.getTipoDocumento().isTipTd();
+        boolean esEntrada = orden.getTipoDocumento().getTipoMovimiento() == TipoMovimiento.INGRESO;
 
         orden.getDetalles().forEach(det -> {
             var articulo = det.getArticulo();

@@ -20,7 +20,7 @@ public class TipoDocumentoControlador {
     @Autowired
     private ITipoDocumentoServicio tipoDocumentoService;
 
-    // Listar todos los tipos de documentos
+    // Listar TODOS los tipos de documentos (activos e inactivos)
     @GetMapping("/tipoDocumentos")
     public String listar(ModelMap modelo) {
         List<TipoDocumento> tiposDocumentos = tipoDocumentoService.listarTipoDocumentos();
@@ -92,7 +92,7 @@ public class TipoDocumentoControlador {
         return "redirect:/tipoDocumentos";
     }
 
-    // Eliminar documento con validación de estado
+    // Inactivar documento (en lugar de eliminar físico)
     @GetMapping("/eliminarTd/{id}")
     public String eliminar(@PathVariable("id") Integer idTd,
                            RedirectAttributes redirectAttrs) {
@@ -101,13 +101,13 @@ public class TipoDocumentoControlador {
 
         if (tdEliminar == null) {
             redirectAttrs.addFlashAttribute("mensajeError", "Documento no encontrado");
-        } else if (!tdEliminar.isEstTd()) {
-            logger.info("TipoDocumento a eliminar: {}", tdEliminar);
-            tipoDocumentoService.eliminarTipoDocumento(tdEliminar);
-            redirectAttrs.addFlashAttribute("mensajeExito", "Documento eliminado correctamente");
+        } else if (tdEliminar.isEstTd()) {
+            // Si está activo, no se elimina
+            redirectAttrs.addFlashAttribute("mensajeError", "No se puede eliminar: el documento está activo en órdenes");
         } else {
-            logger.info("No se puede eliminar porque está activo");
-            redirectAttrs.addFlashAttribute("mensajeError", "No se puede eliminar el registro porque está activo");
+            // Si está inactivo, se elimina físicamente
+            tipoDocumentoService.borrarFisico(tdEliminar);
+            redirectAttrs.addFlashAttribute("mensajeExito", "Documento eliminado correctamente");
         }
         return "redirect:/tipoDocumentos";
     }
@@ -117,13 +117,11 @@ public class TipoDocumentoControlador {
     @ResponseBody
     public boolean validarCodigoTd(@RequestParam String codTd,
                                    @RequestParam(required = false) Integer idTd) {
-        // Si estamos editando y el código es igual al original, no es duplicado
         TipoDocumento actual = (idTd != null) ? tipoDocumentoService.buscarTdPorId(idTd) : null;
         if (actual != null && actual.getCodTd().equalsIgnoreCase(codTd)) {
             return false; // no duplicado
         }
 
-        // Verificar duplicados en la lista
         boolean existe = tipoDocumentoService.listarTipoDocumentos().stream()
                 .anyMatch(td -> !td.getIdTd().equals(idTd) &&
                         td.getCodTd().equalsIgnoreCase(codTd));
