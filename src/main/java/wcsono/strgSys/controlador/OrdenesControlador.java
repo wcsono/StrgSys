@@ -22,6 +22,7 @@ import wcsono.strgSys.servicio.IOrdenServicio;
 import wcsono.strgSys.servicio.ITipoDocumentoServicio;
 import wcsono.strgSys.servicio.MovimientoServicio;
 import wcsono.strgSys.servicio.UsuarioServicio;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpSession;
 import java.math.BigDecimal;
@@ -175,5 +176,23 @@ public class OrdenesControlador {
         logger.info("📦 OrdenDTO construido para enviar al frontend: {}", dto);
 
         return dto;
+    }
+
+    /**
+     * Eliminar orden físicamente (GET directo desde enlace en vista)
+     */
+    @GetMapping("/eliminarOrd/{id}")
+    public String eliminarOrden(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+        Orden orden = ordenServicio.buscarOrdenPorId(id);
+
+        if (orden == null) {
+            redirectAttributes.addFlashAttribute("error", "⚠️ La orden no existe.");
+            return "redirect:/ordenes";
+        }
+
+        ordenServicio.eliminarOrden(orden); // eliminación física
+        redirectAttributes.addFlashAttribute("mensaje", "✅ Orden eliminada correctamente.");
+
+        return "redirect:/ordenes";
     }
 }

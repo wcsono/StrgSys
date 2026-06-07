@@ -27,6 +27,9 @@ public interface IOrdenServicio {
      */
     Orden guardarOrden(Orden orden, Cliente cliente, Usuario usuario);
 
+    /**
+     * Eliminación física directa.
+     */
     void eliminarOrden(Orden orden);
 
     // 🔹 Métodos para estados
@@ -39,7 +42,7 @@ public interface IOrdenServicio {
 
     boolean validarNumOrdUnico(String numOrd);
 
-    // 🔹 Filtros combinados (ajustados)
+    // 🔹 Filtros combinados
     Page<Orden> listarOrdenesFiltradas(String numOrd,
                                        Integer idCliente,
                                        LocalDate fecOrdDesde,

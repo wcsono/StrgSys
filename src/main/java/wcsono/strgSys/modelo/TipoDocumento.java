@@ -3,9 +3,12 @@ package wcsono.strgSys.modelo;
 import jakarta.persistence.*;
 import lombok.*;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import wcsono.strgSys.modelo.TipoMovimiento;
+import wcsono.strgSys.modelo.SubTipoMovimiento;
+
 
 @Entity
-@Table(name = "tipo_documento") // 👈 nombre explícito de la tabla
+@Table(name = "tipo_documento")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,19 +20,23 @@ public class TipoDocumento {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idTd;
 
-    // Código del tipo de documento (ej. "FAC", "BOL")
-    @Column(name = "cod_td", nullable = false, length = 20, unique = true) // 👈 unique para evitar duplicados
-    private String codTd;
+    @Column(name = "cod_td", nullable = false, length = 20, unique = true)
+    private String codTd; // Ej: "FAC", "BOL", "ORDC", "VENT"
 
-    // Descripción del tipo de documento (ej. "Factura", "Boleta")
     @Column(name = "des_td", nullable = false, length = 100)
-    private String desTd;
+    private String desTd; // Ej: "Factura", "Boleta", "Orden de Compra"
 
-    // Indicador de tipo (puede ser boolean o enum, según tu lógica)
-    @Column(name = "tip_td", nullable = false)
-    private boolean tipTd;
+    // Tipo principal: Ingreso o Salida
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_mov", nullable = false, length = 20)
+    private TipoMovimiento tipoMovimiento;
 
-    // Estado del tipo de documento (activo/inactivo)
+    // Subtipo: Compra, Venta, Ajuste, etc.
+    @Enumerated(EnumType.STRING)
+    @Column(name = "subtipo_mov", nullable = false, length = 30)
+    private SubTipoMovimiento subTipoMovimiento;
+
+    // Estado del tipo de documento (activo/inactivo según uso)
     @Column(name = "est_td", nullable = false)
     private boolean estTd;
 }

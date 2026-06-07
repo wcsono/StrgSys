@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import wcsono.strgSys.modelo.Cliente;
 import wcsono.strgSys.modelo.Orden;
 import wcsono.strgSys.modelo.Usuario;
+import wcsono.strgSys.modelo.TipoMovimiento;
 import wcsono.strgSys.repositorio.ClienteRepositorio;
 import wcsono.strgSys.repositorio.OrdenRepositorio;
 
@@ -64,25 +65,16 @@ public class OrdenServicio implements IOrdenServicio {
     @Override
     @Transactional
     public Orden guardarOrden(Orden orden, Cliente cliente, Usuario usuario) {
-        // Guardar cliente si es nuevo
         if (cliente.getIdCliente() == null) {
             cliente = clienteRepositorio.save(cliente);
         }
         orden.setCliente(cliente);
-
-        // Asociar usuario activo
         orden.setUsuario(usuario);
 
-        // Estado inicial = 0 (Orden Creada)
-        orden.setEstOrd(0);
+        orden.setEstOrd(0); // Estado inicial
+        orden.setCosOrd(BigDecimal.ZERO); // Costo inicial
 
-        // Costo inicial = 0
-        orden.setCosOrd(BigDecimal.ZERO);
-
-        // Guardar orden para obtener id
         orden = ordenRepositorio.save(orden);
-
-        // Generar numOrd automático
         orden.setNumOrd(String.valueOf(1000 + orden.getIdOrd()));
 
         Orden saved = ordenRepositorio.save(orden);
@@ -94,15 +86,18 @@ public class OrdenServicio implements IOrdenServicio {
         return saved;
     }
 
+    /**
+     * Eliminación física directa (sin validaciones de Cliente/Usuario).
+     */
     @Override
     public void eliminarOrden(Orden orden) {
-        if (orden.getCliente() != null || orden.getUsuario() != null) {
-            throw new IllegalStateException("No se puede eliminar una orden vinculada a Cliente/Usuario");
-        }
         ordenRepositorio.delete(orden);
-        logger.info("Orden eliminada -> id={}", orden.getIdOrd());
+        logger.info("Orden eliminada físicamente -> id={}", orden.getIdOrd());
     }
 
+    /**
+     * Extornar orden: revertir stock y marcar estado = 8.
+     */
     @Override
     @Transactional
     public void extornarOrden(Integer id) {
@@ -111,7 +106,7 @@ public class OrdenServicio implements IOrdenServicio {
             throw new IllegalArgumentException("Orden no encontrada");
         }
 
-        boolean esEntrada = orden.getTipoDocumento().isTipTd();
+        boolean esEntrada = orden.getTipoDocumento().getTipoMovimiento() == TipoMovimiento.INGRESO;
 
         orden.getDetalles().forEach(det -> {
             var articulo = det.getArticulo();
