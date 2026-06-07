@@ -14,6 +14,8 @@ import wcsono.strgSys.modelo.Usuario;
 import wcsono.strgSys.modelo.TipoMovimiento;
 import wcsono.strgSys.repositorio.ClienteRepositorio;
 import wcsono.strgSys.repositorio.OrdenRepositorio;
+import wcsono.strgSys.modelo.TipoMovimiento;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
