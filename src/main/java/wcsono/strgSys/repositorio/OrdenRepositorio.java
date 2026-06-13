@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import wcsono.strgSys.modelo.Orden;
+import wcsono.strgSys.modelo.TipoMovimiento; // ✅ Import del enum
 
 import java.util.List;
 
@@ -36,8 +37,8 @@ public interface OrdenRepositorio extends JpaRepository<Orden, Integer>, JpaSpec
 
     // 🔹 Reporte: Entradas vs Salidas por mes
     @Query("SELECT MONTH(o.fecOrd), " +
-            "SUM(CASE WHEN o.tipoDocumento.tipTd = true THEN 1 ELSE 0 END), " +
-            "SUM(CASE WHEN o.tipoDocumento.tipTd = false THEN 1 ELSE 0 END) " +
+            "SUM(CASE WHEN o.tipoDocumento.tipoMovimiento = wcsono.strgSys.modelo.TipoMovimiento.INGRESO THEN 1 ELSE 0 END), " +
+            "SUM(CASE WHEN o.tipoDocumento.tipoMovimiento = wcsono.strgSys.modelo.TipoMovimiento.SALIDA THEN 1 ELSE 0 END) " +
             "FROM Orden o GROUP BY MONTH(o.fecOrd)")
     List<Object[]> obtenerEntradasVsSalidasPorMes();
 }

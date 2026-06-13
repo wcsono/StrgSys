@@ -10,6 +10,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import wcsono.strgSys.modelo.TipoMovimiento;
+
 
 @Service
 public class MovimientoServicio {
@@ -52,8 +54,12 @@ public class MovimientoServicio {
         return movimientoRepositorio.findAll().stream()
                 .map(mov -> {
                     // ✅ Usamos TipoDocumento para determinar entrada/salida
-                    int entradas = mov.getTipoDocumento().isTipTd() ? mov.getCantidad() : 0;
-                    int salidas = !mov.getTipoDocumento().isTipTd() ? mov.getCantidad() : 0;
+                    int entradas = mov.getTipoDocumento().getTipoMovimiento() == TipoMovimiento.INGRESO
+                            ? mov.getCantidad() : 0;
+
+                    int salidas  = mov.getTipoDocumento().getTipoMovimiento() == TipoMovimiento.SALIDA
+                            ? mov.getCantidad() : 0;
+
 
                     // ✅ Multiplicación segura con BigDecimal
                     BigDecimal valorMovido = BigDecimal.valueOf(mov.getCantidad())
@@ -92,7 +98,7 @@ public class MovimientoServicio {
                         mov.getArticulo().getDesArt(),
                         mov.getFechaMovimiento().getYear(),
                         mov.getFechaMovimiento().getMonthValue(),
-                        mov.getTipoDocumento().isTipTd() ? "Entrada" : "Salida",
+                        mov.getTipoDocumento().getTipoMovimiento() == TipoMovimiento.INGRESO ? "Entrada" : "Salida",
                         mov.getCantidad(),
                         mov.getCostoUnitario().doubleValue()
                 ))

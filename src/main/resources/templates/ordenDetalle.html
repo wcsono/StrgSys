@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragmentos/cabecero::cabecero-seccion(titulo='Detalle Orden')}"></head>
+<head th:replace="~{fragmentos/cabecero::cabecero-seccion(titulo='ordenDetalle')}"></head>
 <body>
 
 <!-- Navegación principal -->
@@ -53,23 +53,23 @@
                     <th>Subtotal</th>
                 </tr>
                 </thead>
-                <tbody>
-                <!-- Si hay artículos -->
+
+                <!-- Fragmento de la tabla -->
+                <tbody id="tablaArticulos" th:fragment="tablaArticulos">
                 <tr th:each="detalle : ${detalleOrdenes}" th:if="${#lists.size(detalleOrdenes) > 0}">
                     <td th:text="${detalle.articulo.codArt}"></td>
                     <td th:text="${detalle.articulo.desArt}"></td>
                     <td th:text="${detalle.cantidad}"></td>
                     <td th:text="${detalle.cosArt}"></td>
-                    <td th:text="${detalle.cantidad * detalle.cosArt}"></td>
+                    <td th:text="${detalle.subtotal}"></td>
                 </tr>
-
-                <!-- Si no hay artículos -->
                 <tr th:unless="${#lists.size(detalleOrdenes) > 0}">
                     <td colspan="5" class="text-center text-muted">No hay Artículos agregados</td>
                 </tr>
                 </tbody>
-                <!-- Footer con card para el total -->
-                <tfoot>
+
+                <!-- Fragmento del total -->
+                <tfoot id="totalOrdenFragment" th:fragment="totalOrdenFragment">
                 <tr>
                     <td colspan="5">
                         <div class="card bg-success text-white">
@@ -103,6 +103,13 @@
 
 <!-- Pie de página -->
 <div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"></div>
+
+<script th:src="@{/js/offcanvas-articulos.js}"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var ordenId = [[${orden.idOrd}]];
+    /*]]>*/
+</script>
 
 </body>
 </html>

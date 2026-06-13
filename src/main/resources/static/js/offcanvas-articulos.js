@@ -6,8 +6,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const cantidadInput = document.getElementById("cantidad");
     const btnGuardar = document.getElementById("btnGuardar");
     const mensaje = document.getElementById("mensajeValidacion");
+    const form = document.querySelector("#offcanvasArticulos form");
+    const offcanvasEl = document.getElementById("offcanvasArticulos");
+    const offcanvas = bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl);
 
-    // TIPTD ya está definido en editarOrd.html con th:inline="javascript"
+    // TIPTD ya está definido en ordenDetalle.html con th:inline="javascript"
     // true = ingreso, false = salida
 
     function sincronizar(selectOrigen, selectDestino) {
@@ -47,4 +50,34 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+
+    // Guardar artículo vía fetch y refrescar tabla
+    form.addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        fetch(form.action, {
+            method: "POST",
+            body: new FormData(form)
+        })
+        .then(res => {
+            if (!res.ok) throw new Error("Error al guardar artículo");
+            // ✅ refrescar detalle de la orden
+            return fetch(`/ordenDetalle/${ordenId}`);
+        })
+        .then(res => res.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, "text/html");
+
+            const nuevaTabla = doc.querySelector("#tablaArticulos");
+            const nuevoTotal = doc.querySelector("#totalOrdenFragment");
+
+            document.querySelector("#tablaArticulos").innerHTML = nuevaTabla.innerHTML;
+            document.querySelector("#totalOrdenFragment").innerHTML = nuevoTotal.innerHTML;
+
+            offcanvas.hide();
+            form.reset();
+        })
+        .catch(err => console.error(err));
+    });
 });

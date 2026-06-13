@@ -1,65 +1,84 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragmentos/cabecero::cabecero-seccion(titulo='Editar Tipo Documento')}"></head>
 <body>
-<!--Menu de Navegacion-->
+
+<!-- Navegación principal -->
 <div th:replace="~{fragmentos/navegacion-principal::navegacion-principal-seccion}"></div>
 
 <div class="container">
-    <div class="row text-center" style="margin:30px">
-        <div class="col-6">
-            <h3>Editar T.D.</h3>
-            <div class="container" style="margin:30px">
-                <form action="/guardarEditarTd" th:object="${tdEditar}" method="post">
-                    <!-- ID oculto -->
-                    <input type="hidden" th:field="*{idTd}"id="idTd" name="idTd"/>
+    <div class="row text-center my-4">
+        <div class="col-md-8 offset-md-2">
+            <h3>Editar Tipo Documento</h3>
+            <form th:action="@{/guardarEditarTd}" th:object="${tdEditar}" method="post">
 
-                    <!-- Código -->
-                    <div class="input-group mb-3">
-                        <span class="input-group-text">Código</span>
-                        <input type="text" th:field="*{codTd}" id="codTd" class="form-control" aria-label="codigo" autocomplete="on" onfocus="this.select()" style="text-transform: uppercase;"  oninput="this.value = this.value.toUpperCase();">
-                    </div>
+                <!-- ID oculto -->
+                <input type="hidden" th:field="*{idTd}" id="idTd"/>
 
-                    <!-- Descripción -->
-                    <div class="input-group mb-3">
-                        <span class="input-group-text">Descripción</span>
-                        <input type="text" th:field="*{desTd}" id="desTd" class="form-control" aria-label="descripcion" autocomplete="on" onfocus="this.select()" style="text-transform: uppercase;"  oninput="this.value = this.value.toUpperCase();">
-                    </div>
+                <!-- Código -->
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Código</span>
+                    <input type="text" th:field="*{codTd}" id="codTd" class="form-control"
+                           style="text-transform: uppercase;" onfocus="this.select()"
+                           oninput="this.value = this.value.toUpperCase();" required>
+                </div>
 
-                    <!-- Tipo -->
-                    <div class="input-group mb-3">
-                        <span class="input-group-text">Tipo</span>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" th:field="*{tipTd}" id="ingreso" value="true"/>
-                            <label class="form-check-label fw-bold" for="ingreso">Ingreso</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" th:field="*{tipTd}" id="salida" value="false"/>
-                            <label class="form-check-label fw-bold" for="salida">Salida</label>
-                        </div>
-                    </div>
+                <!-- Descripción -->
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Descripción</span>
+                    <input type="text" th:field="*{desTd}" id="desTd" class="form-control"
+                           style="text-transform: uppercase;" onfocus="this.select()"
+                           oninput="this.value = this.value.toUpperCase();" required>
+                </div>
 
-                    <!-- Estatus -->
-                    <div class="input-group mb-3">
-                        <span class="input-group-text">Estatus</span>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" th:field="*{estTd}" id="activo" value="true"  />
-                            <label class="form-check-label fw-bold" for="activo">Activo</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" th:field="*{estTd}" id="inactivo" value="false"  />
-                            <label class="form-check-label fw-bold" for="inactivo">Inactivo</label>
-                        </div>
-                    </div>
+                <!-- Tipo Movimiento -->
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Tipo Movimiento</span>
+                    <select th:field="*{tipoMovimiento}" id="tipoMovimiento" class="form-select" required>
+                        <option value="" disabled>Seleccione</option>
+                        <option value="INGRESO">Ingreso</option>
+                        <option value="SALIDA">Salida</option>
+                    </select>
+                </div>
 
-                    <!-- Botones -->
-                    <div class="mb-1 d-flex justify-content-center mt-4">
-                        <button type="submit"  id="btnGuardarTd" class="btn btn-primary btn-sm me-4">Guardar</button>
-                        <a href="/tipoDocumentos" class="btn btn-secondary btn-sm">Regresar</a>
+                <!-- Subtipo Movimiento -->
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Subtipo</span>
+                    <select th:field="*{subTipoMovimiento}" id="subTipoMovimiento" class="form-select" required>
+                        <option value="" disabled>Seleccione</option>
+                        <option value="COMPRA">Compra</option>
+                        <option value="VENTA">Venta</option>
+                        <option value="DEVOLUCION">Devolución</option>
+                        <!-- Agrega aquí los subtipos definidos en tu enum -->
+                    </select>
+                </div>
+
+                <!-- Estado -->
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Estado</span>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" th:field="*{estTd}" id="activo" value="true"/>
+                        <label class="form-check-label fw-bold" for="activo">Activo</label>
                     </div>
-                    <div id="errorCodigoTdEditar" style="display:none;"></div>
-                </form>
-            </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" th:field="*{estTd}" id="inactivo" value="false"/>
+                        <label class="form-check-label fw-bold" for="inactivo">Inactivo</label>
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="d-flex justify-content-center mt-4">
+                    <button type="submit" id="btnGuardarTd" class="btn btn-primary btn-sm me-3">
+                        <i class="bi bi-save me-1"></i>Guardar
+                    </button>
+                    <a href="/tipoDocumentos" class="btn btn-secondary btn-sm">
+                        <i class="bi bi-arrow-return-left me-1"></i>Regresar
+                    </a>
+                </div>
+
+                <!-- Mensaje de error -->
+                <div id="errorCodigoTdEditar" class="mt-2" style="display:none;"></div>
+            </form>
         </div>
     </div>
 </div>

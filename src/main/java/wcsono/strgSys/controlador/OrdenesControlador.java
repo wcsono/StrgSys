@@ -22,6 +22,7 @@ import wcsono.strgSys.servicio.IOrdenServicio;
 import wcsono.strgSys.servicio.ITipoDocumentoServicio;
 import wcsono.strgSys.servicio.MovimientoServicio;
 import wcsono.strgSys.servicio.UsuarioServicio;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpSession;
 import java.math.BigDecimal;
@@ -51,9 +52,6 @@ public class OrdenesControlador {
 
     private final Logger logger = LoggerFactory.getLogger(OrdenesControlador.class);
 
-    /**
-     * Listar todas las órdenes (vista Thymeleaf)
-     */
     @GetMapping("/ordenes")
     public String mostrarOrdenes(
             @RequestParam(required = false) String numOrd,
@@ -80,9 +78,6 @@ public class OrdenesControlador {
         return "ordenes";
     }
 
-    /**
-     * Mostrar formulario para agregar una nueva orden
-     */
     @GetMapping("/agregarOrden")
     public String mostrarAgregarOrden(Model model) {
         model.addAttribute("ordenForma", new Orden());
@@ -92,11 +87,8 @@ public class OrdenesControlador {
         return "agregarOrden";
     }
 
-    /**
-     * Guardar nueva orden y redirigir a detalle
-     */
     @PostMapping("/guardarAgregarOrden")
-    public String guardarAgregarOrden(@ModelAttribute("orden") Orden orden,
+    public String guardarAgregarOrden(@ModelAttribute("ordenForma") Orden orden,
                                       @RequestParam String codCli,
                                       HttpSession session) {
 
@@ -118,12 +110,9 @@ public class OrdenesControlador {
 
         Orden nuevaOrden = ordenServicio.guardarOrden(orden, clienteExistente, usuarioActivo);
 
-        return "redirect:/orden/" + nuevaOrden.getIdOrd();
+        return "redirect:/ordenDetalle/" + nuevaOrden.getIdOrd();
     }
 
-    /**
-     * Mostrar detalle de la orden (vista Thymeleaf)
-     */
     @GetMapping("/ordenDetalle/{id}")
     public String mostrarDetalleOrden(@PathVariable Integer id, Model model) {
         Orden orden = ordenServicio.buscarOrdenPorId(id);
@@ -133,14 +122,20 @@ public class OrdenesControlador {
 
         model.addAttribute("orden", orden);
         model.addAttribute("detalleOrdenes", orden.getDetalles());
-        model.addAttribute("totalOrden", BigDecimal.ZERO);
+
+        // 🔹 calcular total de la orden sumando subtotales
+        BigDecimal totalOrden = orden.getDetalles().stream()
+                .map(det -> det.getSubtotal() != null ? det.getSubtotal() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        model.addAttribute("totalOrden", totalOrden);
+
+        // lista de artículos para llenar los selects del offcanvas
+        model.addAttribute("articulos", articuloServicio.listarArticulos());
 
         return "ordenDetalle";
     }
 
-    /**
-     * Endpoint REST para devolver OrdenDTO en JSON
-     */
     @GetMapping("/verOrd/{id}")
     @ResponseBody
     public OrdenDTO verOrden(@PathVariable Integer id) {
@@ -171,9 +166,23 @@ public class OrdenesControlador {
 
         dto.setDetalles(detalles);
 
-        // Log del DTO construido
         logger.info("📦 OrdenDTO construido para enviar al frontend: {}", dto);
 
         return dto;
+    }
+
+    @GetMapping("/eliminarOrd/{id}")
+    public String eliminarOrden(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+        Orden orden = ordenServicio.buscarOrdenPorId(id);
+
+        if (orden == null) {
+            redirectAttributes.addFlashAttribute("error", "⚠️ La orden no existe.");
+            return "redirect:/ordenes";
+        }
+
+        ordenServicio.eliminarOrden(orden);
+        redirectAttributes.addFlashAttribute("mensaje", "✅ Orden eliminada correctamente.");
+
+        return "redirect:/ordenes";
     }
 }

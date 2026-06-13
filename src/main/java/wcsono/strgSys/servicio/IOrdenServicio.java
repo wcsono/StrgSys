@@ -2,8 +2,8 @@ package wcsono.strgSys.servicio;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import wcsono.strgSys.modelo.Orden;
 import wcsono.strgSys.modelo.Cliente;
+import wcsono.strgSys.modelo.Orden;
 import wcsono.strgSys.modelo.Usuario;
 
 import java.time.LocalDate;
@@ -21,34 +21,32 @@ public interface IOrdenServicio {
 
     Orden buscarOrdenConTipoDocumentoYDetalles(Integer id);
 
-    /**
-     * Guardar una nueva orden asociando cliente y usuario activo.
-     * Estado inicial = 0 (Orden Creada), costo inicial = 0.
-     */
     Orden guardarOrden(Orden orden, Cliente cliente, Usuario usuario);
+
+    // ✅ Nuevo método para actualizar orden existente
+    Orden actualizarOrden(Orden orden, Cliente cliente, Usuario usuario);
 
     void eliminarOrden(Orden orden);
 
-    // 🔹 Métodos para estados
-    List<Orden> listarOrdenesPorEstado(Integer estOrd);
-    List<Orden> listarOrdenesPorEstados(List<Integer> estados);
-
-    // 🔹 Métodos para Cliente y Usuario
-    List<Orden> listarOrdenesPorCliente(Integer idCliente);
-    List<Orden> listarOrdenesPorUsuario(Integer idUsuario);
+    void extornarOrden(Integer id);
 
     boolean validarNumOrdUnico(String numOrd);
 
-    // 🔹 Filtros combinados (ajustados)
-    Page<Orden> listarOrdenesFiltradas(String numOrd,
-                                       Integer idCliente,
-                                       LocalDate fecOrdDesde,
-                                       LocalDate fecOrdHasta,
-                                       Integer estOrd,
-                                       Pageable pageable);
+    List<Orden> listarOrdenesPorEstado(Integer estOrd);
 
-    // 🔹 Reporte: Entradas vs Salidas por mes
+    List<Orden> listarOrdenesPorEstados(List<Integer> estados);
+
+    List<Orden> listarOrdenesPorCliente(Integer idCliente);
+
+    List<Orden> listarOrdenesPorUsuario(Integer idUsuario);
+
     List<Object[]> obtenerEntradasVsSalidasPorMes();
 
-    void extornarOrden(Integer id);
+    Page<Orden> listarOrdenesFiltradas(
+            String numOrd,
+            Integer idCliente,
+            LocalDate fecOrdDesde,
+            LocalDate fecOrdHasta,
+            Integer estOrd,
+            Pageable pageable);
 }
