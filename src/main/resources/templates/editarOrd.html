@@ -18,36 +18,40 @@
             <form th:action="@{/orden/guardarEdicion}" method="post">
                 <input type="hidden" th:value="${orden.idOrd}" name="idOrd"/>
 
+                <!-- Número de Orden -->
                 <div class="input-group mb-3">
                     <span class="input-group-text">Número Orden</span>
                     <input type="text" class="form-control" name="numOrd"
-                           th:value="${orden.numOrd}" onfocus="this.select()">
+                           th:value="${orden.numOrd}" readonly>
                 </div>
 
+                <!-- Cliente -->
                 <div class="input-group mb-3">
                     <span class="input-group-text">Cliente/Proveedor</span>
-                    <input type="text" class="form-control" name="nomOrd"
-                           th:value="${orden.nomOrd}" style="text-transform: uppercase;"
-                           oninput="this.value = this.value.toUpperCase();" onfocus="this.select()">
+                    <input type="text" class="form-control"
+                           th:value="${orden.cliente.nomCli}" readonly>
                 </div>
 
+                <!-- Tipo Documento -->
                 <div class="input-group mb-3">
                     <span class="input-group-text">Tipo Documento</span>
                     <select class="form-select" name="tipoDocumento.idTd">
                         <option th:each="td : ${tds}"
                                 th:value="${td.idTd}"
-                                th:text="${td.codTd}"
-                                th:selected="${td.idTd} == ${orden.tipoDocumento.idTd}">
+                                th:text="${td.desTd}"
+                                th:selected="${orden.tipoDocumento != null and td.idTd == orden.tipoDocumento.idTd}">
                         </option>
                     </select>
                 </div>
 
+                <!-- Fecha Registro -->
                 <div class="input-group mb-3">
                     <span class="input-group-text">Fecha Registro</span>
                     <input type="date" class="form-control" name="fecOrd"
-                           th:value="${orden.fecOrd}" onfocus="this.select()">
+                           th:value="${#temporals.format(orden.fecOrd,'yyyy-MM-dd')}" readonly>
                 </div>
 
+                <!-- Documento Referencia -->
                 <div class="input-group mb-3">
                     <span class="input-group-text">Documento Referencia</span>
                     <input type="text" class="form-control" name="ndocRef"
@@ -55,8 +59,9 @@
                            oninput="this.value = this.value.toUpperCase();" onfocus="this.select()">
                 </div>
 
+                <!-- Botones -->
                 <div class="text-center mt-3">
-                    <div th:if="${!orden.estOrd}">
+                    <div th:if="${orden.estOrd == T(wcsono.strgSys.enums.EstadoOrden).INICIAL}">
                         <button class="btn btn-success" type="button"
                                 data-bs-toggle="offcanvas" data-bs-target="#offcanvasArticulos">
                             <i class="bi bi-plus-circle me-1"></i> Agregar Artículos
@@ -65,7 +70,7 @@
                             <i class="bi bi-save me-1"></i> Guardar Cambios
                         </button>
                     </div>
-                    <div th:if="${orden.estOrd and !orden.extornada}">
+                    <div th:if="${orden.estOrd == T(wcsono.strgSys.enums.EstadoOrden).EXTORNADA}">
                         <a th:href="@{'/orden/extornar/' + ${orden.idOrd}}" class="btn btn-danger">
                             <i class="bi bi-arrow-counterclockwise me-1"></i> Extornar Orden
                         </a>
@@ -93,7 +98,7 @@
                     <td th:text="${detalle.articulo.desArt}"></td>
                     <td th:text="${detalle.cantidad}"></td>
                     <td th:text="${detalle.cosArt}"></td>
-                    <td th:text="${detalle.cantidad * detalle.cosArt}"></td>
+                    <td th:text="${detalle.subtotal}"></td>
                 </tr>
                 <tr th:unless="${#lists.size(detalles) > 0}">
                     <td colspan="5" class="text-center text-muted">No hay Artículos agregados</td>
@@ -115,7 +120,7 @@
                 </tfoot>
             </table>
 
-            <div class="text-center mt-3" th:if="${!orden.estOrd}">
+            <div class="text-center mt-3" th:if="${orden.estOrd == T(wcsono.strgSys.enums.EstadoOrden).INICIAL}">
                 <form th:action="@{/orden/{id}/cerrar(id=${orden.idOrd})}" method="post">
                     <button type="submit" class="btn btn-danger"
                             th:disabled="${#lists.isEmpty(detalles)}">
@@ -128,17 +133,10 @@
 </div>
 
 <!-- Panel lateral (Offcanvas) para agregar artículos -->
-<div th:replace="@{/fragmentos/offcanvas-articulos}"></div>
+<div th:replace="~{fragmentos/offcanvas-articulos::offcanvas-articulos-seccion}"></div>
 
 <!-- Pie de página -->
 <div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"></div>
-
-<!-- Inyección de tipTd -->
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    const TIPTD = /*[[${orden.tipoDocumento.tipTd}]]*/ true;
-    /*]]>*/
-</script>
 
 <!-- Script principal -->
 <script src="/js/offcanvas-articulos.js" defer></script>

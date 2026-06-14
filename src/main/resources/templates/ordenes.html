@@ -61,9 +61,9 @@
                     <td th:text="${orden.usuario.nombre}"></td>
                     <td th:text="${#temporals.format(orden.fecOrd,'dd/MM/yyyy')}"></td>
                     <td>
-                        <span th:if="${orden.estOrd == 8}" class="badge bg-warning">Extornada</span>
-                        <span th:if="${orden.estOrd == 1}" class="badge bg-success">Cerrada</span>
-                        <span th:if="${orden.estOrd == 0}" class="badge bg-secondary">Abierta</span>
+                        <!-- Estado con nombre y color desde enum -->
+                        <span th:text="${orden.estOrd.descripcion}"
+                              th:class="${orden.estOrd.cssClass}"></span>
                     </td>
                     <td th:text="${orden.cosOrd}"></td>
                     <td>
@@ -72,10 +72,11 @@
                                     th:attr="data-id=${orden.idOrd}" title="Ver">
                                 <i class="bi bi-eye"></i>
                             </button>
-                            <a th:href="@{/editarOrd/{id}(id=${orden.idOrd})}"
+                            <a th:href="@{/orden/editar/{idOrd}(idOrd=${orden.idOrd})}"
                                class="btn btn-dark btn-sm" title="Editar">
                                 <i class="bi bi-pencil-square"></i>
                             </a>
+
                             <a th:href="@{/eliminarOrd/{id}(id=${orden.idOrd})}"
                                class="btn btn-danger btn-sm" title="Eliminar">
                                 <i class="bi bi-trash"></i>
@@ -146,9 +147,10 @@
                 <span class="input-group-text">Estado</span>
                 <select id="estOrd" name="estOrd" class="form-select">
                     <option value="">-- Seleccionar --</option>
-                    <option value="0">Abierta</option>
-                    <option value="1">Cerrada</option>
-                    <option value="8">Extornada</option>
+                    <!-- Opciones dinámicas desde enum -->
+                    <option th:each="estado : ${T(wcsono.strgSys.enums.EstadoOrden).values()}"
+                            th:value="${estado.codigo}"
+                            th:text="${estado.descripcion}"></option>
                 </select>
             </div>
             <button type="submit" class="btn btn-primary mt-2">

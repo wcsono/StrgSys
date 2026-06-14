@@ -3,8 +3,8 @@ package wcsono.strgSys.repositorio;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import wcsono.strgSys.modelo.TipoDocumento;
-import wcsono.strgSys.modelo.TipoMovimiento;
-import wcsono.strgSys.modelo.SubTipoMovimiento;
+import wcsono.strgSys.enums.TipoMovimiento;
+import wcsono.strgSys.enums.SubTipoMovimiento;
 
 public interface TipoDocumentoRepositorio extends JpaRepository<TipoDocumento, Integer> {
 

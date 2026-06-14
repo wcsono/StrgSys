@@ -10,7 +10,7 @@ public class OrdenDTO {
     private String numOrd;
     private String nomOrd;        // cliente.nomCli
     private String fecOrd;        // fecha en formato String
-    private Integer estOrd;       // estado (0,1,8)
+    private String estOrd;        // ✅ ahora es String (descripción del estado)
     private BigDecimal cosOrd;
     private String tipoDocumento; // tipoDocumento.desTd
     private List<DetalleDTO> detalles;

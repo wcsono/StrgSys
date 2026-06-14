@@ -3,8 +3,8 @@ package wcsono.strgSys.modelo;
 import jakarta.persistence.*;
 import lombok.*;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import wcsono.strgSys.modelo.TipoMovimiento;
-import wcsono.strgSys.modelo.SubTipoMovimiento;
+import wcsono.strgSys.enums.SubTipoMovimiento;
+import wcsono.strgSys.enums.TipoMovimiento;
 
 
 @Entity

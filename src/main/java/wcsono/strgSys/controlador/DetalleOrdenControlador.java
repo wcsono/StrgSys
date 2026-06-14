@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import wcsono.strgSys.enums.EstadoOrden;
 import wcsono.strgSys.modelo.Orden;
 import wcsono.strgSys.modelo.Articulo;
 import wcsono.strgSys.modelo.DetalleOrden;
@@ -55,9 +56,9 @@ public class DetalleOrdenControlador {
 
         orden.setCosOrd(totalOrden);
 
-        // Cambiar estado
-        if (orden.getEstOrd() == 0) {
-            orden.setEstOrd(1);
+        // Cambiar estado: si estaba en INICIAL, pasa a ABIERTA
+        if (orden.getEstOrd() == EstadoOrden.INICIAL) {
+            orden.setEstOrd(EstadoOrden.ABIERTA);
         }
 
         // Usuario de sesión

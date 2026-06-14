@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-import wcsono.strgSys.modelo.TipoMovimiento;
+import wcsono.strgSys.enums.TipoMovimiento;
 
 
 @Service

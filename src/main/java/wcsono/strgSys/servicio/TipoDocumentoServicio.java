@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import wcsono.strgSys.modelo.TipoDocumento;
-import wcsono.strgSys.modelo.TipoMovimiento;
-import wcsono.strgSys.modelo.SubTipoMovimiento;
+import wcsono.strgSys.enums.TipoMovimiento;
+import wcsono.strgSys.enums.SubTipoMovimiento;
 import wcsono.strgSys.repositorio.TipoDocumentoRepositorio;
 
 import java.util.List;

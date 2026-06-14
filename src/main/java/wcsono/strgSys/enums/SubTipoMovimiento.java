@@ -1,4 +1,4 @@
-package wcsono.strgSys.modelo;
+package wcsono.strgSys.enums;
 
 public enum SubTipoMovimiento {
     COMPRA,

@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import wcsono.strgSys.modelo.Orden;
-import wcsono.strgSys.modelo.TipoMovimiento; // ✅ Import del enum
+import wcsono.strgSys.enums.EstadoOrden;
 
 import java.util.List;
 
@@ -26,10 +26,10 @@ public interface OrdenRepositorio extends JpaRepository<Orden, Integer>, JpaSpec
     // Validar numOrd único
     boolean existsByNumOrd(String numOrd);
 
-    // 🔹 Métodos adicionales para IOrdenServicio
-    List<Orden> findByEstOrd(Integer estOrd);
+    // 🔹 Métodos adicionales para IOrdenServicio (ajustados a EstadoOrden)
+    List<Orden> findByEstOrd(EstadoOrden estOrd);
 
-    List<Orden> findByEstOrdIn(List<Integer> estados);
+    List<Orden> findByEstOrdIn(List<EstadoOrden> estados);
 
     List<Orden> findByCliente_IdCliente(Integer idCliente);
 
@@ -37,8 +37,8 @@ public interface OrdenRepositorio extends JpaRepository<Orden, Integer>, JpaSpec
 
     // 🔹 Reporte: Entradas vs Salidas por mes
     @Query("SELECT MONTH(o.fecOrd), " +
-            "SUM(CASE WHEN o.tipoDocumento.tipoMovimiento = wcsono.strgSys.modelo.TipoMovimiento.INGRESO THEN 1 ELSE 0 END), " +
-            "SUM(CASE WHEN o.tipoDocumento.tipoMovimiento = wcsono.strgSys.modelo.TipoMovimiento.SALIDA THEN 1 ELSE 0 END) " +
+            "SUM(CASE WHEN o.tipoDocumento.tipoMovimiento = wcsono.strgSys.enums.TipoMovimiento.INGRESO THEN 1 ELSE 0 END), " +
+            "SUM(CASE WHEN o.tipoDocumento.tipoMovimiento = wcsono.strgSys.enums.TipoMovimiento.SALIDA THEN 1 ELSE 0 END) " +
             "FROM Orden o GROUP BY MONTH(o.fecOrd)")
     List<Object[]> obtenerEntradasVsSalidasPorMes();
 }

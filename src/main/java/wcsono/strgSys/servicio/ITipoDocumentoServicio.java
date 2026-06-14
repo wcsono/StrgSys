@@ -1,8 +1,8 @@
 package wcsono.strgSys.servicio;
 
 import wcsono.strgSys.modelo.TipoDocumento;
-import wcsono.strgSys.modelo.TipoMovimiento;
-import wcsono.strgSys.modelo.SubTipoMovimiento;
+import wcsono.strgSys.enums.TipoMovimiento;
+import wcsono.strgSys.enums.SubTipoMovimiento;
 
 import java.util.List;
 

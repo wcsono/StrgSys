@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
+import wcsono.strgSys.enums.EstadoOrden;
+import wcsono.strgSys.enums.EstadoOrdenConverter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -51,10 +53,11 @@ public class Orden {
     @Size(max = 50)
     private String ndocRef;
 
-    // Estado de la orden (0–8)
+    // Estado de la orden (usa enum con converter, columna sigue siendo INT)
     @NotNull
-    @Column(nullable = false)
-    private Integer estOrd;
+    @Convert(converter = EstadoOrdenConverter.class)
+    @Column(name = "est_ord", nullable = false)
+    private EstadoOrden estOrd;
 
     @NotNull
     @PositiveOrZero
