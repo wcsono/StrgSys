@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import wcsono.strgSys.modelo.Cliente;
 import wcsono.strgSys.modelo.Orden;
 import wcsono.strgSys.modelo.Usuario;
+import wcsono.strgSys.enums.EstadoOrden;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,15 +27,17 @@ public interface IOrdenServicio {
     // ✅ Nuevo método para actualizar orden existente
     Orden actualizarOrden(Orden orden, Cliente cliente, Usuario usuario);
 
+    // ✅ Eliminación física directa
     void eliminarOrden(Orden orden);
 
     void extornarOrden(Integer id);
 
     boolean validarNumOrdUnico(String numOrd);
 
-    List<Orden> listarOrdenesPorEstado(Integer estOrd);
+    // 🔹 Ajustados a EstadoOrden
+    List<Orden> listarOrdenesPorEstado(EstadoOrden estOrd);
 
-    List<Orden> listarOrdenesPorEstados(List<Integer> estados);
+    List<Orden> listarOrdenesPorEstados(List<EstadoOrden> estados);
 
     List<Orden> listarOrdenesPorCliente(Integer idCliente);
 
@@ -47,6 +50,6 @@ public interface IOrdenServicio {
             Integer idCliente,
             LocalDate fecOrdDesde,
             LocalDate fecOrdHasta,
-            Integer estOrd,
+            Integer estOrd,   // ⚠️ este se mantiene como Integer porque viene del filtro en la vista
             Pageable pageable);
 }

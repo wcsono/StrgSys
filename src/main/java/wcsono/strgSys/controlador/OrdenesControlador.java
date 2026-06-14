@@ -15,13 +15,12 @@ import wcsono.strgSys.dto.DetalleDTO;
 import wcsono.strgSys.dto.OrdenDTO;
 import wcsono.strgSys.modelo.Cliente;
 import wcsono.strgSys.modelo.Orden;
+import wcsono.strgSys.modelo.TipoDocumento;
+
 import wcsono.strgSys.modelo.Usuario;
-import wcsono.strgSys.servicio.ArticuloServicio;
-import wcsono.strgSys.servicio.ClienteServicio;
-import wcsono.strgSys.servicio.IOrdenServicio;
-import wcsono.strgSys.servicio.ITipoDocumentoServicio;
-import wcsono.strgSys.servicio.MovimientoServicio;
-import wcsono.strgSys.servicio.UsuarioServicio;
+import wcsono.strgSys.modelo.DetalleOrden;
+import wcsono.strgSys.enums.EstadoOrden;
+import wcsono.strgSys.servicio.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpSession;
@@ -49,6 +48,11 @@ public class OrdenesControlador {
 
     @Autowired
     private ClienteServicio clienteServicio;
+
+    @Autowired
+    private DetalleOrdenServicio detalleOrdenServicio;
+
+
 
     private final Logger logger = LoggerFactory.getLogger(OrdenesControlador.class);
 
@@ -149,7 +153,10 @@ public class OrdenesControlador {
         dto.setNumOrd(orden.getNumOrd());
         dto.setNomOrd(orden.getCliente().getNomCli());
         dto.setFecOrd(orden.getFecOrd().toString());
-        dto.setEstOrd(orden.getEstOrd());
+
+        // ✅ Enviar descripción del estado en lugar del enum crudo
+        dto.setEstOrd(orden.getEstOrd().getDescripcion());
+
         dto.setCosOrd(orden.getCosOrd());
         dto.setTipoDocumento(
                 orden.getTipoDocumento() != null ? orden.getTipoDocumento().getDesTd() : null
@@ -171,6 +178,9 @@ public class OrdenesControlador {
         return dto;
     }
 
+    /**
+     * Eliminar orden físicamente (GET directo desde enlace en vista)
+     */
     @GetMapping("/eliminarOrd/{id}")
     public String eliminarOrden(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
         Orden orden = ordenServicio.buscarOrdenPorId(id);
@@ -180,9 +190,27 @@ public class OrdenesControlador {
             return "redirect:/ordenes";
         }
 
-        ordenServicio.eliminarOrden(orden);
+        ordenServicio.eliminarOrden(orden); // eliminación física
         redirectAttributes.addFlashAttribute("mensaje", "✅ Orden eliminada correctamente.");
 
         return "redirect:/ordenes";
     }
+    @GetMapping("/orden/editar/{idOrd}")
+    public String editarOrden(@PathVariable Integer idOrd, Model model) {
+        // Usamos el servicio que ya tienes inyectado
+        Orden orden = ordenServicio.buscarOrdenPorId(idOrd);
+
+        // Servicio para los detalles de la orden
+        List<DetalleOrden> detalles = detalleOrdenServicio.listarPorOrden(idOrd);
+
+        // Servicio para los tipos de documento
+        List<TipoDocumento> tds = tipoDocumentoServicio.listarTipoDocumentos();
+
+        model.addAttribute("orden", orden);
+        model.addAttribute("detalles", detalles);
+        model.addAttribute("tds", tds);
+
+        return "editarOrd"; // nombre de tu plantilla Thymeleaf
+    }
+
 }

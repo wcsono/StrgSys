@@ -11,7 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import wcsono.strgSys.modelo.Cliente;
 import wcsono.strgSys.modelo.Orden;
 import wcsono.strgSys.modelo.Usuario;
-import wcsono.strgSys.modelo.TipoMovimiento;
+import wcsono.strgSys.enums.EstadoOrden;
+import wcsono.strgSys.enums.TipoMovimiento;
 import wcsono.strgSys.repositorio.ClienteRepositorio;
 import wcsono.strgSys.repositorio.OrdenRepositorio;
 
@@ -60,7 +61,7 @@ public class OrdenServicio implements IOrdenServicio {
 
     /**
      * Guardar una nueva orden con cliente y usuario activo.
-     * Estado inicial = 0 (Orden Creada), costo inicial = 0.
+     * Estado inicial = INICIAL, costo inicial = 0.
      */
     @Override
     @Transactional
@@ -71,8 +72,8 @@ public class OrdenServicio implements IOrdenServicio {
         orden.setCliente(cliente);
         orden.setUsuario(usuario);
 
-        orden.setEstOrd(0); // Estado inicial
-        orden.setCosOrd(BigDecimal.ZERO); // Costo inicial
+        orden.setEstOrd(EstadoOrden.INICIAL); // ✅ Estado inicial
+        orden.setCosOrd(BigDecimal.ZERO);     // Costo inicial
 
         orden = ordenRepositorio.save(orden);
         orden.setNumOrd(String.valueOf(1000 + orden.getIdOrd()));
@@ -105,12 +106,18 @@ public class OrdenServicio implements IOrdenServicio {
         return saved;
     }
 
+    /**
+     * Eliminación física directa (sin validaciones de Cliente/Usuario).
+     */
     @Override
     public void eliminarOrden(Orden orden) {
         ordenRepositorio.delete(orden);
         logger.info("Orden eliminada físicamente -> id={}", orden.getIdOrd());
     }
 
+    /**
+     * Extornar orden: revertir stock y marcar estado = EXTORNADA.
+     */
     @Override
     @Transactional
     public void extornarOrden(Integer id) {
@@ -130,7 +137,7 @@ public class OrdenServicio implements IOrdenServicio {
             articuloServicio.guardarArticulo(articulo);
         });
 
-        orden.setEstOrd(8); // Estado = Extornado
+        orden.setEstOrd(EstadoOrden.EXTORNADA); // ✅ Estado = Extornada
         actualizarOrden(orden, orden.getCliente(), orden.getUsuario());
 
         logger.info("Orden extornada -> id={}, numOrd={}", orden.getIdOrd(), orden.getNumOrd());
@@ -141,13 +148,14 @@ public class OrdenServicio implements IOrdenServicio {
         return !ordenRepositorio.existsByNumOrd(numOrd);
     }
 
+    // 🔹 Ajustados a EstadoOrden
     @Override
-    public List<Orden> listarOrdenesPorEstado(Integer estOrd) {
+    public List<Orden> listarOrdenesPorEstado(EstadoOrden estOrd) {
         return ordenRepositorio.findByEstOrd(estOrd);
     }
 
     @Override
-    public List<Orden> listarOrdenesPorEstados(List<Integer> estados) {
+    public List<Orden> listarOrdenesPorEstados(List<EstadoOrden> estados) {
         return ordenRepositorio.findByEstOrdIn(estados);
     }
 
