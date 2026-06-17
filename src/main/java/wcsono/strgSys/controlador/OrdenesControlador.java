@@ -16,9 +16,9 @@ import wcsono.strgSys.dto.OrdenDTO;
 import wcsono.strgSys.modelo.Cliente;
 import wcsono.strgSys.modelo.Orden;
 import wcsono.strgSys.modelo.TipoDocumento;
-
 import wcsono.strgSys.modelo.Usuario;
 import wcsono.strgSys.modelo.DetalleOrden;
+import wcsono.strgSys.modelo.Articulo;
 import wcsono.strgSys.enums.EstadoOrden;
 import wcsono.strgSys.servicio.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -51,8 +51,6 @@ public class OrdenesControlador {
 
     @Autowired
     private DetalleOrdenServicio detalleOrdenServicio;
-
-
 
     private final Logger logger = LoggerFactory.getLogger(OrdenesControlador.class);
 
@@ -127,14 +125,11 @@ public class OrdenesControlador {
         model.addAttribute("orden", orden);
         model.addAttribute("detalleOrdenes", orden.getDetalles());
 
-        // 🔹 calcular total de la orden sumando subtotales
         BigDecimal totalOrden = orden.getDetalles().stream()
                 .map(det -> det.getSubtotal() != null ? det.getSubtotal() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         model.addAttribute("totalOrden", totalOrden);
-
-        // lista de artículos para llenar los selects del offcanvas
         model.addAttribute("articulos", articuloServicio.listarArticulos());
 
         return "ordenDetalle";
@@ -153,10 +148,7 @@ public class OrdenesControlador {
         dto.setNumOrd(orden.getNumOrd());
         dto.setNomOrd(orden.getCliente().getNomCli());
         dto.setFecOrd(orden.getFecOrd().toString());
-
-        // ✅ Enviar descripción del estado en lugar del enum crudo
         dto.setEstOrd(orden.getEstOrd().getDescripcion());
-
         dto.setCosOrd(orden.getCosOrd());
         dto.setTipoDocumento(
                 orden.getTipoDocumento() != null ? orden.getTipoDocumento().getDesTd() : null
@@ -178,9 +170,6 @@ public class OrdenesControlador {
         return dto;
     }
 
-    /**
-     * Eliminar orden físicamente (GET directo desde enlace en vista)
-     */
     @GetMapping("/eliminarOrd/{id}")
     public String eliminarOrden(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
         Orden orden = ordenServicio.buscarOrdenPorId(id);
@@ -190,27 +179,65 @@ public class OrdenesControlador {
             return "redirect:/ordenes";
         }
 
-        ordenServicio.eliminarOrden(orden); // eliminación física
+        ordenServicio.eliminarOrden(orden);
         redirectAttributes.addFlashAttribute("mensaje", "✅ Orden eliminada correctamente.");
 
         return "redirect:/ordenes";
     }
+
+    /**
+     * Mostrar formulario de edición de una orden
+     */
     @GetMapping("/orden/editar/{idOrd}")
     public String editarOrden(@PathVariable Integer idOrd, Model model) {
-        // Usamos el servicio que ya tienes inyectado
         Orden orden = ordenServicio.buscarOrdenPorId(idOrd);
-
-        // Servicio para los detalles de la orden
         List<DetalleOrden> detalles = detalleOrdenServicio.listarPorOrden(idOrd);
-
-        // Servicio para los tipos de documento
         List<TipoDocumento> tds = tipoDocumentoServicio.listarTipoDocumentos();
+        List<Articulo> articulos = articuloServicio.listarArticulos();
 
         model.addAttribute("orden", orden);
         model.addAttribute("detalles", detalles);
         model.addAttribute("tds", tds);
+        model.addAttribute("articulos", articulos);
 
-        return "editarOrd"; // nombre de tu plantilla Thymeleaf
+        return "editarOrd";
     }
 
+    /**
+     * Guardar cambios de la edición de una orden
+     */
+    @PostMapping("/orden/guardarEdicion")
+    public String guardarEdicion(@ModelAttribute Orden orden,
+                                 @RequestParam String codCli,
+                                 HttpSession session,
+                                 RedirectAttributes redirectAttrs) {
+
+        Usuario usuarioActivo = (Usuario) session.getAttribute("usuarioSesion");
+        if (usuarioActivo == null) {
+            return "redirect:/login";
+        }
+
+        Cliente cliente = clienteServicio.obtenerClientePorCodigo(codCli);
+        if (cliente == null) {
+            redirectAttrs.addFlashAttribute("error", "Cliente no encontrado con código: " + codCli);
+            return "redirect:/orden/editar/" + orden.getIdOrd();
+        }
+
+        orden.setCliente(cliente);
+
+        // ✅ llamada corregida con los tres parámetros
+        ordenServicio.actualizarOrden(orden, cliente, usuarioActivo);
+
+        redirectAttrs.addFlashAttribute("mensaje", "Orden actualizada correctamente");
+        return "redirect:/ordenDetalle/" + orden.getIdOrd();
+    }
+
+    /**
+     * Endpoint para búsqueda de cliente por código
+     */
+    @GetMapping("/orden/buscarCliente")
+    @ResponseBody
+    public Cliente buscarCliente(@RequestParam String codCli) {
+        return clienteServicio.obtenerClientePorCodigo(codCli);
+    }
 }
