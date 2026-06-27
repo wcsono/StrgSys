@@ -18,6 +18,7 @@ import wcsono.strgSys.repositorio.OrdenRepositorio;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -72,16 +73,17 @@ public class OrdenServicio implements IOrdenServicio {
         orden.setCliente(cliente);
         orden.setUsuario(usuario);
 
-        orden.setEstOrd(EstadoOrden.INICIAL); // ✅ Estado inicial
+        orden.setEstOrd(EstadoOrden.INICIAL); // Estado inicial
         orden.setCosOrd(BigDecimal.ZERO);     // Costo inicial
+        orden.setFechaEstado(LocalDateTime.now()); // ✅ fecha/hora inicial
 
         orden = ordenRepositorio.save(orden);
         orden.setNumOrd(String.valueOf(1000 + orden.getIdOrd()));
 
         Orden saved = ordenRepositorio.save(orden);
 
-        logger.info("Orden guardada -> id={}, numOrd={}, estOrd={}, cliente={}, usuario={}",
-                saved.getIdOrd(), saved.getNumOrd(), saved.getEstOrd(),
+        logger.info("Orden guardada -> id={}, numOrd={}, estOrd={}, fechaEstado={}, cliente={}, usuario={}",
+                saved.getIdOrd(), saved.getNumOrd(), saved.getEstOrd(), saved.getFechaEstado(),
                 saved.getCliente().getNomCli(), saved.getUsuario().getNombre());
 
         return saved;
@@ -96,11 +98,13 @@ public class OrdenServicio implements IOrdenServicio {
         orden.setCliente(cliente);
         orden.setUsuario(usuario);
 
-        // ✅ Aquí NO se reinicia estOrd ni cosOrd
+        // ✅ Registrar fecha/hora del cambio de estado
+        orden.setFechaEstado(LocalDateTime.now());
+
         Orden saved = ordenRepositorio.save(orden);
 
-        logger.info("Orden actualizada -> id={}, numOrd={}, estOrd={}, cosOrd={}, cliente={}, usuario={}",
-                saved.getIdOrd(), saved.getNumOrd(), saved.getEstOrd(), saved.getCosOrd(),
+        logger.info("Orden actualizada -> id={}, numOrd={}, estOrd={}, fechaEstado={}, cosOrd={}, cliente={}, usuario={}",
+                saved.getIdOrd(), saved.getNumOrd(), saved.getEstOrd(), saved.getFechaEstado(), saved.getCosOrd(),
                 saved.getCliente().getNomCli(), saved.getUsuario().getNombre());
 
         return saved;
@@ -137,10 +141,12 @@ public class OrdenServicio implements IOrdenServicio {
             articuloServicio.guardarArticulo(articulo);
         });
 
-        orden.setEstOrd(EstadoOrden.EXTORNADA); // ✅ Estado = Extornada
+        orden.setEstOrd(EstadoOrden.EXTORNADA); // Estado = Extornada
+        orden.setFechaEstado(LocalDateTime.now()); // ✅ fecha/hora del cambio
+
         actualizarOrden(orden, orden.getCliente(), orden.getUsuario());
 
-        logger.info("Orden extornada -> id={}, numOrd={}", orden.getIdOrd(), orden.getNumOrd());
+        logger.info("Orden extornada -> id={}, numOrd={}, fechaEstado={}", orden.getIdOrd(), orden.getNumOrd(), orden.getFechaEstado());
     }
 
     @Override

@@ -51,7 +51,7 @@ body {
   overflow-y: visible;
 }
 
-/* ===== Tablas ===== */
+/* ===== Tablas generales ===== */
 .col-md-6.tabla-ordenes {
   max-height: 80vh;
   overflow-y: auto;
@@ -127,3 +127,28 @@ body {
   justify-content: center;
   cursor: pointer;
   min-height: 120px; /* altura controlada */
+}
+
+/* ===== Tabla compacta para detalle de órdenes ===== */
+/* Este bloque SOLO afecta a la tabla generada en orden.js con class="table-compact" */
+.table-compact td,
+.table-compact th {
+  padding: 0.35rem 0.5rem;   /* menos espacio vertical */
+  white-space: nowrap;       /* evita saltos de línea */
+  overflow: hidden;          /* oculta texto largo */
+  text-overflow: ellipsis;   /* agrega "..." */
+  font-size: 0.75rem;        /* texto más pequeño */
+  vertical-align: middle;    /* centra verticalmente */
+}
+
+/* Limitar ancho de la columna Artículo */
+.table-compact td.text-truncate {
+  max-width: 220px;          /* ajusta según tu diseño */
+}
+
+/* ===== Panel derecho más compacto ===== */
+/* Reduce el tamaño de todo el texto dentro del panel derecho */
+#detallePanel,
+#detallePanel * {
+  font-size: 0.80rem !important;
+}

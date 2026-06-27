@@ -20,12 +20,14 @@ import wcsono.strgSys.modelo.Usuario;
 import wcsono.strgSys.modelo.DetalleOrden;
 import wcsono.strgSys.modelo.Articulo;
 import wcsono.strgSys.enums.EstadoOrden;
+import wcsono.strgSys.enums.TipoMovimiento;
 import wcsono.strgSys.servicio.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpSession;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller
@@ -143,6 +145,16 @@ public class OrdenesControlador {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Orden no encontrada");
         }
 
+        // ✅ Lógica de actualización automática
+        if (orden.getEstOrd() == EstadoOrden.INICIAL &&
+                orden.getTipoDocumento() != null &&
+                orden.getTipoDocumento().getTipoMovimiento() == TipoMovimiento.INGRESO) {
+
+            orden.setEstOrd(EstadoOrden.PREPARACION);
+            orden.setFechaEstado(LocalDateTime.now()); // registrar fecha/hora del cambio
+            ordenServicio.actualizarOrden(orden, orden.getCliente(), orden.getUsuario());
+        }
+
         OrdenDTO dto = new OrdenDTO();
         dto.setIdOrd(orden.getIdOrd());
         dto.setNumOrd(orden.getNumOrd());
@@ -153,12 +165,18 @@ public class OrdenesControlador {
         dto.setTipoDocumento(
                 orden.getTipoDocumento() != null ? orden.getTipoDocumento().getDesTd() : null
         );
+        dto.setFechaEstado(
+                orden.getFechaEstado() != null ? orden.getFechaEstado().toString() : null
+        );
 
         List<DetalleDTO> detalles = orden.getDetalles().stream().map(det -> {
             DetalleDTO d = new DetalleDTO();
+            d.setCodArt(det.getArticulo().getCodArt());
             d.setArticulo(det.getArticulo().getDesArt());
+            d.setUbicacion(det.getArticulo().getUbiArt());
             d.setCantidad(det.getCantidad());
-            d.setCosArt(det.getCosArt());
+            d.setCosto(det.getArticulo().getCosto());
+            d.setPrecioVenta(det.getArticulo().getPrecioVenta());
             d.setSubtotal(det.getSubtotal());
             return d;
         }).toList();
@@ -185,9 +203,6 @@ public class OrdenesControlador {
         return "redirect:/ordenes";
     }
 
-    /**
-     * Mostrar formulario de edición de una orden
-     */
     @GetMapping("/orden/editar/{idOrd}")
     public String editarOrden(@PathVariable Integer idOrd, Model model) {
         Orden orden = ordenServicio.buscarOrdenPorId(idOrd);
@@ -203,9 +218,6 @@ public class OrdenesControlador {
         return "editarOrd";
     }
 
-    /**
-     * Guardar cambios de la edición de una orden
-     */
     @PostMapping("/orden/guardarEdicion")
     public String guardarEdicion(@ModelAttribute Orden orden,
                                  @RequestParam String codCli,
@@ -225,19 +237,15 @@ public class OrdenesControlador {
 
         orden.setCliente(cliente);
 
-        // ✅ llamada corregida con los tres parámetros
         ordenServicio.actualizarOrden(orden, cliente, usuarioActivo);
 
         redirectAttrs.addFlashAttribute("mensaje", "Orden actualizada correctamente");
         return "redirect:/ordenDetalle/" + orden.getIdOrd();
     }
-
-    /**
-     * Endpoint para búsqueda de cliente por código
-     */
     @GetMapping("/orden/buscarCliente")
     @ResponseBody
     public Cliente buscarCliente(@RequestParam String codCli) {
         return clienteServicio.obtenerClientePorCodigo(codCli);
     }
-}
+} // ✅ cierre de la clase OrdenesControlador
+

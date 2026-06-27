@@ -4,18 +4,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const detalle = document.getElementById("detalleContenido");
 
-  // --- Función para mapear estado de orden ---
   function estadoOrden(estOrd, extornada) {
     if (extornada) return "Extornada";
-    switch (estOrd) {
-      case 1: return "Cerrada";
-      case 0: return "Abierta";
-      case 8: return "Extornada";
-      default: return "—";
-    }
+    return estOrd || "—";
   }
 
-  // --- Función para renderizar detalle de orden ---
   function renderOrden(data, detalle) {
     let html = `
       <div class="card shadow-sm">
@@ -31,7 +24,7 @@ document.addEventListener("DOMContentLoaded", function () {
           </div>
           <div class="d-flex justify-content-between">
             <span><strong>Costo Total:</strong> ${window.formatoMoneda(data.cosOrd)}</span>
-            <span><strong>Documento:</strong> ${data.tipoDocumento?.desTd || "—"}</span>
+            <span><strong>Documento:</strong> ${data.tipoDocumento || "—"}</span>
           </div>
         </div>
       </div>
@@ -44,35 +37,41 @@ document.addEventListener("DOMContentLoaded", function () {
     detalle.innerHTML = html;
   }
 
-  // --- Función para renderizar tabla de artículos ---
   function renderTabla(detalles) {
     const total = detalles.reduce((sum, d) => sum + (d.subtotal || 0), 0);
 
     return `
       <div class="mt-3">
         <h5>Detalles</h5>
-        <table class="table table-sm table-bordered">
+        <table class="table table-sm table-bordered table-compact">
           <thead>
             <tr>
-              <th>Artículo</th>
-              <th>Cantidad</th>
-              <th>Costo Unitario</th>
+              <th>Art.</th>
+              <th>Ubi.</th>
+              <th>Can.</th>
+              <th>Valor</th>
               <th>Subtotal</th>
             </tr>
           </thead>
           <tbody>
-            ${detalles.map(d => `
-              <tr>
-                <td>${d.articulo?.desArt || "—"}</td>
-                <td>${d.cantidad ?? "—"}</td>
-                <td>${window.formatoMoneda(d.cosArt)}</td>
-                <td>${window.formatoMoneda(d.subtotal)}</td>
-              </tr>
-            `).join("")}
+            ${detalles.map(d => {
+              const textoCompleto = `${d.codArt ?? ""}-${d.articulo ?? "—"}`;
+              return `
+                <tr>
+                  <td class="text-truncate" title="${textoCompleto}">
+                    ${textoCompleto}
+                  </td>
+                  <td>${d.ubicacion ?? "—"}</td>
+                  <td>${d.cantidad ?? "—"}</td>
+                  <td>${window.formatoMoneda(d.precioVenta ?? d.costo)}</td>
+                  <td>${window.formatoMoneda(d.subtotal)}</td>
+                </tr>
+              `;
+            }).join("")}
           </tbody>
           <tfoot>
             <tr class="table-primary">
-              <td colspan="3" class="text-end"><strong>Total de la Orden:</strong></td>
+              <td colspan="4" class="text-end"><strong>Total de la Orden:</strong></td>
               <td><strong>${window.formatoMoneda(total)}</strong></td>
             </tr>
           </tfoot>
@@ -81,7 +80,6 @@ document.addEventListener("DOMContentLoaded", function () {
     `;
   }
 
-  // --- Evento: clic en botón "Ver Orden" ---
   document.querySelectorAll(".ver-orden").forEach(btn => {
     btn.addEventListener("click", function () {
       const id = this.dataset.id;
@@ -106,24 +104,6 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .catch(err => {
           console.error("Error en fetch:", err);
-
-          // Mock de prueba si falla el backend
-          const mock = {
-            numOrd: id,
-            nomOrd: "Distribuidora Andina SAC",
-            fecOrd: "2026-03-20",
-            estOrd: 0,
-            extornada: false,
-            cosOrd: 0,
-            tipoDocumento: { desTd: "Factura" },
-            detalles: [
-              { articulo: { desArt: "Laptop Lenovo ThinkPad" }, cantidad: 2, cosArt: 3500, subtotal: 7000 },
-              { articulo: { desArt: "Mouse inalámbrico" }, cantidad: 5, cosArt: 80, subtotal: 400 },
-              { articulo: { desArt: "Teclado mecánico" }, cantidad: 3, cosArt: 250, subtotal: 750 }
-            ]
-          };
-          renderOrden(mock, detalle);
-          detalle.classList.add("show");
         });
     });
   });

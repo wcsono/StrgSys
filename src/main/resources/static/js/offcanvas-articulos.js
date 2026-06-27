@@ -2,7 +2,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const codArtSelect = document.getElementById("codArt");
     const desArtSelect = document.getElementById("desArt");
     const stockInput = document.getElementById("stock");
-    const precioInput = document.getElementById("precio");
+    const costoInput = document.getElementById("costo");
+    const precioVentaInput = document.getElementById("precioVenta");
+    const precioInput = document.getElementById("precio"); // hidden usado para cálculo
     const cantidadInput = document.getElementById("cantidad");
     const btnGuardar = document.getElementById("btnGuardar");
     const mensaje = document.getElementById("mensajeValidacion");
@@ -10,16 +12,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const offcanvasEl = document.getElementById("offcanvasArticulos");
     const offcanvas = bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl);
 
-    // TIPTD ya está definido en ordenDetalle.html con th:inline="javascript"
-    // true = ingreso, false = salida
-
+    // Sincronizar selects y llenar campos
     function sincronizar(selectOrigen, selectDestino) {
         const selectedOption = selectOrigen.options[selectOrigen.selectedIndex];
         if (!selectedOption || !selectedOption.value) return;
 
         selectDestino.value = selectedOption.value;
         stockInput.value = selectedOption.dataset.stock || "";
-        precioInput.value = selectedOption.dataset.precio || "";
+        costoInput.value = selectedOption.dataset.costo || "";
+        precioVentaInput.value = selectedOption.dataset.precioventa || "";
+
+        // El campo oculto "precio" se llena según tipoMovimiento
+        if (typeof tipoMovimiento !== "undefined" && tipoMovimiento === "VENTA") {
+            precioInput.value = selectedOption.dataset.precioventa || "";
+        } else {
+            precioInput.value = selectedOption.dataset.costo || "";
+        }
     }
 
     if (codArtSelect && desArtSelect) {
@@ -27,10 +35,10 @@ document.addEventListener("DOMContentLoaded", () => {
         desArtSelect.addEventListener("change", () => sincronizar(desArtSelect, codArtSelect));
     }
 
-    // Validación dinámica con estilos Bootstrap
+    // Validación dinámica con tipoMovimiento
     if (cantidadInput) {
         cantidadInput.addEventListener("input", () => {
-            if (!TIPTD) { // salida
+            if (tipoMovimiento === "SALIDA") { // salida
                 const cantidad = parseFloat(cantidadInput.value) || 0;
                 const stock = parseFloat(stockInput.value) || 0;
 
@@ -55,14 +63,20 @@ document.addEventListener("DOMContentLoaded", () => {
     form.addEventListener("submit", function(e) {
         e.preventDefault();
 
+        const datos = new FormData(form);
+
         fetch(form.action, {
             method: "POST",
-            body: new FormData(form)
+            body: datos
         })
         .then(res => {
             if (!res.ok) throw new Error("Error al guardar artículo");
-            // ✅ refrescar detalle de la orden
-            return fetch(`/ordenDetalle/${ordenId}`);
+
+            // Detectar página actual
+            const esEditar = document.body.getAttribute("data-estado-orden") !== null;
+            const urlRefresco = esEditar ? `/editarOrd/${ordenId}` : `/ordenDetalle/${ordenId}`;
+
+            return fetch(urlRefresco);
         })
         .then(res => res.text())
         .then(html => {
@@ -72,12 +86,17 @@ document.addEventListener("DOMContentLoaded", () => {
             const nuevaTabla = doc.querySelector("#tablaArticulos");
             const nuevoTotal = doc.querySelector("#totalOrdenFragment");
 
-            document.querySelector("#tablaArticulos").innerHTML = nuevaTabla.innerHTML;
-            document.querySelector("#totalOrdenFragment").innerHTML = nuevoTotal.innerHTML;
+            if (nuevaTabla && nuevoTotal) {
+                document.querySelector("#tablaArticulos").innerHTML = nuevaTabla.innerHTML;
+                document.querySelector("#totalOrdenFragment").innerHTML = nuevoTotal.innerHTML;
+            }
 
             offcanvas.hide();
             form.reset();
         })
-        .catch(err => console.error(err));
+        .catch(err => {
+            console.error(err);
+            offcanvas.hide(); // cerrar aunque haya error
+        });
     });
 });

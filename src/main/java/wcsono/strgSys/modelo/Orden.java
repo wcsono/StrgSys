@@ -1,75 +1,65 @@
 package wcsono.strgSys.modelo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
-import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import wcsono.strgSys.enums.EstadoOrden;
-import wcsono.strgSys.enums.EstadoOrdenConverter;
+
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
+@Table(name = "orden")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = "detalles")
 public class Orden {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idOrd;
 
-    // Número de orden calculado (ej: 1000 + idOrd)
-    @Column(nullable = false, unique = true, length = 20)
+    @Column(name = "num_ord", length = 20, unique = true)
     private String numOrd;
 
-    // Relación con TipoDocumento
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "idTd", nullable = false)
-    private TipoDocumento tipoDocumento;
-
-    // Relación con Usuario
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "idUsuario", nullable = false)
-    private Usuario usuario;
-
-    // Relación con Cliente
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "idCli", nullable = false)
-    private Cliente cliente;
-
-    @NotNull
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "fec_ord", nullable = false)
     private LocalDate fecOrd;
 
-    @Size(max = 50)
-    private String ndocRef;
-
-    // Estado de la orden (usa enum con converter, columna sigue siendo INT)
-    @NotNull
-    @Convert(converter = EstadoOrdenConverter.class)
+    @Enumerated(EnumType.STRING)
     @Column(name = "est_ord", nullable = false)
     private EstadoOrden estOrd;
 
-    @NotNull
-    @PositiveOrZero
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(name = "cos_ord", precision = 10, scale = 2)
     private BigDecimal cosOrd;
 
-    // Documento de venta asociado
-    @Column(length = 50)
-    private String docVenta;
+    // ✅ Campo para fecha/hora del último cambio de estado
+    @Column(name = "fec_estado")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime fechaEstado;
 
-    // Relación con DetalleOrden (lado padre)
+    // ✅ Ajustado para coincidir con la tabla y la vista
+    @Column(name = "ndoc_ref", length = 50)
+    private String ndocRef;
+
+    @ManyToOne
+    @JoinColumn(name = "id_cliente", nullable = false)
+    private Cliente cliente;
+
+    @ManyToOne
+    @JoinColumn(name = "id_usuario", nullable = false)
+    private Usuario usuario;
+
+    @ManyToOne
+    @JoinColumn(name = "id_td", nullable = false)
+    private TipoDocumento tipoDocumento;
+
     @OneToMany(mappedBy = "orden", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private List<DetalleOrden> detalles = new ArrayList<>();
+    private List<DetalleOrden> detalles;
 }

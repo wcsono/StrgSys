@@ -9,9 +9,10 @@ public class OrdenDTO {
     private Integer idOrd;
     private String numOrd;
     private String nomOrd;        // cliente.nomCli
-    private String fecOrd;        // fecha en formato String
-    private String estOrd;        // ✅ ahora es String (descripción del estado)
+    private String fecOrd;        // fecha ingreso en formato String
+    private String estOrd;        // descripción del estado
     private BigDecimal cosOrd;
     private String tipoDocumento; // tipoDocumento.desTd
+    private String fechaEstado;   // ✅ nuevo campo para fecha/hora del último cambio de estado
     private List<DetalleDTO> detalles;
 }

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragmentos/cabecero::cabecero-seccion(titulo='Editar Orden')}"></head>
-<body th:data-estado-orden="${orden.estOrd}">
+<body th:data-estado-orden="${orden.estOrd}" th:data-tipo-orden="${orden.tipoDocumento.tipoMovimiento}">
 
 <!-- Navegación principal -->
 <div th:replace="~{fragmentos/navegacion-principal::navegacion-principal-seccion}" th:remove="tag"></div>
@@ -67,19 +67,17 @@
 
                 <!-- Footer con botones alineados -->
                 <div class="d-flex justify-content-center flex-wrap gap-2 mt-3">
-                    <!-- Botón Guardar Cambios -->
                     <button id="btnGuardar" type="submit" class="btn btn-primary">
                         <i class="bi bi-save me-1"></i> Guardar Cambios
                     </button>
 
-                    <!-- Menú drop-up dinámico -->
                     <div class="dropup">
                         <button class="btn btn-secondary dropdown-toggle" type="button" id="accionesMenu"
                                 data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-gear-fill me-1"></i> Acciones
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="accionesMenu">
-                            <!-- JS insertará aquí los botones según estado -->
+                            <!-- JS insertará aquí los botones según estado y tipo -->
                         </ul>
                     </div>
                 </div>
@@ -133,10 +131,60 @@
 </div>
 
 <!-- Panel lateral offcanvas-articulos -->
-<div th:replace="fragmentos/offcanvas-articulos :: offcanvas-articulos-seccion"></div>
+<div th:insert="~{fragmentos/offcanvas-articulos :: offcanvas-articulos-seccion}"></div>
 
 <!-- Pie de página -->
 <div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"></div>
+
+<!-- Modal Facturar -->
+<div class="modal fade" id="facturarModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form th:action="@{/facturacion/guardar}" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title text-center w-100">Facturar Orden</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- idOrd oculto -->
+                    <input type="hidden" name="idOrd" th:value="${orden.idOrd}"/>
+
+                    <!-- Número de Factura -->
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Número de Factura</span>
+                        <input type="text" id="numFacturaModal" name="numFactura" class="form-control" required>
+                    </div>
+
+                    <!-- Monto a Facturar (solo mostrar, backend ya lo usa) -->
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Monto</span>
+                        <input type="number" id="montoFacturar" name="montoFacturar" class="form-control"
+                               th:value="${orden.cosOrd}" readonly>
+                    </div>
+                </div>
+
+                <div class="modal-footer d-flex justify-content-between">
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-save me-1"></i> Guardar
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i> Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Script para enfocar automáticamente el input Número de Factura -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var facturarModal = document.getElementById('facturarModal');
+        facturarModal.addEventListener('shown.bs.modal', function () {
+            document.getElementById('numFacturaModal').focus();
+        });
+    });
+</script>
 
 <!-- Scripts -->
 <script src="/js/offcanvas-articulos.js" defer></script>

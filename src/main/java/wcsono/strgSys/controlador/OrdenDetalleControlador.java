@@ -18,7 +18,7 @@ import jakarta.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping("/orden")
-public class DetalleOrdenControlador {
+public class OrdenDetalleControlador {
 
     @Autowired
     private OrdenServicio ordenServicio;
@@ -29,27 +29,29 @@ public class DetalleOrdenControlador {
     @Autowired
     private DetalleOrdenServicio detalleOrdenServicio;
 
+    // ✅ Agregar artículo a la orden
     @PostMapping("/{id}/articulos")
     public ResponseEntity<Void> agregarArticulo(@PathVariable Integer id,
                                                 @RequestParam Integer idArt,
                                                 @RequestParam Integer cantidad,
-                                                @RequestParam BigDecimal precio,
                                                 HttpSession session) {
 
         Orden orden = ordenServicio.buscarOrdenPorId(id);
         Articulo articulo = articuloServicio.buscarArticuloPorId(idArt);
 
-        // Crear detalle con subtotal explícito
         DetalleOrden detalle = new DetalleOrden();
         detalle.setOrden(orden);
         detalle.setArticulo(articulo);
         detalle.setCantidad(cantidad);
-        detalle.setCosArt(precio);
-        detalle.setSubtotal(precio.multiply(BigDecimal.valueOf(cantidad))); // ✅ asegura cálculo
 
+        // Asignar directamente porque ya son BigDecimal en Articulo
+        detalle.setCosArt(articulo.getCosto());
+        detalle.setPrecioVenta(articulo.getPrecioVenta());
+
+        // Subtotal se calcula automáticamente en @PrePersist/@PreUpdate
         detalleOrdenServicio.guardarDetalleOrden(detalle);
 
-        // Recalcular costo total
+        // Recalcular costo total de la orden
         BigDecimal totalOrden = detalleOrdenServicio.listarPorOrden(id).stream()
                 .map(DetalleOrden::getSubtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -61,12 +63,40 @@ public class DetalleOrdenControlador {
             orden.setEstOrd(EstadoOrden.ABIERTA);
         }
 
-        // Usuario de sesión
         Usuario usuarioActivo = (Usuario) session.getAttribute("usuarioSesion");
-
-        // Guardar orden con usuario activo usando actualizarOrden
         ordenServicio.actualizarOrden(orden, orden.getCliente(), usuarioActivo);
 
         return ResponseEntity.ok().build();
+    }
+
+    // ✅ Eliminar artículo de la orden (solo si está INICIAL o ABIERTA)
+    @PostMapping("/{id}/articulos/{idDet}/eliminar")
+    public ResponseEntity<String> eliminarArticulo(@PathVariable Integer id,
+                                                   @PathVariable Integer idDet,
+                                                   HttpSession session) {
+
+        Orden orden = ordenServicio.buscarOrdenPorId(id);
+
+        if (orden.getEstOrd() == EstadoOrden.INICIAL || orden.getEstOrd() == EstadoOrden.ABIERTA) {
+            // Buscar el detalle antes de eliminar (porque el servicio elimina por objeto)
+            DetalleOrden detalle = detalleOrdenServicio.buscarDetalleOrdenPorId(idDet);
+            if (detalle != null) {
+                detalleOrdenServicio.eliminarDetalleOrden(detalle);
+            }
+
+            // Recalcular costo total
+            BigDecimal totalOrden = detalleOrdenServicio.listarPorOrden(id).stream()
+                    .map(DetalleOrden::getSubtotal)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            orden.setCosOrd(totalOrden);
+
+            Usuario usuarioActivo = (Usuario) session.getAttribute("usuarioSesion");
+            ordenServicio.actualizarOrden(orden, orden.getCliente(), usuarioActivo);
+
+            return ResponseEntity.ok("Artículo eliminado correctamente");
+        } else {
+            return ResponseEntity.badRequest().body("No se puede eliminar artículos de una orden facturada o superior");
+        }
     }
 }

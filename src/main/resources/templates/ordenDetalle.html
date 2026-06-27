@@ -26,10 +26,9 @@
 
             <!-- Botones debajo de los datos -->
             <div class="d-flex justify-content-center gap-3 mt-3">
-                <!-- Botón agregar artículos -->
+                <!-- Botón agregar artículos (siempre habilitado) -->
                 <button class="btn btn-success" type="button"
-                        data-bs-toggle="offcanvas" data-bs-target="#offcanvasArticulos"
-                        th:disabled="${orden.estOrd != 0}">
+                        data-bs-toggle="offcanvas" data-bs-target="#offcanvasArticulos">
                     <i class="bi bi-plus-circle me-1"></i> Agregar Artículos
                 </button>
 
@@ -84,16 +83,6 @@
                 </tr>
                 </tfoot>
             </table>
-
-            <!-- Botón cerrar orden -->
-            <div class="text-center mt-3">
-                <form th:action="@{/orden/{id}/cerrar(id=${orden.idOrd})}" method="post">
-                    <button type="submit" class="btn btn-danger"
-                            th:disabled="${#lists.isEmpty(detalleOrdenes)}">
-                        <i class="bi bi-lock-fill me-1"></i> Cerrar Orden
-                    </button>
-                </form>
-            </div>
         </div>
     </div>
 </div>
@@ -103,13 +92,12 @@
 
 <!-- Pie de página -->
 <div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"></div>
-<script th:src="@{/js/offcanvas-articulos.js}"></script>
-
 
 <script th:src="@{/js/offcanvas-articulos.js}"></script>
 <script th:inline="javascript">
     /*<![CDATA[*/
     var ordenId = [[${orden.idOrd}]];
+    var tipoMovimiento = '[[${orden.tipoDocumento.tipoMovimiento}]]'; // "INGRESO" o "SALIDA"
     /*]]>*/
 </script>
 

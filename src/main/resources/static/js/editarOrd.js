@@ -1,9 +1,7 @@
-// editarOrd.js
-
 // Tabla de estados con botones visibles
 const estados = {
     INICIAL:       ["btnAgregarArticulos","btnListado"],
-    ABIERTA:       ["btnAgregarArticulos","btnFacturar","btnListado"],
+    ABIERTA:       ["btnAgregarArticulos","btnFacturar","btnListado"], // se ajusta según tipo
     FACTURADA:     ["btnEntregar","btnIngresar","btnListado"],
     EN_PREPARACION:["btnEntregar","btnDevolver","btnListado"],
     ENTREGADA:     ["btnExtornar","btnCerrar","btnListado"],
@@ -26,7 +24,8 @@ const botonesHTML = {
 
     btnFacturar: `
 <li>
-  <a id="btnFacturar" class="dropdown-item bg-info text-white" href="#">
+  <a id="btnFacturar" class="dropdown-item bg-info text-white" href="#"
+     data-bs-toggle="modal" data-bs-target="#facturarModal">
     <i class="bi bi-receipt me-1"></i> Facturar
   </a>
 </li>`,
@@ -75,15 +74,24 @@ const botonesHTML = {
 };
 
 // Construir menú dinámico
-function construirMenu(estOrd) {
-    const menu = document.querySelector("#accionesMenu + ul");
+function construirMenu(estOrd, tipoOrd) {
+    const menu = document.querySelector("#accionesMenu").nextElementSibling;
     if (!menu) return;
 
     menu.innerHTML = "";
-    const visibles = estados[estOrd];
-    console.log("Estado recibido:", estOrd, "Botones visibles:", visibles);
+    let visibles = estados[estOrd];
+    console.log("Estado recibido:", estOrd, "Tipo:", tipoOrd, "Botones visibles:", visibles);
 
     if (!visibles) return;
+
+    // Ajuste especial: estado ABIERTA
+    if (estOrd === "ABIERTA") {
+        if (tipoOrd === "SALIDA") {
+            visibles = ["btnAgregarArticulos", "btnFacturar", "btnListado"];
+        } else if (tipoOrd === "INGRESO") {
+            visibles = ["btnAgregarArticulos", "btnListado"];
+        }
+    }
 
     visibles.forEach(btnId => {
         menu.insertAdjacentHTML("beforeend", botonesHTML[btnId]);
@@ -93,5 +101,6 @@ function construirMenu(estOrd) {
 // Inicialización
 document.addEventListener("DOMContentLoaded", () => {
     const estadoOrden = document.body.getAttribute("data-estado-orden");
-    construirMenu(estadoOrden);
+    const tipoOrden = document.body.getAttribute("data-tipo-orden");
+    construirMenu(estadoOrden, tipoOrden);
 });
