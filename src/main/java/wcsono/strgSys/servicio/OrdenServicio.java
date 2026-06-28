@@ -75,7 +75,7 @@ public class OrdenServicio implements IOrdenServicio {
 
         orden.setEstOrd(EstadoOrden.INICIAL); // Estado inicial
         orden.setCosOrd(BigDecimal.ZERO);     // Costo inicial
-        orden.setFechaEstado(LocalDateTime.now()); // ✅ fecha/hora inicial
+        orden.setFechaEstado(LocalDateTime.now()); // fecha/hora inicial
 
         orden = ordenRepositorio.save(orden);
         orden.setNumOrd(String.valueOf(1000 + orden.getIdOrd()));
@@ -98,7 +98,6 @@ public class OrdenServicio implements IOrdenServicio {
         orden.setCliente(cliente);
         orden.setUsuario(usuario);
 
-        // ✅ Registrar fecha/hora del cambio de estado
         orden.setFechaEstado(LocalDateTime.now());
 
         Orden saved = ordenRepositorio.save(orden);
@@ -111,17 +110,31 @@ public class OrdenServicio implements IOrdenServicio {
     }
 
     /**
-     * Eliminación física directa (sin validaciones de Cliente/Usuario).
+     * ✅ Nuevo método: actualizar solo el estado y fechaEstado de la orden.
      */
+    @Override
+    @Transactional
+    public Orden actualizarEstadoOrden(Integer idOrd, EstadoOrden nuevoEstado) {
+        Orden orden = ordenRepositorio.findById(idOrd)
+                .orElseThrow(() -> new RuntimeException("Orden no encontrada"));
+
+        orden.setEstOrd(nuevoEstado);
+        orden.setFechaEstado(LocalDateTime.now());
+
+        Orden saved = ordenRepositorio.save(orden);
+
+        logger.info("Orden actualizada de estado -> id={}, numOrd={}, nuevoEstado={}, fechaEstado={}",
+                saved.getIdOrd(), saved.getNumOrd(), saved.getEstOrd(), saved.getFechaEstado());
+
+        return saved;
+    }
+
     @Override
     public void eliminarOrden(Orden orden) {
         ordenRepositorio.delete(orden);
         logger.info("Orden eliminada físicamente -> id={}", orden.getIdOrd());
     }
 
-    /**
-     * Extornar orden: revertir stock y marcar estado = EXTORNADA.
-     */
     @Override
     @Transactional
     public void extornarOrden(Integer id) {
@@ -141,8 +154,8 @@ public class OrdenServicio implements IOrdenServicio {
             articuloServicio.guardarArticulo(articulo);
         });
 
-        orden.setEstOrd(EstadoOrden.EXTORNADA); // Estado = Extornada
-        orden.setFechaEstado(LocalDateTime.now()); // ✅ fecha/hora del cambio
+        orden.setEstOrd(EstadoOrden.EXTORNADA);
+        orden.setFechaEstado(LocalDateTime.now());
 
         actualizarOrden(orden, orden.getCliente(), orden.getUsuario());
 
@@ -154,7 +167,6 @@ public class OrdenServicio implements IOrdenServicio {
         return !ordenRepositorio.existsByNumOrd(numOrd);
     }
 
-    // 🔹 Ajustados a EstadoOrden
     @Override
     public List<Orden> listarOrdenesPorEstado(EstadoOrden estOrd) {
         return ordenRepositorio.findByEstOrd(estOrd);
@@ -180,9 +192,6 @@ public class OrdenServicio implements IOrdenServicio {
         return ordenRepositorio.obtenerEntradasVsSalidasPorMes();
     }
 
-    /**
-     * Implementación correcta de listarOrdenesFiltradas
-     */
     @Override
     public Page<Orden> listarOrdenesFiltradas(
             String numOrd,

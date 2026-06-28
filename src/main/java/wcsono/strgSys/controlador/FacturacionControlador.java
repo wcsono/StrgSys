@@ -8,20 +8,18 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import wcsono.strgSys.modelo.Orden;
 import wcsono.strgSys.servicio.FacturacionServicio;
-import wcsono.strgSys.servicio.OrdenServicio;
+import wcsono.strgSys.servicio.IOrdenServicio;   // 🔹 usa la interfaz
 import wcsono.strgSys.enums.EstadoOrden;
-
-import java.time.LocalDateTime;
 
 @Controller
 public class FacturacionControlador {
 
     private static final Logger logger = LoggerFactory.getLogger(FacturacionControlador.class);
     private final FacturacionServicio facturacionServicio;
-    private final OrdenServicio ordenServicio;
+    private final IOrdenServicio ordenServicio;   // 🔹 mejor usar la interfaz
 
     // Constructor injection
-    public FacturacionControlador(FacturacionServicio facturacionServicio, OrdenServicio ordenServicio) {
+    public FacturacionControlador(FacturacionServicio facturacionServicio, IOrdenServicio ordenServicio) {
         this.facturacionServicio = facturacionServicio;
         this.ordenServicio = ordenServicio;
     }
@@ -43,11 +41,8 @@ public class FacturacionControlador {
         // 1️⃣ Registrar la factura
         facturacionServicio.registrarFactura(idOrd, numFactura);
 
-        // 2️⃣ Actualizar estado y fechaEstado de la orden
-        LocalDateTime fechaActual = LocalDateTime.now();
-        orden.setEstOrd(EstadoOrden.FACTURADA);   // ✅ asignamos directamente el enum
-        orden.setFechaEstado(fechaActual);
-        ordenServicio.guardarOrden(orden, orden.getCliente(), orden.getUsuario());
+        // 2️⃣ Actualizar estado de la orden a FACTURADA
+        ordenServicio.actualizarEstadoOrden(idOrd, EstadoOrden.FACTURADA);
 
         // 3️⃣ Redirigir al listado
         redirectAttrs.addFlashAttribute("mensaje", "Orden facturada correctamente.");
