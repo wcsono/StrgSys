@@ -28,6 +28,7 @@ import jakarta.servlet.http.HttpSession;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Controller
@@ -139,37 +140,49 @@ public class OrdenesControlador {
 
     @GetMapping("/verOrd/{id}")
     @ResponseBody
-    public OrdenDTO verOrden(@PathVariable Integer id) {
+    public OrdenDTO verOrd(@PathVariable Integer id) {
         Orden orden = ordenServicio.buscarOrdenPorId(id);
         if (orden == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Orden no encontrada");
         }
 
-        // ✅ Lógica de actualización automática
-        if (orden.getEstOrd() == EstadoOrden.INICIAL &&
-                orden.getTipoDocumento() != null &&
-                orden.getTipoDocumento().getTipoMovimiento() == TipoMovimiento.INGRESO) {
-
-            orden.setEstOrd(EstadoOrden.PREPARACION);
-            orden.setFechaEstado(LocalDateTime.now()); // registrar fecha/hora del cambio
-            ordenServicio.actualizarOrden(orden, orden.getCliente(), orden.getUsuario());
+        // 🔹 Reglas de transición de estado
+        if (orden.getTipoDocumento() != null) {
+            if (orden.getTipoDocumento().getTipoMovimiento() == TipoMovimiento.INGRESO
+                    && orden.getEstOrd() == EstadoOrden.ABIERTA) {
+                ordenServicio.actualizarEstadoOrden(id, EstadoOrden.PREPARACION);
+            } else if (orden.getTipoDocumento().getTipoMovimiento() == TipoMovimiento.SALIDA
+                    && orden.getEstOrd() == EstadoOrden.FACTURADA) {
+                ordenServicio.actualizarEstadoOrden(id, EstadoOrden.PREPARACION);
+            }
         }
 
+        Orden ordenActualizada = ordenServicio.buscarOrdenPorId(id);
+
         OrdenDTO dto = new OrdenDTO();
-        dto.setIdOrd(orden.getIdOrd());
-        dto.setNumOrd(orden.getNumOrd());
-        dto.setNomOrd(orden.getCliente().getNomCli());
-        dto.setFecOrd(orden.getFecOrd().toString());
-        dto.setEstOrd(orden.getEstOrd().getDescripcion());
-        dto.setCosOrd(orden.getCosOrd());
+        dto.setIdOrd(ordenActualizada.getIdOrd());
+        dto.setNumOrd(ordenActualizada.getNumOrd());
+        dto.setNomOrd(ordenActualizada.getCliente().getNomCli());
+        dto.setFecOrd(ordenActualizada.getFecOrd().toString());
+
+        // 🔹 Estado y estilo
+        dto.setEstOrd(ordenActualizada.getEstOrd().getDescripcion());
+        dto.setCssClass(ordenActualizada.getEstOrd().getCssClass());
+
+        dto.setCosOrd(ordenActualizada.getCosOrd());
         dto.setTipoDocumento(
-                orden.getTipoDocumento() != null ? orden.getTipoDocumento().getDesTd() : null
-        );
-        dto.setFechaEstado(
-                orden.getFechaEstado() != null ? orden.getFechaEstado().toString() : null
+                ordenActualizada.getTipoDocumento() != null ? ordenActualizada.getTipoDocumento().getDesTd() : null
         );
 
-        List<DetalleDTO> detalles = orden.getDetalles().stream().map(det -> {
+        // 🔹 Formatear fechaEstado
+        if (ordenActualizada.getFechaEstado() != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+            dto.setFechaEstado(ordenActualizada.getFechaEstado().format(formatter));
+        } else {
+            dto.setFechaEstado(null);
+        }
+
+        dto.setDetalles(ordenActualizada.getDetalles().stream().map(det -> {
             DetalleDTO d = new DetalleDTO();
             d.setCodArt(det.getArticulo().getCodArt());
             d.setArticulo(det.getArticulo().getDesArt());
@@ -179,14 +192,11 @@ public class OrdenesControlador {
             d.setPrecioVenta(det.getArticulo().getPrecioVenta());
             d.setSubtotal(det.getSubtotal());
             return d;
-        }).toList();
-
-        dto.setDetalles(detalles);
-
-        logger.info("📦 OrdenDTO construido para enviar al frontend: {}", dto);
+        }).toList());
 
         return dto;
     }
+
 
     @GetMapping("/eliminarOrd/{id}")
     public String eliminarOrden(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
