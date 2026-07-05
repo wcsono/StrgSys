@@ -42,6 +42,10 @@ public interface IOrdenServicio {
     // 🔹 Consultas por estado
     List<Orden> listarOrdenesPorEstado(EstadoOrden estOrd);
 
+    // ✅ Nuevo método para actualizar estado con usuario y fechaEstado
+    Orden actualizarEstadoOrden(Orden orden, Usuario usuario);
+
+
     List<Orden> listarOrdenesPorEstados(List<EstadoOrden> estados);
 
     List<Orden> listarOrdenesPorCliente(Integer idCliente);

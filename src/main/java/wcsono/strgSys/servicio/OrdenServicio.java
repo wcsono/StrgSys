@@ -178,6 +178,28 @@ public class OrdenServicio implements IOrdenServicio {
     }
 
     @Override
+    @Transactional
+    public Orden actualizarEstadoOrden(Orden orden, Usuario usuario) {
+        // Buscar la orden en BD para asegurar que existe
+        Orden ordenExistente = ordenRepositorio.findById(orden.getIdOrd())
+                .orElseThrow(() -> new RuntimeException("Orden no encontrada"));
+
+        // Actualizar estado, fecha y usuario
+        ordenExistente.setEstOrd(orden.getEstOrd());
+        ordenExistente.setFechaEstado(LocalDateTime.now());
+        ordenExistente.setUsuario(usuario);
+
+        // Guardar cambios
+        Orden saved = ordenRepositorio.save(ordenExistente);
+
+        logger.info("Orden actualizada de estado -> id={}, numOrd={}, nuevoEstado={}, fechaEstado={}, usuario={}",
+                saved.getIdOrd(), saved.getNumOrd(), saved.getEstOrd(), saved.getFechaEstado(), saved.getUsuario().getNombre());
+
+        return saved;
+    }
+
+
+    @Override
     public List<Orden> listarOrdenesPorCliente(Integer idCliente) {
         return ordenRepositorio.findByCliente_IdCliente(idCliente);
     }

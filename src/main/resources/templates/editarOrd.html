@@ -65,23 +65,30 @@
                            th:value="${orden.ndocRef}" style="text-transform: uppercase;">
                 </div>
 
-                <!-- Footer con botones alineados -->
-                <div class="d-flex justify-content-center flex-wrap gap-2 mt-3">
-                    <button id="btnGuardar" type="submit" class="btn btn-primary">
-                        <i class="bi bi-save me-1"></i> Guardar Cambios
+                <!-- Botones dentro del formulario -->
+                <div class="d-flex justify-content-center align-items-center gap-2 mt-3">
+                    <button id="btnGuardar" type="submit" class="btn btn-primary btn-sm">
+                        <i class="bi bi-save me-1 fs-6"></i> Guardar
                     </button>
 
-                    <div class="dropup">
-                        <button class="btn btn-secondary dropdown-toggle" type="button" id="accionesMenu"
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-gear-fill me-1"></i> Acciones
-                        </button>
-                        <ul class="dropdown-menu" aria-labelledby="accionesMenu">
-                            <!-- JS insertará aquí los botones según estado y tipo -->
-                        </ul>
-                    </div>
+                    <a href="/ordenes" class="btn btn-secondary btn-sm">
+                        <i class="bi bi-arrow-left-circle me-1 fs-6"></i> Regresar
+                    </a>
                 </div>
             </form>
+
+            <!-- Bloque Acciones fuera del formulario pero dentro de la misma columna -->
+            <div class="d-flex justify-content-center align-items-center gap-2 mt-3">
+                <div class="dropup">
+                    <button class="btn btn-dark btn-sm dropdown-toggle" type="button" id="accionesMenuBtn"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-gear-fill me-1 fs-6"></i> Acciones
+                    </button>
+                    <ul class="dropdown-menu" id="accionesMenu" aria-labelledby="accionesMenuBtn">
+                        <!-- Aquí se insertan dinámicamente los enlaces -->
+                    </ul>
+                </div>
+            </div>
         </div>
 
         <!-- Columna derecha: Tabla de artículos -->
@@ -140,29 +147,23 @@
 <div class="modal fade" id="facturarModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form th:action="@{/facturacion/guardar}" method="post">
+            <form th:action="@{/facturacion/facturar}" method="post">
                 <div class="modal-header">
                     <h5 class="modal-title text-center w-100">Facturar Orden</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <!-- idOrd oculto -->
                     <input type="hidden" name="idOrd" th:value="${orden.idOrd}"/>
-
-                    <!-- Número de Factura -->
                     <div class="input-group mb-3">
                         <span class="input-group-text">Número de Factura</span>
                         <input type="text" id="numFacturaModal" name="numFactura" class="form-control" required>
                     </div>
-
-                    <!-- Monto a Facturar (solo mostrar, backend ya lo usa) -->
                     <div class="input-group mb-3">
                         <span class="input-group-text">Monto</span>
                         <input type="number" id="montoFacturar" name="montoFacturar" class="form-control"
                                th:value="${orden.cosOrd}" readonly>
                     </div>
                 </div>
-
                 <div class="modal-footer d-flex justify-content-between">
                     <button type="submit" class="btn btn-warning">
                         <i class="bi bi-save me-1"></i> Guardar
@@ -172,6 +173,29 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Confirmación Entregar/Ingresar -->
+<div class="modal fade" id="confirmarAccionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="confirmarAccionTitulo" class="modal-title text-center w-100"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p id="confirmarAccionMensaje"></p>
+            </div>
+            <div class="modal-footer d-flex justify-content-between">
+                <button id="btnConfirmarAccion" type="button" class="btn btn-success">
+                    <i class="bi bi-check-circle me-1"></i> Aceptar
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i> Cancelar
+                </button>
+            </div>
         </div>
     </div>
 </div>

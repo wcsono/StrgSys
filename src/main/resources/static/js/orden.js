@@ -1,4 +1,3 @@
-// orden.js
 document.addEventListener("DOMContentLoaded", function () {
   console.log("cargando orden.js");
 
@@ -26,6 +25,9 @@ document.addEventListener("DOMContentLoaded", function () {
             <span><strong>Costo Total:</strong> ${window.formatoMoneda(data.cosOrd)}</span>
             <span><strong>Documento:</strong> ${data.tipoDocumento || "—"}</span>
           </div>
+          <div class="d-flex justify-content-between">
+            <span><strong>Fecha Estado:</strong> ${data.fechaEstado || "—"}</span>
+          </div>
         </div>
       </div>
     `;
@@ -35,6 +37,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     detalle.innerHTML = html;
+
+    // 🔹 Actualizar también la fila en la tabla principal
+    actualizarFilaOrden(data);
   }
 
   function renderTabla(detalles) {
@@ -78,6 +83,22 @@ document.addEventListener("DOMContentLoaded", function () {
         </table>
       </div>
     `;
+  }
+
+  // 🔹 Actualizar fila en tabla principal
+  function actualizarFilaOrden(data) {
+    const fila = document.querySelector(`#fila-orden-${data.idOrd}`);
+    if (fila) {
+      const estadoCell = fila.querySelector(".col-estado span");
+      if (estadoCell) {
+        estadoCell.textContent = data.estOrd;
+        estadoCell.className = data.cssClass || ""; // aplica el estilo correcto
+      }
+      const fechaCell = fila.querySelector(".col-fechaEstado");
+      if (fechaCell) {
+        fechaCell.textContent = data.fechaEstado ? data.fechaEstado : "—";
+      }
+    }
   }
 
   document.querySelectorAll(".ver-orden").forEach(btn => {
