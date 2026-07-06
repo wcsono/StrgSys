@@ -108,6 +108,22 @@ function mostrarConfirmacionAccion(accion) {
     }
 
     btnConfirmar.onclick = function () {
+        const idOrd = document.querySelector("input[name='idOrd']").value;
+
+        fetch(`/orden/entregadoIngresado/${idOrd}?accion=${accion}`, {
+            method: "POST"
+        })
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url; // redirige al detalle de la orden
+            } else {
+                return response.text();
+            }
+        })
+        .catch(error => {
+            console.error("Error al actualizar estado:", error);
+        });
+
         const modal = bootstrap.Modal.getInstance(document.getElementById("confirmarAccionModal"));
         modal.hide();
     };
