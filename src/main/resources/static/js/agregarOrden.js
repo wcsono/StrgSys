@@ -6,6 +6,16 @@ document.addEventListener("DOMContentLoaded", function () {
   const nomCliInput = document.getElementById("nomCli");
   const dirCliInput = document.getElementById("dirCli");
 
+  // 🔹 Establecer fecha actual por defecto en el campo Fecha Registro
+  const fechaRegistroInput = document.getElementById("fecOrd");
+  if (fechaRegistroInput) {
+    const hoy = new Date();
+    const yyyy = hoy.getFullYear();
+    const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+    const dd = String(hoy.getDate()).padStart(2, '0');
+    fechaRegistroInput.value = `${yyyy}-${mm}-${dd}`;
+  }
+
   // 🔹 Buscar cliente por código al presionar Enter
   if (codCliInput) {
     codCliInput.addEventListener("keydown", function (e) {

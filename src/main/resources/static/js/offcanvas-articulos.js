@@ -74,9 +74,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Detectar página actual
             const esEditar = document.body.getAttribute("data-estado-orden") !== null;
-            const urlRefresco = esEditar ? `/editarOrd/${ordenId}` : `/ordenDetalle/${ordenId}`;
+            if (esEditar) {
+                        window.location.href = `/orden/editar/${ordenId}`;
+                return;
+            } else {
+                return fetch(`/ordenDetalle/${ordenId}`);
+            }
 
-            return fetch(urlRefresco);
         })
         .then(res => res.text())
         .then(html => {

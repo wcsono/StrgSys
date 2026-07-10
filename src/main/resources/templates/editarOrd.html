@@ -209,6 +209,13 @@
         });
     });
 </script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var ordenId = [[${orden.idOrd}]];
+    var tipoMovimiento = '[[${orden.tipoDocumento.tipoMovimiento}]]';
+    /*]]>*/
+</script>
+
 
 <!-- Scripts -->
 <script src="/js/offcanvas-articulos.js" defer></script>

@@ -23,7 +23,21 @@
                     <th>Fecha Est</th>
                     <th>Costo</th>
                     <th>T.Doc.</th>
-                    <th>Acciones</th>
+                    <th>
+                        <!-- Botones de búsqueda y agregar -->
+                        <div class="d-flex flex-column align-items-center gap-2">
+                            <button class="btn btn-outline-primary btn-sm d-flex align-items-center justify-content-center"
+                                    type="button" data-bs-toggle="offcanvas" data-bs-target="#filtroArticulosOffcanvas">
+                                <i class="bi bi-binoculars me-1"></i> Buscar
+                            </button>
+                            <a href="/agregarOrden"
+                               class="btn btn-sm btn-primary rounded d-flex align-items-center justify-content-center"
+                               style="white-space: nowrap;">
+                                <i class="bi bi-file-earmark-plus me-1"></i> Nva. Orden
+                            </a>
+                        </div>
+
+                    </th>
                 </tr>
                 </thead>
 

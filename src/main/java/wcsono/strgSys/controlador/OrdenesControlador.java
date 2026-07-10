@@ -296,8 +296,9 @@ public class OrdenesControlador {
             redirectAttrs.addFlashAttribute("error", "Error al actualizar estado: " + e.getMessage());
         }
 
-        return "redirect:/ordenDetalle/" + idOrd;
+        return "redirect:/ordenes";
     }
+
 
 
 } // ✅ cierre de la clase OrdenesControlador

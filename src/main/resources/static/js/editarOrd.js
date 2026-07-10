@@ -13,21 +13,27 @@ function construirMenu(estadoOrden, tipoOrden) {
     switch (estadoOrden) {
         case "INICIAL":
             menuAcciones.innerHTML += `
-                <li><a href="#" id="btnAgregar" class="btn btn-outline-dark btn-sm w-100 text-start"><i class="bi bi-plus-circle"></i> Agregar Artículos</a></li>
+                <li><a href="#" id="btnAgregar" class="btn btn-outline-dark btn-sm w-100 text-start">
+                    <i class="bi bi-plus-circle"></i> Agregar Artículos</a></li>
             `;
             break;
 
         case "ABIERTA":
             if (tipoOrden === "INGRESO") {
                 menuAcciones.innerHTML += `
-                    <li><a href="#" id="btnAgregar" class="btn btn-outline-dark btn-sm w-100 text-start"><i class="bi bi-plus-circle"></i> Agregar Artículos</a></li>
-                    <li><a href="#" id="btnIngresar" class="btn btn-outline-dark btn-sm w-100 text-start"><i class="bi bi-box-arrow-in-down"></i> Ingresar</a></li>
-                    <li><a href="#" id="btnDevolver" class="btn btn-outline-dark btn-sm w-100 text-start"><i class="bi bi-arrow-counterclockwise"></i> Devolver</a></li>
+                    <li><a href="#" id="btnAgregar" class="btn btn-outline-dark btn-sm w-100 text-start">
+                        <i class="bi bi-plus-circle"></i> Agregar Artículos</a></li>
+                    <li><a href="#" id="btnIngresar" class="btn btn-outline-dark btn-sm w-100 text-start">
+                        <i class="bi bi-box-arrow-in-down"></i> Ingresar</a></li>
+                    <li><a href="#" id="btnDevolver" class="btn btn-outline-dark btn-sm w-100 text-start">
+                        <i class="bi bi-arrow-counterclockwise"></i> Devolver</a></li>
                 `;
             } else if (tipoOrden === "SALIDA") {
                 menuAcciones.innerHTML += `
-                    <li><a href="#" id="btnAgregar" class="btn btn-outline-dark btn-sm w-100 text-start"><i class="bi bi-plus-circle"></i> Agregar Artículos</a></li>
-                    <li><a href="#" id="btnFacturar" class="btn btn-outline-dark btn-sm w-100 text-start"><i class="bi bi-receipt"></i> Facturar</a></li>
+                    <li><a href="#" id="btnAgregar" class="btn btn-outline-dark btn-sm w-100 text-start">
+                        <i class="bi bi-plus-circle"></i> Agregar Artículos</a></li>
+                    <li><a href="#" id="btnFacturar" class="btn btn-outline-dark btn-sm w-100 text-start">
+                        <i class="bi bi-receipt"></i> Facturar</a></li>
                 `;
             }
             break;
@@ -35,7 +41,8 @@ function construirMenu(estadoOrden, tipoOrden) {
         case "FACTURADA":
             if (tipoOrden === "SALIDA") {
                 menuAcciones.innerHTML += `
-                    <li><a href="#" id="btnEntregar" class="btn btn-outline-dark btn-sm w-100 text-start"><i class="bi bi-box-arrow-up"></i> Entregar</a></li>
+                    <li><a href="#" id="btnEntregar" class="btn btn-outline-dark btn-sm w-100 text-start">
+                        <i class="bi bi-box-arrow-up"></i> Entregar</a></li>
                 `;
             }
             break;
@@ -43,13 +50,17 @@ function construirMenu(estadoOrden, tipoOrden) {
         case "PREPARACION":
             if (tipoOrden === "INGRESO") {
                 menuAcciones.innerHTML += `
-                    <li><a href="#" id="btnIngresar" class="btn btn-outline-dark btn-sm w-100 text-start"><i class="bi bi-box-arrow-in-down"></i> Ingresar</a></li>
-                    <li><a href="#" id="btnDevolver" class="btn btn-outline-dark btn-sm w-100 text-start"><i class="bi bi-arrow-counterclockwise"></i> Devolver</a></li>
+                    <li><a href="#" id="btnIngresar" class="btn btn-outline-dark btn-sm w-100 text-start">
+                        <i class="bi bi-box-arrow-in-down"></i> Ingresar</a></li>
+                    <li><a href="#" id="btnDevolver" class="btn btn-outline-dark btn-sm w-100 text-start">
+                        <i class="bi bi-arrow-counterclockwise"></i> Devolver</a></li>
                 `;
             } else if (tipoOrden === "SALIDA") {
                 menuAcciones.innerHTML += `
-                    <li><a href="#" id="btnEntregar" class="btn btn-outline-dark btn-sm w-100 text-start"><i class="bi bi-box-arrow-up"></i> Entregar</a></li>
-                    <li><a href="#" id="btnDevolver" class="btn btn-outline-dark btn-sm w-100 text-start"><i class="bi bi-arrow-counterclockwise"></i> Devolver</a></li>
+                    <li><a href="#" id="btnEntregar" class="btn btn-outline-dark btn-sm w-100 text-start">
+                        <i class="bi bi-box-arrow-up"></i> Entregar</a></li>
+                    <li><a href="#" id="btnDevolver" class="btn btn-outline-dark btn-sm w-100 text-start">
+                        <i class="bi bi-arrow-counterclockwise"></i> Devolver</a></li>
                 `;
             }
             break;
@@ -57,8 +68,10 @@ function construirMenu(estadoOrden, tipoOrden) {
         case "INGRESADA":
             if (tipoOrden === "INGRESO") {
                 menuAcciones.innerHTML += `
-                    <li><a href="#" id="btnExtornar" class="btn btn-outline-dark btn-sm w-100 text-start"><i class="bi bi-arrow-return-left"></i> Extornar</a></li>
-                    <li><a href="#" id="btnCerrar" class="btn btn-outline-dark btn-sm w-100 text-start"><i class="bi bi-x-circle"></i> Cerrar</a></li>
+                    <li><a href="#" id="btnExtornar" class="btn btn-outline-dark btn-sm w-100 text-start">
+                        <i class="bi bi-arrow-return-left"></i> Extornar</a></li>
+                    <li><a href="#" id="btnCerrar" class="btn btn-outline-dark btn-sm w-100 text-start">
+                        <i class="bi bi-x-circle"></i> Cerrar</a></li>
                 `;
             }
             break;
@@ -66,14 +79,16 @@ function construirMenu(estadoOrden, tipoOrden) {
         case "ENTREGADA":
             if (tipoOrden === "SALIDA") {
                 menuAcciones.innerHTML += `
-                    <li><a href="#" id="btnCerrar" class="btn btn-outline-dark btn-sm w-100 text-start"><i class="bi bi-x-circle"></i> Cerrar</a></li>
+                    <li><a href="#" id="btnCerrar" class="btn btn-outline-dark btn-sm w-100 text-start">
+                        <i class="bi bi-x-circle"></i> Cerrar</a></li>
                 `;
             }
             break;
 
         case "CERRADA":
             menuAcciones.innerHTML += `
-                <li><a href="#" id="btnExtornar" class="btn btn-outline-dark btn-sm w-100 text-start"><i class="bi bi-arrow-return-left"></i> Extornar</a></li>
+                <li><a href="#" id="btnExtornar" class="btn btn-outline-dark btn-sm w-100 text-start">
+                    <i class="bi bi-arrow-return-left"></i> Extornar</a></li>
             `;
             break;
 
@@ -108,6 +123,22 @@ function mostrarConfirmacionAccion(accion) {
     }
 
     btnConfirmar.onclick = function () {
+        const idOrd = document.querySelector("input[name='idOrd']").value;
+
+        fetch(`/orden/entregadoIngresado/${idOrd}?accion=${accion}`, {
+            method: "POST"
+        })
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url; // redirige al detalle de la orden
+            } else {
+                return response.text();
+            }
+        })
+        .catch(error => {
+            console.error("Error al actualizar estado:", error);
+        });
+
         const modal = bootstrap.Modal.getInstance(document.getElementById("confirmarAccionModal"));
         modal.hide();
     };
@@ -116,22 +147,30 @@ function mostrarConfirmacionAccion(accion) {
     modal.show();
 }
 
-// Registrar listeners para enlaces Entregar, Ingresar y Facturar
+// Registrar listeners para enlaces Entregar, Ingresar, Facturar y Agregar
 function registrarAcciones() {
     document.addEventListener("click", function(e) {
         const link = e.target.closest("a");
         if (!link) return;
 
-        e.preventDefault(); // evita navegación
+        // Solo interceptamos si es uno de nuestros botones dinámicos
+        if (["btnEntregar", "btnIngresar", "btnFacturar", "btnAgregar"].includes(link.id)) {
+            e.preventDefault(); // evita navegación solo en estos casos
 
-        if (link.id === "btnEntregar") {
-            mostrarConfirmacionAccion("ENTREGAR");
-        } else if (link.id === "btnIngresar") {
-            mostrarConfirmacionAccion("INGRESAR");
-        } else if (link.id === "btnFacturar") {
-            const modal = new bootstrap.Modal(document.getElementById("facturarModal"));
-            modal.show();
+            if (link.id === "btnEntregar") {
+                mostrarConfirmacionAccion("ENTREGAR");
+            } else if (link.id === "btnIngresar") {
+                mostrarConfirmacionAccion("INGRESAR");
+            } else if (link.id === "btnFacturar") {
+                const modal = new bootstrap.Modal(document.getElementById("facturarModal"));
+                modal.show();
+            } else if (link.id === "btnAgregar") {
+                const offcanvasEl = document.getElementById("offcanvasArticulos");
+                const offcanvas = new bootstrap.Offcanvas(offcanvasEl);
+                offcanvas.show();
+            }
         }
+        // Si no es uno de esos IDs, dejamos que el enlace funcione normalmente
     });
 }
 
