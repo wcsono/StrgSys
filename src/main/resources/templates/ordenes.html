@@ -55,7 +55,7 @@
                     <td th:text="${orden.numOrd}"></td>
                     <td th:text="${orden.cliente.nomCli}"></td>
                     <td th:text="${#temporals.format(orden.fecOrd,'dd/MM/yyyy')}"></td>
-                    <td th:text="${orden.usuario.nombre}"></td>
+                    <td class="col-usuario" th:text="${orden.usuario.nombre}"></td>
                     <td class="col-estado">
                         <span th:text="${orden.estOrd.descripcion}"
                               th:class="${orden.estOrd.cssClass}"></span>

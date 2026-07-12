@@ -27,6 +27,7 @@ document.addEventListener("DOMContentLoaded", function () {
           </div>
           <div class="d-flex justify-content-between">
             <span><strong>Fecha Estado:</strong> ${data.fechaEstado || "—"}</span>
+            <span><strong>Usuario:</strong> ${data.usuarioAccion || "—"}</span>
           </div>
         </div>
       </div>
@@ -97,6 +98,10 @@ document.addEventListener("DOMContentLoaded", function () {
       const fechaCell = fila.querySelector(".col-fechaEstado");
       if (fechaCell) {
         fechaCell.textContent = data.fechaEstado ? data.fechaEstado : "—";
+      }
+      const usuarioCell = fila.querySelector(".col-usuario");
+      if (usuarioCell) {
+        usuarioCell.textContent = data.usuarioAccion ? data.usuarioAccion : "—";
       }
     }
   }

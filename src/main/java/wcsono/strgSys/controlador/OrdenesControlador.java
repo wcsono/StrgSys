@@ -140,20 +140,24 @@ public class OrdenesControlador {
 
     @GetMapping("/verOrd/{id}")
     @ResponseBody
-    public OrdenDTO verOrd(@PathVariable Integer id) {
+    public OrdenDTO verOrd(@PathVariable Integer id, HttpSession session) {
         Orden orden = ordenServicio.buscarOrdenPorId(id);
         if (orden == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Orden no encontrada");
         }
 
-        // 🔹 Reglas de transición de estado
+        Usuario usuarioActivo = (Usuario) session.getAttribute("usuarioSesion");
+
+        // 🔹 Reglas de transición de estado con usuario
         if (orden.getTipoDocumento() != null) {
             if (orden.getTipoDocumento().getTipoMovimiento() == TipoMovimiento.INGRESO
                     && orden.getEstOrd() == EstadoOrden.ABIERTA) {
-                ordenServicio.actualizarEstadoOrden(id, EstadoOrden.PREPARACION);
+                orden.setEstOrd(EstadoOrden.PREPARACION);
+                ordenServicio.actualizarEstadoOrden(orden, usuarioActivo);
             } else if (orden.getTipoDocumento().getTipoMovimiento() == TipoMovimiento.SALIDA
                     && orden.getEstOrd() == EstadoOrden.FACTURADA) {
-                ordenServicio.actualizarEstadoOrden(id, EstadoOrden.PREPARACION);
+                orden.setEstOrd(EstadoOrden.PREPARACION);
+                ordenServicio.actualizarEstadoOrden(orden, usuarioActivo);
             }
         }
 
@@ -181,6 +185,11 @@ public class OrdenesControlador {
         } else {
             dto.setFechaEstado(null);
         }
+
+        // 🔹 Nuevo: incluir usuario activo en el DTO
+        dto.setUsuarioAccion(
+                ordenActualizada.getUsuario() != null ? ordenActualizada.getUsuario().getNombre() : "—"
+        );
 
         dto.setDetalles(ordenActualizada.getDetalles().stream().map(det -> {
             DetalleDTO d = new DetalleDTO();
