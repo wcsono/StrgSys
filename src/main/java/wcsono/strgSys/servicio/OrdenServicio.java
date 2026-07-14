@@ -8,13 +8,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import wcsono.strgSys.modelo.Cliente;
-import wcsono.strgSys.modelo.Orden;
-import wcsono.strgSys.modelo.Usuario;
+import wcsono.strgSys.modelo.*;
 import wcsono.strgSys.enums.EstadoOrden;
 import wcsono.strgSys.enums.TipoMovimiento;
 import wcsono.strgSys.repositorio.ClienteRepositorio;
 import wcsono.strgSys.repositorio.OrdenRepositorio;
+import wcsono.strgSys.repositorio.ArticuloRepositorio;
+import wcsono.strgSys.repositorio.MovimientoRepositorio;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -33,7 +33,10 @@ public class OrdenServicio implements IOrdenServicio {
     private ClienteRepositorio clienteRepositorio;
 
     @Autowired
-    private ArticuloServicio articuloServicio;
+    private ArticuloRepositorio articuloRepositorio;
+
+    @Autowired
+    private MovimientoRepositorio movimientoRepositorio;
 
     @Override
     public Page<Orden> listarOrdenesConTipoDocumento(Pageable pageable) {
@@ -56,14 +59,20 @@ public class OrdenServicio implements IOrdenServicio {
     }
 
     @Override
+    public List<Orden> listarOrdenesOrdenadasPorFechaDesc() {
+        return ordenRepositorio.findAllByOrderByFecOrdDesc();
+    }
+
+    @Override
+    public List<Orden> listarOrdenesOrdenadasPorIdDesc() {
+        return ordenRepositorio.findAllByOrderByIdOrdDesc();
+    }
+
+    @Override
     public Orden buscarOrdenConTipoDocumentoYDetalles(Integer id) {
         return ordenRepositorio.findWithTipoDocumentoAndDetallesByIdOrd(id);
     }
 
-    /**
-     * Guardar una nueva orden con cliente y usuario activo.
-     * Estado inicial = INICIAL, costo inicial = 0.
-     */
     @Override
     @Transactional
     public Orden guardarOrden(Orden orden, Cliente cliente, Usuario usuario) {
@@ -73,9 +82,9 @@ public class OrdenServicio implements IOrdenServicio {
         orden.setCliente(cliente);
         orden.setUsuario(usuario);
 
-        orden.setEstOrd(EstadoOrden.INICIAL); // Estado inicial
-        orden.setCosOrd(BigDecimal.ZERO);     // Costo inicial
-        orden.setFechaEstado(LocalDateTime.now()); // fecha/hora inicial
+        orden.setEstOrd(EstadoOrden.INICIAL);
+        orden.setCosOrd(BigDecimal.ZERO);
+        orden.setFechaEstado(LocalDateTime.now());
 
         orden = ordenRepositorio.save(orden);
         orden.setNumOrd(String.valueOf(1000 + orden.getIdOrd()));
@@ -89,15 +98,11 @@ public class OrdenServicio implements IOrdenServicio {
         return saved;
     }
 
-    /**
-     * Actualizar una orden existente (estado, costo, usuario).
-     */
     @Override
     @Transactional
     public Orden actualizarOrden(Orden orden, Cliente cliente, Usuario usuario) {
         orden.setCliente(cliente);
         orden.setUsuario(usuario);
-
         orden.setFechaEstado(LocalDateTime.now());
 
         Orden saved = ordenRepositorio.save(orden);
@@ -109,9 +114,6 @@ public class OrdenServicio implements IOrdenServicio {
         return saved;
     }
 
-    /**
-     * ✅ Nuevo método: actualizar solo el estado y fechaEstado de la orden.
-     */
     @Override
     @Transactional
     public Orden actualizarEstadoOrden(Integer idOrd, EstadoOrden nuevoEstado) {
@@ -146,18 +148,18 @@ public class OrdenServicio implements IOrdenServicio {
         boolean esEntrada = orden.getTipoDocumento().getTipoMovimiento() == TipoMovimiento.INGRESO;
 
         orden.getDetalles().forEach(det -> {
-            var articulo = det.getArticulo();
+            Articulo articulo = det.getArticulo();
             int nuevoStock = esEntrada
                     ? articulo.getStk() - det.getCantidad()
                     : articulo.getStk() + det.getCantidad();
             articulo.setStk(nuevoStock);
-            articuloServicio.guardarArticulo(articulo);
+            articuloRepositorio.save(articulo);
         });
 
         orden.setEstOrd(EstadoOrden.EXTORNADA);
         orden.setFechaEstado(LocalDateTime.now());
 
-        actualizarOrden(orden, orden.getCliente(), orden.getUsuario());
+        ordenRepositorio.save(orden);
 
         logger.info("Orden extornada -> id={}, numOrd={}, fechaEstado={}", orden.getIdOrd(), orden.getNumOrd(), orden.getFechaEstado());
     }
@@ -180,16 +182,38 @@ public class OrdenServicio implements IOrdenServicio {
     @Override
     @Transactional
     public Orden actualizarEstadoOrden(Orden orden, Usuario usuario) {
-        // Buscar la orden en BD para asegurar que existe
         Orden ordenExistente = ordenRepositorio.findById(orden.getIdOrd())
                 .orElseThrow(() -> new RuntimeException("Orden no encontrada"));
 
-        // Actualizar estado, fecha y usuario
         ordenExistente.setEstOrd(orden.getEstOrd());
         ordenExistente.setFechaEstado(LocalDateTime.now());
         ordenExistente.setUsuario(usuario);
 
-        // Guardar cambios
+        // 🔹 Procesar movimientos solo en estados ENTREGADA o INGRESADA
+        if (ordenExistente.getEstOrd() == EstadoOrden.ENTREGADA || ordenExistente.getEstOrd() == EstadoOrden.INGRESADA) {
+            for (DetalleOrden detalle : ordenExistente.getDetalles()) {
+                Articulo articulo = detalle.getArticulo();
+
+                if (ordenExistente.getEstOrd() == EstadoOrden.INGRESADA) {
+                    articulo.setStk(articulo.getStk() + detalle.getCantidad());
+                } else if (ordenExistente.getEstOrd() == EstadoOrden.ENTREGADA) {
+                    articulo.setStk(articulo.getStk() - detalle.getCantidad());
+                }
+                articuloRepositorio.save(articulo);
+
+                Movimiento movimiento = Movimiento.builder()
+                        .articulo(articulo)
+                        .tipoDocumento(ordenExistente.getTipoDocumento())
+                        .orden(ordenExistente)
+                        .cantidad(detalle.getCantidad())
+                        .costoUnitario(articulo.getCosto())
+                        .fechaMovimiento(LocalDateTime.now())
+                        .build();
+
+                movimientoRepositorio.save(movimiento);
+            }
+        }
+
         Orden saved = ordenRepositorio.save(ordenExistente);
 
         logger.info("Orden actualizada de estado -> id={}, numOrd={}, nuevoEstado={}, fechaEstado={}, usuario={}",
@@ -197,7 +221,6 @@ public class OrdenServicio implements IOrdenServicio {
 
         return saved;
     }
-
 
     @Override
     public List<Orden> listarOrdenesPorCliente(Integer idCliente) {

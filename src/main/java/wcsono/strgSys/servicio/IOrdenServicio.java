@@ -12,46 +12,45 @@ import java.util.List;
 
 public interface IOrdenServicio {
 
+    // 🔹 Listados generales
     Page<Orden> listarOrdenesConTipoDocumento(Pageable pageable);
-
     Page<Orden> listarOrdenes(Pageable pageable);
 
+    // 🔹 Búsquedas
     Orden buscarOrdenPorId(Integer id);
-
     Orden buscarOrdenConDetalles(Integer id);
-
     Orden buscarOrdenConTipoDocumentoYDetalles(Integer id);
 
-    // ✅ Inserción de nueva orden (siempre inicia en INICIAL)
+    // 🔹 Inserción y actualización
     Orden guardarOrden(Orden orden, Cliente cliente, Usuario usuario);
-
-    // ✅ Actualización general de la orden (datos completos)
     Orden actualizarOrden(Orden orden, Cliente cliente, Usuario usuario);
 
-    // ✅ Nuevo método para actualizar solo el estado y fechaEstado
+    // ✅ Actualización solo de estado (sin usuario)
     Orden actualizarEstadoOrden(Integer idOrd, EstadoOrden nuevoEstado);
 
-    // ✅ Eliminación física directa
-    void eliminarOrden(Orden orden);
+    // ✅ Actualización de estado con usuario y fechaEstado
+    Orden actualizarEstadoOrden(Orden orden, Usuario usuario);
 
-    // ✅ Extornar orden (cambia estado a EXTORNADA)
+    List<Orden> listarOrdenesOrdenadasPorFechaDesc();
+
+    List<Orden> listarOrdenesOrdenadasPorIdDesc();
+
+
+
+    // 🔹 Eliminación y extorno
+    void eliminarOrden(Orden orden);
     void extornarOrden(Integer id);
 
+    // 🔹 Validación
     boolean validarNumOrdUnico(String numOrd);
 
     // 🔹 Consultas por estado
     List<Orden> listarOrdenesPorEstado(EstadoOrden estOrd);
-
-    // ✅ Nuevo método para actualizar estado con usuario y fechaEstado
-    Orden actualizarEstadoOrden(Orden orden, Usuario usuario);
-
-
     List<Orden> listarOrdenesPorEstados(List<EstadoOrden> estados);
-
     List<Orden> listarOrdenesPorCliente(Integer idCliente);
-
     List<Orden> listarOrdenesPorUsuario(Integer idUsuario);
 
+    // 🔹 Estadísticas
     List<Object[]> obtenerEntradasVsSalidasPorMes();
 
     // 🔹 Filtros combinados
@@ -61,5 +60,6 @@ public interface IOrdenServicio {
             LocalDate fecOrdDesde,
             LocalDate fecOrdHasta,
             Integer estOrd,   // ⚠️ se mantiene como Integer porque viene del filtro en la vista
-            Pageable pageable);
+            Pageable pageable
+    );
 }

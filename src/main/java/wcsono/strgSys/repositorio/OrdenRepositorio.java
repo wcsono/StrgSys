@@ -35,6 +35,13 @@ public interface OrdenRepositorio extends JpaRepository<Orden, Integer>, JpaSpec
 
     List<Orden> findByUsuario_IdUsuario(Integer idUsuario);
 
+    // Listar todas las órdenes ordenadas por ID descendente
+    List<Orden> findAllByOrderByIdOrdDesc();
+
+    // Listar todas las órdenes ordenadas por fecha de ingreso descendente
+    List<Orden> findAllByOrderByFecOrdDesc();
+
+
     // 🔹 Reporte: Entradas vs Salidas por mes
     @Query("SELECT MONTH(o.fecOrd), " +
             "SUM(CASE WHEN o.tipoDocumento.tipoMovimiento = wcsono.strgSys.enums.TipoMovimiento.INGRESO THEN 1 ELSE 0 END), " +

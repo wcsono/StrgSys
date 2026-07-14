@@ -22,6 +22,20 @@
                 <tr><th>Tipo Documento</th><td th:text="${orden.tipoDocumento.desTd}"></td></tr>
                 <tr><th>Fecha Registro</th><td th:text="${#temporals.format(orden.fecOrd,'dd/MM/yyyy')}"></td></tr>
                 <tr><th>Documento Referencia</th><td th:text="${orden.ndocRef}"></td></tr>
+
+                <!-- 🔹 Nuevas filas -->
+                <tr>
+                    <th>Estado</th>
+                    <td th:text="${orden.estOrd.descripcion}"></td>
+                </tr>
+                <tr>
+                    <th>Fecha Estado</th>
+                    <td th:text="${orden.fechaEstado != null ? #temporals.format(orden.fechaEstado,'dd/MM/yyyy HH:mm') : '—'}"></td>
+                </tr>
+                <tr>
+                    <th>Usuario</th>
+                    <td th:text="${orden.usuario != null ? orden.usuario.nombre : '—'}"></td>
+                </tr>
             </table>
 
             <!-- Botones debajo de los datos -->

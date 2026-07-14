@@ -30,6 +30,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+
 
 @Controller
 public class OrdenesControlador {
@@ -74,8 +77,15 @@ public class OrdenesControlador {
             estado = Integer.parseInt(estOrd);
         }
 
+        // 🔹 Forzar orden descendente por ID
+        Pageable pageableOrdenado = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "idOrd")
+        );
+
         Page<Orden> paginaOrdenes = ordenServicio
-                .listarOrdenesFiltradas(numOrd, idCliente, fecOrdDesde, fecOrdHasta, estado, pageable);
+                .listarOrdenesFiltradas(numOrd, idCliente, fecOrdDesde, fecOrdHasta, estado, pageableOrdenado);
 
         model.addAttribute("paginaOrdenes", paginaOrdenes);
         model.addAttribute("listadoOrdenes", paginaOrdenes.getContent());
@@ -297,9 +307,10 @@ public class OrdenesControlador {
             // ✅ Ahora usamos el nuevo método con Orden + Usuario
             ordenServicio.actualizarEstadoOrden(orden, usuarioActivo);
 
-            redirectAttrs.addFlashAttribute("success",
+            redirectAttrs.addFlashAttribute("mensaje",
                     "Orden actualizada a estado: " + orden.getEstOrd().getDescripcion() +
                             " por el usuario: " + usuarioActivo.getNombre());
+
 
         } catch (Exception e) {
             redirectAttrs.addFlashAttribute("error", "Error al actualizar estado: " + e.getMessage());
