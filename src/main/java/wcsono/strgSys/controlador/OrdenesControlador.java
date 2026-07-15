@@ -276,20 +276,30 @@ public class OrdenesControlador {
     public Cliente buscarCliente(@RequestParam String codCli) {
         return clienteServicio.obtenerClientePorCodigo(codCli);
     }
+
+
     @PostMapping("/orden/entregadoIngresado/{idOrd}")
     public String entregadoIngresado(@PathVariable Integer idOrd,
                                      @RequestParam String accion,
                                      HttpSession session,
                                      RedirectAttributes redirectAttrs) {
+        Logger log = LoggerFactory.getLogger(getClass());
+
+        log.info("➡️ Iniciando entregadoIngresado...");
+        log.info("ID recibido: {}", idOrd);
+        log.info("Acción recibida: {}", accion);
+
         Orden orden = ordenServicio.buscarOrdenPorId(idOrd);
 
         if (orden == null) {
+            log.warn("❌ Orden no encontrada con ID: {}", idOrd);
             redirectAttrs.addFlashAttribute("error", "Orden no encontrada");
             return "redirect:/ordenes";
         }
 
         Usuario usuarioActivo = (Usuario) session.getAttribute("usuarioSesion");
         if (usuarioActivo == null) {
+            log.warn("⚠️ Usuario no activo en sesión.");
             redirectAttrs.addFlashAttribute("error", "Debe iniciar sesión para continuar.");
             return "redirect:/login";
         }
@@ -297,25 +307,31 @@ public class OrdenesControlador {
         try {
             if ("ENTREGAR".equalsIgnoreCase(accion)) {
                 orden.setEstOrd(EstadoOrden.ENTREGADA);
+                log.info("✅ Estado asignado: ENTREGADA");
             } else if ("INGRESAR".equalsIgnoreCase(accion)) {
                 orden.setEstOrd(EstadoOrden.INGRESADA);
+                log.info("✅ Estado asignado: INGRESADA");
             } else {
+                log.error("❌ Acción inválida: {}", accion);
                 redirectAttrs.addFlashAttribute("error", "Acción inválida: " + accion);
                 return "redirect:/ordenDetalle/" + idOrd;
             }
 
-            // ✅ Ahora usamos el nuevo método con Orden + Usuario
+            // Guardamos con usuario
             ordenServicio.actualizarEstadoOrden(orden, usuarioActivo);
+            log.info("✔️ Orden actualizada por usuario: {}", usuarioActivo.getNombre());
 
-            redirectAttrs.addFlashAttribute("mensaje",
-                    "Orden actualizada a estado: " + orden.getEstOrd().getDescripcion() +
-                            " por el usuario: " + usuarioActivo.getNombre());
-
+            String mensajeFlash = "✅ Orden actualizada a estado: " + orden.getEstOrd().getDescripcion() +
+                    " por el usuario: " + usuarioActivo.getNombre();
+            redirectAttrs.addFlashAttribute("mensaje", mensajeFlash);
+            log.info("📢 Mensaje flash seteado: {}", mensajeFlash);
 
         } catch (Exception e) {
+            log.error("❌ Error al actualizar estado: {}", e.getMessage(), e);
             redirectAttrs.addFlashAttribute("error", "Error al actualizar estado: " + e.getMessage());
         }
 
+        log.info("➡️ Redirigiendo a /ordenes");
         return "redirect:/ordenes";
     }
 

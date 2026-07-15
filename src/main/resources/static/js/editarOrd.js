@@ -112,7 +112,7 @@ function construirMenu(estadoOrden, tipoOrden) {
 function mostrarConfirmacionAccion(accion) {
     const titulo = document.getElementById("confirmarAccionTitulo");
     const mensaje = document.getElementById("confirmarAccionMensaje");
-    const btnConfirmar = document.getElementById("btnConfirmarAccion");
+    const accionHidden = document.getElementById("accionHidden");
 
     if (accion === "ENTREGAR") {
         titulo.textContent = "Confirmar Entrega";
@@ -122,27 +122,10 @@ function mostrarConfirmacionAccion(accion) {
         mensaje.textContent = "¿Está seguro que desea marcar la orden como INGRESADA?";
     }
 
-    btnConfirmar.onclick = function () {
-        const idOrd = document.querySelector("input[name='idOrd']").value;
+    // 🔹 Setear el valor del hidden para que el formulario lo envíe
+    accionHidden.value = accion;
 
-        fetch(`/orden/entregadoIngresado/${idOrd}?accion=${accion}`, {
-            method: "POST"
-        })
-        .then(response => {
-            if (response.redirected) {
-                window.location.href = response.url; // redirige al detalle de la orden
-            } else {
-                return response.text();
-            }
-        })
-        .catch(error => {
-            console.error("Error al actualizar estado:", error);
-        });
-
-        const modal = bootstrap.Modal.getInstance(document.getElementById("confirmarAccionModal"));
-        modal.hide();
-    };
-
+    // Mostrar el modal
     const modal = new bootstrap.Modal(document.getElementById("confirmarAccionModal"));
     modal.show();
 }

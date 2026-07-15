@@ -181,21 +181,26 @@
 <div class="modal fade" id="confirmarAccionModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 id="confirmarAccionTitulo" class="modal-title text-center w-100"></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body text-center">
-                <p id="confirmarAccionMensaje"></p>
-            </div>
-            <div class="modal-footer d-flex justify-content-between">
-                <button id="btnConfirmarAccion" type="button" class="btn btn-success">
-                    <i class="bi bi-check-circle me-1"></i> Aceptar
-                </button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle me-1"></i> Cancelar
-                </button>
-            </div>
+            <!-- 🔹 Formulario directo al endpoint entregadoIngresado -->
+            <form th:action="@{/orden/entregadoIngresado/{idOrd}(idOrd=${orden.idOrd})}" method="post">
+                <div class="modal-header">
+                    <h5 id="confirmarAccionTitulo" class="modal-title text-center w-100"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <p id="confirmarAccionMensaje"></p>
+                    <!-- Campo oculto para la acción (ENTREGAR o INGRESAR) -->
+                    <input type="hidden" id="accionHidden" name="accion" value=""/>
+                </div>
+                <div class="modal-footer d-flex justify-content-between">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle me-1"></i> Aceptar
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i> Cancelar
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

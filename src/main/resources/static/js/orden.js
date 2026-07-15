@@ -3,6 +3,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const detalle = document.getElementById("detalleContenido");
 
+  // 🔹 Función para mostrar alertas en el fragmento
+  function mostrarAlerta(mensaje, tipo = "success") {
+    const alertContainer = document.getElementById("alertContainer");
+    alertContainer.innerHTML = `
+      <div class="alert alert-${tipo} alert-dismissible fade show mt-2" role="alert">
+        <span>${mensaje}</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    `;
+  }
+
   function estadoOrden(estOrd, extornada) {
     if (extornada) return "Extornada";
     return estOrd || "—";
@@ -41,6 +52,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // 🔹 Actualizar también la fila en la tabla principal
     actualizarFilaOrden(data);
+
+    // 🔹 Mostrar mensaje de éxito si viene en la respuesta
+    if (data.mensaje) {
+      mostrarAlerta(data.mensaje, "success");
+    }
+    if (data.error) {
+      mostrarAlerta(data.error, "danger");
+    }
   }
 
   function renderTabla(detalles) {
@@ -130,6 +149,7 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .catch(err => {
           console.error("Error en fetch:", err);
+          mostrarAlerta("❌ Error al cargar la orden", "danger");
         });
     });
   });
