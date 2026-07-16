@@ -136,7 +136,8 @@
         </div>
     </div>
 </div>
-
+<!--Mitad del Archivo-->
+<!--****************************************************-->
 <!-- Panel lateral offcanvas-articulos -->
 <div th:insert="~{fragmentos/offcanvas-articulos :: offcanvas-articulos-seccion}"></div>
 
@@ -205,6 +206,31 @@
     </div>
 </div>
 
+<!-- Modal de confirmación de devolución -->
+<div class="modal fade" id="modalStockInsuficiente" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">⚠️ Stock insuficiente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p th:text="${errorStock}"></p>
+                <p>¿Desea devolver la orden a Ventas para corrección?</p>
+            </div>
+            <div class="modal-footer">
+                <form th:action="@{/orden/devolver/{id}(id=${orden.idOrd})}" method="post">
+                    <button type="submit" class="btn btn-danger">Aceptar y devolver</button>
+                </form>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<span th:if="${errorStock}" th:attr="data-error-stock=${errorStock}"></span>
+
+
 <!-- Script para enfocar automáticamente el input Número de Factura -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -217,9 +243,11 @@
 <script th:inline="javascript">
     /*<![CDATA[*/
     var ordenId = [[${orden.idOrd}]];
-    var tipoMovimiento = '[[${orden.tipoDocumento.tipoMovimiento}]]';
+    var tipoMovimiento = /*[[${orden.tipoDocumento.tipoMovimiento}]]*/ "";
+    console.log("tipoMovimiento (EditarOrd):", tipoMovimiento);
     /*]]>*/
 </script>
+
 
 
 <!-- Scripts -->

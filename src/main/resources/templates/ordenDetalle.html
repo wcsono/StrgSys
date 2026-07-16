@@ -111,9 +111,11 @@
 <script th:inline="javascript">
     /*<![CDATA[*/
     var ordenId = [[${orden.idOrd}]];
-    var tipoMovimiento = '[[${orden.tipoDocumento.tipoMovimiento}]]'; // "INGRESO" o "SALIDA"
+    var tipoMovimiento = /*[[${orden.tipoDocumento.tipoMovimiento}]]*/ "";
+    console.log("tipoMovimiento:", tipoMovimiento);
     /*]]>*/
 </script>
+
 
 </body>
 </html>

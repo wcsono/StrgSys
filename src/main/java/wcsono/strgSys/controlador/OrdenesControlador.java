@@ -283,57 +283,91 @@ public class OrdenesControlador {
                                      @RequestParam String accion,
                                      HttpSession session,
                                      RedirectAttributes redirectAttrs) {
-        Logger log = LoggerFactory.getLogger(getClass());
-
-        log.info("➡️ Iniciando entregadoIngresado...");
-        log.info("ID recibido: {}", idOrd);
-        log.info("Acción recibida: {}", accion);
-
         Orden orden = ordenServicio.buscarOrdenPorId(idOrd);
-
         if (orden == null) {
-            log.warn("❌ Orden no encontrada con ID: {}", idOrd);
             redirectAttrs.addFlashAttribute("error", "Orden no encontrada");
             return "redirect:/ordenes";
         }
 
         Usuario usuarioActivo = (Usuario) session.getAttribute("usuarioSesion");
         if (usuarioActivo == null) {
-            log.warn("⚠️ Usuario no activo en sesión.");
             redirectAttrs.addFlashAttribute("error", "Debe iniciar sesión para continuar.");
             return "redirect:/login";
         }
 
         try {
+            String tipoMovimiento = orden.getTipoDocumento().getTipoMovimiento().name();
+
+            if ("SALIDA".equalsIgnoreCase(tipoMovimiento)) {
+                // Primera pasada: validación
+                for (DetalleOrden detalle : orden.getDetalles()) {
+                    Articulo articulo = detalle.getArticulo();
+                    if (detalle.getCantidad() > articulo.getStk()) {
+                        // ⚠️ No cambiamos estado aquí, solo enviamos flag al frontend
+                        redirectAttrs.addFlashAttribute("errorStock",
+                                "Stock insuficiente para el artículo: " + articulo.getDesArt());
+                        return "redirect:/orden/editar/" + idOrd;
+                    }
+                }
+                // Segunda pasada: actualización
+                for (DetalleOrden detalle : orden.getDetalles()) {
+                    Articulo articulo = detalle.getArticulo();
+                    articulo.setStk(articulo.getStk() - detalle.getCantidad());
+                    articuloServicio.guardarArticulo(articulo);
+                }
+            } else if ("INGRESO".equalsIgnoreCase(tipoMovimiento)) {
+                for (DetalleOrden detalle : orden.getDetalles()) {
+                    Articulo articulo = detalle.getArticulo();
+                    articulo.setStk(articulo.getStk() + detalle.getCantidad());
+                    articuloServicio.guardarArticulo(articulo);
+                }
+            }
+
+            // Estado según acción
             if ("ENTREGAR".equalsIgnoreCase(accion)) {
                 orden.setEstOrd(EstadoOrden.ENTREGADA);
-                log.info("✅ Estado asignado: ENTREGADA");
             } else if ("INGRESAR".equalsIgnoreCase(accion)) {
                 orden.setEstOrd(EstadoOrden.INGRESADA);
-                log.info("✅ Estado asignado: INGRESADA");
             } else {
-                log.error("❌ Acción inválida: {}", accion);
                 redirectAttrs.addFlashAttribute("error", "Acción inválida: " + accion);
                 return "redirect:/ordenDetalle/" + idOrd;
             }
 
-            // Guardamos con usuario
             ordenServicio.actualizarEstadoOrden(orden, usuarioActivo);
-            log.info("✔️ Orden actualizada por usuario: {}", usuarioActivo.getNombre());
-
-            String mensajeFlash = "✅ Orden actualizada a estado: " + orden.getEstOrd().getDescripcion() +
-                    " por el usuario: " + usuarioActivo.getNombre();
-            redirectAttrs.addFlashAttribute("mensaje", mensajeFlash);
-            log.info("📢 Mensaje flash seteado: {}", mensajeFlash);
+            redirectAttrs.addFlashAttribute("mensaje",
+                    "✅ Orden actualizada a estado: " + orden.getEstOrd().getDescripcion());
 
         } catch (Exception e) {
-            log.error("❌ Error al actualizar estado: {}", e.getMessage(), e);
             redirectAttrs.addFlashAttribute("error", "Error al actualizar estado: " + e.getMessage());
         }
 
-        log.info("➡️ Redirigiendo a /ordenes");
         return "redirect:/ordenes";
     }
+
+    @PostMapping("/orden/devolver/{idOrd}")
+    public String devolverOrden(@PathVariable Integer idOrd,
+                                HttpSession session,
+                                RedirectAttributes redirectAttrs) {
+        Orden orden = ordenServicio.buscarOrdenPorId(idOrd);
+        if (orden == null) {
+            redirectAttrs.addFlashAttribute("error", "Orden no encontrada");
+            return "redirect:/ordenes";
+        }
+
+        Usuario usuarioActivo = (Usuario) session.getAttribute("usuarioSesion");
+        if (usuarioActivo == null) {
+            redirectAttrs.addFlashAttribute("error", "Debe iniciar sesión para continuar.");
+            return "redirect:/login";
+        }
+
+        // 🔹 Cambiar estado a DEVUELTA
+        orden.setEstOrd(EstadoOrden.DEVUELTA);
+        ordenServicio.actualizarEstadoOrden(orden, usuarioActivo);
+
+        redirectAttrs.addFlashAttribute("mensaje", "La orden fue devuelta a Ventas para corrección.");
+        return "redirect:/ordenes";
+    }
+
 
 
 

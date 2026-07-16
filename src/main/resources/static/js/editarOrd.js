@@ -1,5 +1,3 @@
-// editarOrd.js
-
 // Construcción dinámica del menú según estado y tipo de orden
 function construirMenu(estadoOrden, tipoOrden) {
     const menuAcciones = document.getElementById("accionesMenu");
@@ -100,7 +98,6 @@ function construirMenu(estadoOrden, tipoOrden) {
             break;
     }
 
-    // Si no se agregó nada, mostrar mensaje
     if (menuAcciones.innerHTML.trim() === "") {
         menuAcciones.innerHTML = `
             <li><span class="dropdown-item text-muted">Sin acciones disponibles</span></li>
@@ -122,23 +119,20 @@ function mostrarConfirmacionAccion(accion) {
         mensaje.textContent = "¿Está seguro que desea marcar la orden como INGRESADA?";
     }
 
-    // 🔹 Setear el valor del hidden para que el formulario lo envíe
     accionHidden.value = accion;
 
-    // Mostrar el modal
     const modal = new bootstrap.Modal(document.getElementById("confirmarAccionModal"));
     modal.show();
 }
 
-// Registrar listeners para enlaces Entregar, Ingresar, Facturar y Agregar
+// Registrar listeners para enlaces dinámicos
 function registrarAcciones() {
     document.addEventListener("click", function(e) {
         const link = e.target.closest("a");
         if (!link) return;
 
-        // Solo interceptamos si es uno de nuestros botones dinámicos
-        if (["btnEntregar", "btnIngresar", "btnFacturar", "btnAgregar"].includes(link.id)) {
-            e.preventDefault(); // evita navegación solo en estos casos
+        if (["btnEntregar", "btnIngresar", "btnFacturar", "btnAgregar", "btnDevolver"].includes(link.id)) {
+            e.preventDefault();
 
             if (link.id === "btnEntregar") {
                 mostrarConfirmacionAccion("ENTREGAR");
@@ -151,9 +145,12 @@ function registrarAcciones() {
                 const offcanvasEl = document.getElementById("offcanvasArticulos");
                 const offcanvas = new bootstrap.Offcanvas(offcanvasEl);
                 offcanvas.show();
+            } else if (link.id === "btnDevolver") {
+                // 🔹 Abrir directamente el modal de devolución
+                const modal = new bootstrap.Modal(document.getElementById("modalStockInsuficiente"));
+                modal.show();
             }
         }
-        // Si no es uno de esos IDs, dejamos que el enlace funcione normalmente
     });
 }
 
@@ -164,4 +161,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     construirMenu(estadoOrden, tipoOrden);
     registrarAcciones();
+
+    // 🔹 Si backend envió errorStock, abrir modal automáticamente
+    const errorStockElement = document.querySelector("[data-error-stock]");
+    if (errorStockElement) {
+        const modal = new bootstrap.Modal(document.getElementById("modalStockInsuficiente"));
+        modal.show();
+    }
 });

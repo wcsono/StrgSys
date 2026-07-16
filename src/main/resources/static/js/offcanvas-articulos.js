@@ -36,33 +36,39 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Validación dinámica con tipoMovimiento
-    if (cantidadInput) {
-        cantidadInput.addEventListener("input", () => {
-            if (tipoMovimiento === "SALIDA") { // salida
-                const cantidad = parseFloat(cantidadInput.value) || 0;
-                const stock = parseFloat(stockInput.value) || 0;
+    function validarCantidad() {
+        if (tipoMovimiento === "SALIDA") { // salida
+            const cantidad = parseFloat(cantidadInput.value) || 0;
+            const stock = parseFloat(stockInput.value) || 0;
 
-                if (cantidad > stock) {
-                    btnGuardar.disabled = true;
-                    mensaje.style.display = "block";
-                    cantidadInput.classList.add("is-invalid");
-                } else {
-                    btnGuardar.disabled = false;
-                    mensaje.style.display = "none";
-                    cantidadInput.classList.remove("is-invalid");
-                }
-            } else { // ingreso
+            if (cantidad > stock) {
+                btnGuardar.disabled = true;
+                mensaje.style.display = "block";
+                cantidadInput.classList.add("is-invalid");
+            } else {
                 btnGuardar.disabled = false;
                 mensaje.style.display = "none";
                 cantidadInput.classList.remove("is-invalid");
             }
-        });
+        } else { // ingreso
+            btnGuardar.disabled = false;
+            mensaje.style.display = "none";
+            cantidadInput.classList.remove("is-invalid");
+        }
+    }
+
+    if (cantidadInput) {
+        cantidadInput.addEventListener("input", validarCantidad);
     }
 
     // Guardar artículo vía fetch y refrescar tabla
     form.addEventListener("submit", function(e) {
-        e.preventDefault();
+        if (btnGuardar.disabled) {
+            e.preventDefault();
+            return;
+        }
 
+        e.preventDefault();
         const datos = new FormData(form);
 
         fetch(form.action, {
@@ -75,15 +81,15 @@ document.addEventListener("DOMContentLoaded", () => {
             // Detectar página actual
             const esEditar = document.body.getAttribute("data-estado-orden") !== null;
             if (esEditar) {
-                        window.location.href = `/orden/editar/${ordenId}`;
+                window.location.href = `/orden/editar/${ordenId}`;
                 return;
             } else {
                 return fetch(`/ordenDetalle/${ordenId}`);
             }
-
         })
-        .then(res => res.text())
+        .then(res => res ? res.text() : null)
         .then(html => {
+            if (!html) return;
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, "text/html");
 
@@ -103,4 +109,26 @@ document.addEventListener("DOMContentLoaded", () => {
             offcanvas.hide(); // cerrar aunque haya error
         });
     });
+
+    // Limpiar y resetear al cerrar offcanvas
+    offcanvasEl.addEventListener("hidden.bs.offcanvas", () => {
+        // limpiar validación
+        mensaje.style.display = "none";
+        cantidadInput.classList.remove("is-invalid");
+        btnGuardar.disabled = false;
+
+        // resetear formulario completo
+        form.reset();
+
+        // limpiar selects (volver al primer valor vacío)
+        if (codArtSelect) codArtSelect.selectedIndex = 0;
+        if (desArtSelect) desArtSelect.selectedIndex = 0;
+
+        // limpiar campos de stock/costo/precio
+        stockInput.value = "";
+        costoInput.value = "";
+        precioVentaInput.value = "";
+        precioInput.value = "";
+    });
+
 });
