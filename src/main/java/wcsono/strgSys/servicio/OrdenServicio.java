@@ -38,6 +38,9 @@ public class OrdenServicio implements IOrdenServicio {
     @Autowired
     private MovimientoRepositorio movimientoRepositorio;
 
+    @Autowired
+    private FacturacionServicio facturacionServicio; // 🔹 para anular facturas
+
     @Override
     public Page<Orden> listarOrdenesConTipoDocumento(Pageable pageable) {
         return ordenRepositorio.listarConTipoDocumento(pageable);
@@ -81,20 +84,15 @@ public class OrdenServicio implements IOrdenServicio {
         }
         orden.setCliente(cliente);
         orden.setUsuario(usuario);
-
         orden.setEstOrd(EstadoOrden.INICIAL);
         orden.setCosOrd(BigDecimal.ZERO);
         orden.setFechaEstado(LocalDateTime.now());
-
         orden = ordenRepositorio.save(orden);
         orden.setNumOrd(String.valueOf(1000 + orden.getIdOrd()));
-
         Orden saved = ordenRepositorio.save(orden);
-
         logger.info("Orden guardada -> id={}, numOrd={}, estOrd={}, fechaEstado={}, cliente={}, usuario={}",
                 saved.getIdOrd(), saved.getNumOrd(), saved.getEstOrd(), saved.getFechaEstado(),
                 saved.getCliente().getNomCli(), saved.getUsuario().getNombre());
-
         return saved;
     }
 
@@ -104,13 +102,10 @@ public class OrdenServicio implements IOrdenServicio {
         orden.setCliente(cliente);
         orden.setUsuario(usuario);
         orden.setFechaEstado(LocalDateTime.now());
-
         Orden saved = ordenRepositorio.save(orden);
-
         logger.info("Orden actualizada -> id={}, numOrd={}, estOrd={}, fechaEstado={}, cosOrd={}, cliente={}, usuario={}",
-                saved.getIdOrd(), saved.getNumOrd(), saved.getEstOrd(), saved.getFechaEstado(), saved.getCosOrd(),
-                saved.getCliente().getNomCli(), saved.getUsuario().getNombre());
-
+                saved.getIdOrd(), saved.getNumOrd(), saved.getEstOrd(), saved.getFechaEstado(),
+                saved.getCosOrd(), saved.getCliente().getNomCli(), saved.getUsuario().getNombre());
         return saved;
     }
 
@@ -119,15 +114,11 @@ public class OrdenServicio implements IOrdenServicio {
     public Orden actualizarEstadoOrden(Integer idOrd, EstadoOrden nuevoEstado) {
         Orden orden = ordenRepositorio.findById(idOrd)
                 .orElseThrow(() -> new RuntimeException("Orden no encontrada"));
-
         orden.setEstOrd(nuevoEstado);
         orden.setFechaEstado(LocalDateTime.now());
-
         Orden saved = ordenRepositorio.save(orden);
-
         logger.info("Orden actualizada de estado -> id={}, numOrd={}, nuevoEstado={}, fechaEstado={}",
                 saved.getIdOrd(), saved.getNumOrd(), saved.getEstOrd(), saved.getFechaEstado());
-
         return saved;
     }
 
@@ -144,23 +135,16 @@ public class OrdenServicio implements IOrdenServicio {
         if (orden == null) {
             throw new IllegalArgumentException("Orden no encontrada");
         }
-
         boolean esEntrada = orden.getTipoDocumento().getTipoMovimiento() == TipoMovimiento.INGRESO;
-
         orden.getDetalles().forEach(det -> {
             Articulo articulo = det.getArticulo();
-            int nuevoStock = esEntrada
-                    ? articulo.getStk() - det.getCantidad()
-                    : articulo.getStk() + det.getCantidad();
+            int nuevoStock = esEntrada ? articulo.getStk() - det.getCantidad() : articulo.getStk() + det.getCantidad();
             articulo.setStk(nuevoStock);
             articuloRepositorio.save(articulo);
         });
-
         orden.setEstOrd(EstadoOrden.EXTORNADA);
         orden.setFechaEstado(LocalDateTime.now());
-
         ordenRepositorio.save(orden);
-
         logger.info("Orden extornada -> id={}, numOrd={}, fechaEstado={}", orden.getIdOrd(), orden.getNumOrd(), orden.getFechaEstado());
     }
 
@@ -184,16 +168,15 @@ public class OrdenServicio implements IOrdenServicio {
     public Orden actualizarEstadoOrden(Orden orden, Usuario usuario) {
         Orden ordenExistente = ordenRepositorio.findById(orden.getIdOrd())
                 .orElseThrow(() -> new RuntimeException("Orden no encontrada"));
-
         ordenExistente.setEstOrd(orden.getEstOrd());
         ordenExistente.setFechaEstado(LocalDateTime.now());
         ordenExistente.setUsuario(usuario);
 
         // 🔹 Procesar movimientos solo en estados ENTREGADA o INGRESADA
-        if (ordenExistente.getEstOrd() == EstadoOrden.ENTREGADA || ordenExistente.getEstOrd() == EstadoOrden.INGRESADA) {
+        if (ordenExistente.getEstOrd() == EstadoOrden.ENTREGADA
+                || ordenExistente.getEstOrd() == EstadoOrden.INGRESADA) {
             for (DetalleOrden detalle : ordenExistente.getDetalles()) {
                 Articulo articulo = detalle.getArticulo();
-
                 if (ordenExistente.getEstOrd() == EstadoOrden.INGRESADA) {
                     articulo.setStk(articulo.getStk() + detalle.getCantidad());
                 } else if (ordenExistente.getEstOrd() == EstadoOrden.ENTREGADA) {
@@ -209,16 +192,13 @@ public class OrdenServicio implements IOrdenServicio {
                         .costoUnitario(articulo.getCosto())
                         .fechaMovimiento(LocalDateTime.now())
                         .build();
-
                 movimientoRepositorio.save(movimiento);
             }
         }
 
         Orden saved = ordenRepositorio.save(ordenExistente);
-
         logger.info("Orden actualizada de estado -> id={}, numOrd={}, nuevoEstado={}, fechaEstado={}, usuario={}",
                 saved.getIdOrd(), saved.getNumOrd(), saved.getEstOrd(), saved.getFechaEstado(), saved.getUsuario().getNombre());
-
         return saved;
     }
 
@@ -245,37 +225,88 @@ public class OrdenServicio implements IOrdenServicio {
             LocalDate fecOrdHasta,
             Integer estOrd,
             Pageable pageable) {
-
         Specification<Orden> spec = (root, query, cb) -> {
             var predicates = cb.conjunction();
-
             if (numOrd != null && !numOrd.isEmpty()) {
-                predicates = cb.and(predicates,
-                        cb.like(root.get("numOrd"), "%" + numOrd + "%"));
+                predicates = cb.and(predicates, cb.like(root.get("numOrd"), "%" + numOrd + "%"));
             }
-
             if (idCliente != null) {
-                predicates = cb.and(predicates,
-                        cb.equal(root.get("cliente").get("idCliente"), idCliente));
+                predicates = cb.and(predicates, cb.equal(root.get("cliente").get("idCliente"), idCliente));
             }
-
             if (fecOrdDesde != null) {
-                predicates = cb.and(predicates,
-                        cb.greaterThanOrEqualTo(root.get("fecOrd"), fecOrdDesde));
+                predicates = cb.and(predicates, cb.greaterThanOrEqualTo(root.get("fecOrd"), fecOrdDesde));
             }
             if (fecOrdHasta != null) {
-                predicates = cb.and(predicates,
-                        cb.lessThanOrEqualTo(root.get("fecOrd"), fecOrdHasta));
+                predicates = cb.and(predicates, cb.lessThanOrEqualTo(root.get("fecOrd"), fecOrdHasta));
             }
-
             if (estOrd != null) {
-                predicates = cb.and(predicates,
-                        cb.equal(root.get("estOrd"), estOrd));
+                predicates = cb.and(predicates, cb.equal(root.get("estOrd"), estOrd));
             }
-
             return predicates;
         };
-
         return ordenRepositorio.findAll(spec, pageable);
     }
+
+    @Override
+    @Transactional
+    public void procesarEliminacionOAnulacion(Orden orden, Usuario usuario) {
+        if (orden.getEstOrd() == EstadoOrden.INICIAL || orden.getEstOrd() == EstadoOrden.ABIERTA) {
+            if (facturacionServicio.existenFacturasPorOrden(orden.getIdOrd())) {
+                throw new RuntimeException("⚠️ No se puede eliminar la orden porque tiene facturación asociada.");
+            }
+            ordenRepositorio.delete(orden);
+            logger.info("Orden eliminada físicamente -> id={}, numOrd={}", orden.getIdOrd(), orden.getNumOrd());
+
+        } else if (orden.getEstOrd() == EstadoOrden.DEVUELTA) {
+            orden.setEstOrd(EstadoOrden.ANULADA);
+            orden.setFechaEstado(LocalDateTime.now());
+            orden.setUsuario(usuario);
+            ordenRepositorio.save(orden);
+
+            facturacionServicio.anularFacturasPorOrden(orden.getIdOrd());
+            logger.info("Orden devuelta anulada -> id={}, numOrd={}", orden.getIdOrd(), orden.getNumOrd());
+
+        } else {
+            throw new RuntimeException("⚠️ La orden no puede eliminarse ni anularse en su estado actual.");
+        }
+    }
+
+
+    @Override
+    @Transactional
+    public void procesarEliminacionOAnulacion(Integer idOrd, Usuario usuarioActivo) {
+        Orden orden = ordenRepositorio.findById(idOrd)
+                .orElseThrow(() -> new RuntimeException("Orden no encontrada"));
+
+        switch (orden.getEstOrd()) {
+            case DEVUELTA:
+                // ✅ Nunca se elimina, siempre se anula junto con sus facturas
+                orden.setEstOrd(EstadoOrden.ANULADA);
+                ordenRepositorio.save(orden);
+                facturacionServicio.anularFacturasPorOrden(idOrd);
+                logger.info("Orden {} DEVUELTA fue ANULADA junto con sus facturas por {}", idOrd, usuarioActivo.getNombre());
+                break;
+
+            case INICIAL:
+            case ABIERTA:
+                if (facturacionServicio.existenFacturasPorOrden(idOrd)) {
+                    // ✅ Tiene facturas → se anula
+                    orden.setEstOrd(EstadoOrden.ANULADA);
+                    ordenRepositorio.save(orden);
+                    facturacionServicio.anularFacturasPorOrden(idOrd);
+                    logger.info("Orden {} con facturas fue ANULADA junto con sus facturas por {}", idOrd, usuarioActivo.getNombre());
+                } else {
+                    // ✅ No tiene facturas → se elimina
+                    ordenRepositorio.deleteById(idOrd);
+                    logger.info("Orden {} eliminada por {}", idOrd, usuarioActivo.getNombre());
+                }
+                break;
+
+            default:
+                // ✅ Otros estados no se eliminan ni se anulan
+                logger.warn("Orden {} en estado {} no puede eliminarse ni anularse", idOrd, orden.getEstOrd());
+                throw new IllegalStateException("No se permite la anulación o eliminación de una orden en estado " + orden.getEstOrd());
+        }
+    }
+
 }

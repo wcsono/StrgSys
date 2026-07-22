@@ -1,7 +1,6 @@
 package wcsono.strgSys.servicio;
 
 import wcsono.strgSys.modelo.Facturacion;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -24,4 +23,10 @@ public interface IFacturacionServicio {
 
     // Eliminar factura (Facturacion usa Long en idFact)
     void eliminarFactura(Long idFact);
+
+    // ✅ Nuevo: verificar si existen facturas asociadas a una orden
+    boolean existenFacturasPorOrden(Integer idOrd);
+
+    // ✅ Nuevo: anular todas las facturas asociadas a una orden
+    void anularFacturasPorOrden(Integer idOrd);
 }

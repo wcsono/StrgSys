@@ -52,10 +52,10 @@ public class FacturacionControlador {
             return "redirect:/ordenes";
         }
 
-        // Registrar factura
+        // ✅ Registrar factura con estado ACTIVA y fecha actual
         facturacionServicio.registrarFactura(idOrd, numFactura);
 
-        // Actualizar estado y usuario activo
+        // Actualizar estado de la orden y registrar usuario activo
         orden.setEstOrd(EstadoOrden.FACTURADA);
         ordenServicio.actualizarEstadoOrden(orden, usuarioActivo);
 

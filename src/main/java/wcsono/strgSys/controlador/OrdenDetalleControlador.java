@@ -12,7 +12,6 @@ import wcsono.strgSys.modelo.Usuario;
 import wcsono.strgSys.servicio.OrdenServicio;
 import wcsono.strgSys.servicio.ArticuloServicio;
 import wcsono.strgSys.servicio.DetalleOrdenServicio;
-
 import java.math.BigDecimal;
 import jakarta.servlet.http.HttpSession;
 
@@ -35,7 +34,6 @@ public class OrdenDetalleControlador {
                                                 @RequestParam Integer idArt,
                                                 @RequestParam Integer cantidad,
                                                 HttpSession session) {
-
         Orden orden = ordenServicio.buscarOrdenPorId(id);
         Articulo articulo = articuloServicio.buscarArticuloPorId(idArt);
 
@@ -43,23 +41,19 @@ public class OrdenDetalleControlador {
         detalle.setOrden(orden);
         detalle.setArticulo(articulo);
         detalle.setCantidad(cantidad);
-
-        // Asignar directamente porque ya son BigDecimal en Articulo
         detalle.setCosArt(articulo.getCosto());
         detalle.setPrecioVenta(articulo.getPrecioVenta());
 
-        // Subtotal se calcula automáticamente en @PrePersist/@PreUpdate
         detalleOrdenServicio.guardarDetalleOrden(detalle);
 
         // Recalcular costo total de la orden
         BigDecimal totalOrden = detalleOrdenServicio.listarPorOrden(id).stream()
                 .map(DetalleOrden::getSubtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-
         orden.setCosOrd(totalOrden);
 
-        // Cambiar estado: si estaba en INICIAL, pasa a ABIERTA
-        if (orden.getEstOrd() == EstadoOrden.INICIAL) {
+        // 🔹 Cambiar estado: si estaba en INICIAL o DEVUELTA → ABIERTA
+        if (orden.getEstOrd() == EstadoOrden.INICIAL || orden.getEstOrd() == EstadoOrden.DEVUELTA) {
             orden.setEstOrd(EstadoOrden.ABIERTA);
         }
 
@@ -69,16 +63,17 @@ public class OrdenDetalleControlador {
         return ResponseEntity.ok().build();
     }
 
-    // ✅ Eliminar artículo de la orden (solo si está INICIAL o ABIERTA)
+    // ✅ Eliminar artículo de la orden (permitido si está INICIAL, ABIERTA o DEVUELTA)
     @PostMapping("/{id}/articulos/{idDet}/eliminar")
     public ResponseEntity<String> eliminarArticulo(@PathVariable Integer id,
                                                    @PathVariable Integer idDet,
                                                    HttpSession session) {
-
         Orden orden = ordenServicio.buscarOrdenPorId(id);
 
-        if (orden.getEstOrd() == EstadoOrden.INICIAL || orden.getEstOrd() == EstadoOrden.ABIERTA) {
-            // Buscar el detalle antes de eliminar (porque el servicio elimina por objeto)
+        if (orden.getEstOrd() == EstadoOrden.INICIAL ||
+                orden.getEstOrd() == EstadoOrden.ABIERTA ||
+                orden.getEstOrd() == EstadoOrden.DEVUELTA) {
+
             DetalleOrden detalle = detalleOrdenServicio.buscarDetalleOrdenPorId(idDet);
             if (detalle != null) {
                 detalleOrdenServicio.eliminarDetalleOrden(detalle);
@@ -88,7 +83,6 @@ public class OrdenDetalleControlador {
             BigDecimal totalOrden = detalleOrdenServicio.listarPorOrden(id).stream()
                     .map(DetalleOrden::getSubtotal)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
-
             orden.setCosOrd(totalOrden);
 
             Usuario usuarioActivo = (Usuario) session.getAttribute("usuarioSesion");

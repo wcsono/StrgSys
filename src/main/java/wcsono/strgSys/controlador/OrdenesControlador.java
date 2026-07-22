@@ -367,6 +367,52 @@ public class OrdenesControlador {
         redirectAttrs.addFlashAttribute("mensaje", "La orden fue devuelta a Ventas para corrección.");
         return "redirect:/ordenes";
     }
+    @PostMapping("/orden/{id}/eliminarOAnular")
+    public String eliminarOAnularOrden(@PathVariable("id") Integer idOrd,
+                                       HttpSession session,
+                                       RedirectAttributes redirectAttrs) {
+        Usuario usuarioActivo = (Usuario) session.getAttribute("usuarioSesion");
+        if (usuarioActivo == null) {
+            redirectAttrs.addFlashAttribute("error", "Debe iniciar sesión para continuar.");
+            return "redirect:/login";
+        }
+
+        try {
+            ordenServicio.procesarEliminacionOAnulacion(idOrd, usuarioActivo);
+            redirectAttrs.addFlashAttribute("mensaje", "Operación realizada correctamente.");
+        } catch (IllegalStateException e) {
+            // ⚠️ Caso de estados no permitidos
+            redirectAttrs.addFlashAttribute("error", e.getMessage());
+        } catch (RuntimeException e) {
+            // ⚠️ Orden no encontrada u otro error
+            redirectAttrs.addFlashAttribute("error", "Error al procesar la orden: " + e.getMessage());
+        }
+
+        return "redirect:/ordenes";
+    }
+// Proceso de cerrar una Orden
+@GetMapping("/orden/{id}/cerrar")
+public String cerrarOrden(@PathVariable("id") Integer idOrd,
+                          HttpSession session,
+                          RedirectAttributes redirectAttrs) {
+    Usuario usuarioActivo = (Usuario) session.getAttribute("usuarioSesion");
+    if (usuarioActivo == null) {
+        redirectAttrs.addFlashAttribute("error", "Debe iniciar sesión para continuar.");
+        return "redirect:/login";
+    }
+
+    try {
+        ordenServicio.actualizarEstadoOrden(idOrd, EstadoOrden.CERRADA);
+        redirectAttrs.addFlashAttribute("mensaje", "La orden fue cerrada correctamente.");
+    } catch (RuntimeException e) {
+        redirectAttrs.addFlashAttribute("error", "Error al cerrar la orden: " + e.getMessage());
+    }
+
+    return "redirect:/ordenes";
+}
+
+
+
 
 
 
