@@ -67,18 +67,25 @@
 
                     <td>
                         <div class="d-flex justify-content-center gap-2">
+                            <!-- Botón Ver -->
                             <button class="btn btn-info btn-sm ver-orden"
                                     th:attr="data-id=${orden.idOrd}" title="Ver">
                                 <i class="bi bi-eye"></i>
                             </button>
+
+                            <!-- Botón Editar -->
                             <a th:href="@{/orden/editar/{idOrd}(idOrd=${orden.idOrd})}"
                                class="btn btn-dark btn-sm" title="Editar">
                                 <i class="bi bi-pencil-square"></i>
                             </a>
-                            <a th:href="@{/eliminarOrd/{id}(id=${orden.idOrd})}"
-                               class="btn btn-danger btn-sm" title="Eliminar">
-                                <i class="bi bi-trash"></i>
-                            </a>
+
+                            <!-- Botón Eliminar/Anular (POST) -->
+                            <form th:action="@{/orden/{id}/eliminarOAnular(id=${orden.idOrd})}"
+                                  method="post" class="d-inline">
+                                <button type="submit" class="btn btn-danger btn-sm" title="Eliminar / Anular">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
                         </div>
                     </td>
                 </tr>

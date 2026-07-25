@@ -17,4 +17,7 @@ public interface FacturacionRepositorio extends JpaRepository<Facturacion, Long>
 
     // Opcional: obtener todas las facturas de un cliente a través de la orden
     List<Facturacion> findByOrden_Cliente_CodCli(String codCli);
+
+    // ✅ Nuevo: verificar si existen facturas asociadas a una orden
+    boolean existsByOrden_IdOrd(Integer idOrd);
 }

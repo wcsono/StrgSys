@@ -131,7 +131,7 @@ function registrarAcciones() {
         const link = e.target.closest("a");
         if (!link) return;
 
-        if (["btnEntregar", "btnIngresar", "btnFacturar", "btnAgregar", "btnDevolver"].includes(link.id)) {
+        if (["btnEntregar", "btnIngresar", "btnFacturar", "btnAgregar", "btnDevolver", "btnCerrar"].includes(link.id)) {
             e.preventDefault();
 
             if (link.id === "btnEntregar") {
@@ -146,9 +146,12 @@ function registrarAcciones() {
                 const offcanvas = new bootstrap.Offcanvas(offcanvasEl);
                 offcanvas.show();
             } else if (link.id === "btnDevolver") {
-                // 🔹 Abrir directamente el modal de devolución
                 const modal = new bootstrap.Modal(document.getElementById("modalStockInsuficiente"));
                 modal.show();
+            } else if (link.id === "btnCerrar") {
+                // 🔹 Redirigir directamente al endpoint de cerrar
+                const idOrden = document.body.getAttribute("data-id-orden");
+                window.location.href = `/orden/${idOrden}/cerrar`;
             }
         }
     });

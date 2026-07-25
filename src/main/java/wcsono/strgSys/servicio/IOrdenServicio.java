@@ -6,12 +6,10 @@ import wcsono.strgSys.modelo.Cliente;
 import wcsono.strgSys.modelo.Orden;
 import wcsono.strgSys.modelo.Usuario;
 import wcsono.strgSys.enums.EstadoOrden;
-
 import java.time.LocalDate;
 import java.util.List;
 
 public interface IOrdenServicio {
-
     // 🔹 Listados generales
     Page<Orden> listarOrdenesConTipoDocumento(Pageable pageable);
     Page<Orden> listarOrdenes(Pageable pageable);
@@ -32,14 +30,14 @@ public interface IOrdenServicio {
     Orden actualizarEstadoOrden(Orden orden, Usuario usuario);
 
     List<Orden> listarOrdenesOrdenadasPorFechaDesc();
-
     List<Orden> listarOrdenesOrdenadasPorIdDesc();
-
-
 
     // 🔹 Eliminación y extorno
     void eliminarOrden(Orden orden);
     void extornarOrden(Integer id);
+
+    // 🔹 Nuevo método: eliminación/anulación unificada
+    void procesarEliminacionOAnulacion(Orden orden, Usuario usuario);
 
     // 🔹 Validación
     boolean validarNumOrdUnico(String numOrd);
@@ -59,7 +57,15 @@ public interface IOrdenServicio {
             Integer idCliente,
             LocalDate fecOrdDesde,
             LocalDate fecOrdHasta,
-            Integer estOrd,   // ⚠️ se mantiene como Integer porque viene del filtro en la vista
+            Integer estOrd, // ⚠️ se mantiene como Integer porque viene del filtro en la vista
             Pageable pageable
     );
+    /**
+     * Procesa la eliminación o anulación de una orden según reglas de negocio:
+     * - DEVUELTA → siempre se ANULA junto con sus facturas
+     * - INICIAL o ABIERTA → se elimina si no tiene facturas, se ANULA si las tiene
+     * - Otros estados → no se permite anulación ni eliminación
+     */
+    void procesarEliminacionOAnulacion(Integer idOrd, Usuario usuarioActivo);
+
 }
