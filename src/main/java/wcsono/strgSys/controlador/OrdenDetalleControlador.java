@@ -79,6 +79,13 @@ public class OrdenDetalleControlador {
             return "redirect:/ordenes";
         }
 
+        // 🔹 Validar estado permitido (solo ABIERTA o DEVUELTA)
+        if (!(orden.getEstOrd() == EstadoOrden.ABIERTA || orden.getEstOrd() == EstadoOrden.DEVUELTA)) {
+            redirectAttrs.addFlashAttribute("error",
+                    "No se pueden eliminar artículos en estado " + orden.getEstOrd().getDescripcion());
+            return "redirect:/orden/editar/" + idOrd;
+        }
+
         // Buscar detalle y eliminar
         DetalleOrden detalle = detalleOrdenServicio.buscarDetalleOrdenPorId(idDo);
         if (detalle != null) {
@@ -112,4 +119,5 @@ public class OrdenDetalleControlador {
 
         return "redirect:/orden/editar/" + idOrd;
     }
-}
+
+} // fin de la clase

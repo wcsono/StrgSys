@@ -131,7 +131,7 @@ function registrarAcciones() {
         const link = e.target.closest("a");
         if (!link) return;
 
-        if (["btnEntregar", "btnIngresar", "btnFacturar", "btnAgregar", "btnDevolver", "btnCerrar"].includes(link.id)) {
+        if (["btnEntregar", "btnIngresar", "btnFacturar", "btnAgregar", "btnDevolver", "btnCerrar", "btnExtornar"].includes(link.id)) {
             e.preventDefault();
 
             if (link.id === "btnEntregar") {
@@ -149,9 +149,16 @@ function registrarAcciones() {
                 const modal = new bootstrap.Modal(document.getElementById("modalStockInsuficiente"));
                 modal.show();
             } else if (link.id === "btnCerrar") {
-                // 🔹 Redirigir directamente al endpoint de cerrar
                 const idOrden = document.body.getAttribute("data-id-orden");
                 window.location.href = `/orden/${idOrden}/cerrar`;
+            } else if (link.id === "btnExtornar") {
+                const idOrden = document.body.getAttribute("data-id-orden");
+                const modal = new bootstrap.Modal(document.getElementById("confirmarExtornoModal"));
+                modal.show();
+
+                document.getElementById("confirmarExtornoBtn").onclick = function() {
+                    window.location.href = `/orden/${idOrden}/extornar`;
+                };
             }
         }
     });

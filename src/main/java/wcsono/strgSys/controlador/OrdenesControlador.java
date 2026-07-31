@@ -13,12 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 import wcsono.strgSys.dto.DetalleDTO;
 import wcsono.strgSys.dto.OrdenDTO;
-import wcsono.strgSys.modelo.Cliente;
-import wcsono.strgSys.modelo.Orden;
-import wcsono.strgSys.modelo.TipoDocumento;
-import wcsono.strgSys.modelo.Usuario;
-import wcsono.strgSys.modelo.DetalleOrden;
-import wcsono.strgSys.modelo.Articulo;
+import wcsono.strgSys.modelo.*;
 import wcsono.strgSys.enums.EstadoOrden;
 import wcsono.strgSys.enums.TipoMovimiento;
 import wcsono.strgSys.servicio.*;
@@ -410,12 +405,76 @@ public String cerrarOrden(@PathVariable("id") Integer idOrd,
 
     return "redirect:/ordenes";
 }
+//EndPoint de Extornar una Orden
+@GetMapping("/orden/{idOrd}/extornar")
+public String extornarOrden(@PathVariable Integer idOrd,
+                            HttpSession session,
+                            RedirectAttributes redirectAttrs) {
+    Orden orden = ordenServicio.buscarOrdenPorId(idOrd);
+    if (orden == null) {
+        redirectAttrs.addFlashAttribute("error", "⚠️ Orden no encontrada.");
+        return "redirect:/ordenes";
+    }
 
+    Usuario usuarioActivo = (Usuario) session.getAttribute("usuarioSesion");
+    if (usuarioActivo == null || usuarioActivo.getNivelAcceso() != 1) {
+        redirectAttrs.addFlashAttribute("error", "❌ Solo un Administrador puede extornar órdenes.");
+        return "redirect:/ordenes";
+    }
 
+    // Validar estados permitidos
+    if (!(orden.getEstOrd() == EstadoOrden.ENTREGADA
+            || orden.getEstOrd() == EstadoOrden.INGRESADA
+            || orden.getEstOrd() == EstadoOrden.CERRADA)) {
+        redirectAttrs.addFlashAttribute("error",
+                "❌ No se puede extornar una orden en estado " + orden.getEstOrd().getDescripcion());
+        return "redirect:/ordenes";
+    }
 
+    try {
+        // Invertir movimientos de inventario y registrar en Movimientos
+        for (DetalleOrden detalle : orden.getDetalles()) {
+            Articulo articulo = detalle.getArticulo();
+            Integer cantidad = detalle.getCantidad();
 
+            if (orden.getTipoDocumento().getTipoMovimiento() == TipoMovimiento.INGRESO) {
+                // Si fue ingreso, ahora restamos
+                articulo.setStk(articulo.getStk() - cantidad);
+            } else if (orden.getTipoDocumento().getTipoMovimiento() == TipoMovimiento.SALIDA) {
+                // Si fue salida, ahora sumamos
+                articulo.setStk(articulo.getStk() + cantidad);
+            }
+            articuloServicio.guardarArticulo(articulo);
 
+            // 🔹 Registrar movimiento de extorno
+            Movimiento mov = new Movimiento();
+            mov.setArticulo(articulo);
+            mov.setTipoDocumento(orden.getTipoDocumento());
+            mov.setOrden(orden);
+            mov.setCantidad(cantidad);
+            mov.setCostoUnitario(detalle.getCosArt() != null ? detalle.getCosArt() : detalle.getPrecioVenta());
+            mov.setFechaMovimiento(LocalDateTime.now());
 
+            // El valorMovimiento se calcula automáticamente en @PrePersist/@PreUpdate
+            movimientoServicio.guardarMovimiento(mov);
+        }
+
+        // Cambiar estado a EXTORNADA con fecha y usuario
+        orden.setEstOrd(EstadoOrden.EXTORNADA);
+        orden.setFechaEstado(LocalDateTime.now());
+        orden.setUsuario(usuarioActivo);
+
+        ordenServicio.actualizarEstadoOrden(orden, usuarioActivo);
+
+        redirectAttrs.addFlashAttribute("mensaje",
+                "✅ La orden " + idOrd + " fue extornada correctamente. Nuevo estado: EXTORNADA");
+
+    } catch (Exception e) {
+        redirectAttrs.addFlashAttribute("error", "Error al extornar la orden: " + e.getMessage());
+    }
+
+    return "redirect:/ordenes";
+}
 
 } // ✅ cierre de la clase OrdenesControlador
 

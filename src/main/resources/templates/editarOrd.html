@@ -115,11 +115,22 @@
                     <td th:text="${detalle.articulo.codArt}"></td>
                     <td th:text="${detalle.articulo.desArt}"></td>
                     <td th:text="${detalle.cantidad}"></td>
-                    <td th:text="${detalle.cosArt}"></td>
+
+                    <!-- Precio Unitario -->
+                    <td th:text="${orden.tipoDocumento.subTipoMovimiento == T(wcsono.strgSys.enums.SubTipoMovimiento).VENTA
+              ? detalle.precioVenta
+              : detalle.cosArt}"></td>
+
+                    <!-- Subtotal -->
                     <td th:text="${detalle.subtotal}"></td>
+
+
                     <td>
-                        <!-- Botón eliminar solo con ícono y tooltip -->
-                        <form th:action="@{/orden/{idOrd}/articulos/{idDo}/eliminar(idOrd=${orden.idOrd}, idDo=${detalle.idDo})}" method="post" class="d-inline">
+                        <!-- Botón eliminar solo si la orden está ABIERTA o DEVUELTA -->
+                        <form th:if="${orden.estOrd == T(wcsono.strgSys.enums.EstadoOrden).ABIERTA
+                  or orden.estOrd == T(wcsono.strgSys.enums.EstadoOrden).DEVUELTA}"
+                              th:action="@{/orden/{idOrd}/articulos/{idDo}/eliminar(idOrd=${orden.idOrd}, idDo=${detalle.idDo})}"
+                              method="post" class="d-inline">
                             <button type="submit" class="btn btn-danger btn-sm"
                                     data-bs-toggle="tooltip"
                                     data-bs-placement="top"
@@ -128,7 +139,17 @@
                             </button>
                         </form>
 
+                        <!-- Botón deshabilitado en otros estados -->
+                        <button th:if="${orden.estOrd != T(wcsono.strgSys.enums.EstadoOrden).ABIERTA
+                    and orden.estOrd != T(wcsono.strgSys.enums.EstadoOrden).DEVUELTA}"
+                                type="button" class="btn btn-danger btn-sm" disabled
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="top"
+                                title="No se puede eliminar en este estado">
+                            <i class="bi bi-trash"></i>
+                        </button>
                     </td>
+
                 </tr>
                 <tr th:unless="${#lists.size(orden.detalles) > 0}">
                     <td colspan="6" class="text-center text-muted">No hay Artículos agregados</td>
@@ -247,6 +268,25 @@
 </div>
 
 <span th:if="${errorStock}" th:attr="data-error-stock=${errorStock}"></span>
+
+<!-- Modal de confirmación de Extorno -->
+<div class="modal fade" id="confirmarExtornoModal" tabindex="-1" aria-labelledby="confirmarExtornoTitulo" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title" id="confirmarExtornoTitulo">Confirmar Extorno</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmarExtornoMensaje">¿Está seguro que desea extornar esta orden? Esta acción revertirá los movimientos de inventario.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="confirmarExtornoBtn" class="btn btn-warning btn-sm">Extornar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 <!-- Script para enfocar automáticamente el input Número de Factura -->
