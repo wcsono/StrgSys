@@ -121,39 +121,37 @@
                         <p>$ 45,600</p>
                     </div>
 
-                    <div class="card card-yellow">
-                        <h4>Ingresos Vs Salidas</h4>
-                        <ul>
-                            <li>Entrada: Producto A (12/04)</li>
-                            <li>Salida: Producto B (13/04)</li>
-                            <li>Entrada: Producto C (14/04)</li>
-                        </ul>
-                    </div>
-
-                    <!-- Segunda fila -->
-                    <div class="card card-red">
-                        <h4>Top 3 productos más movidos</h4>
+                    <!-- 🔹 Top 3 productos más vendidos -->
+                    <div class="card card-red" id="topProductosCard">
+                        <h4>Top 3 productos más vendidos</h4>
                         <ol>
-                            <li>Producto X</li>
-                            <li>Producto Y</li>
-                            <li>Producto Z</li>
+                            <!-- El contenido se llenará dinámicamente desde reportesDashboard.js -->
                         </ol>
                     </div>
 
+                    <!-- Segunda fila -->
                     <div class="card card-light">
-                        <h4>Entradas vs Salidas (2026)</h4>
-                        <canvas id="graficoEntradasVsSalidas"></canvas>
+                        <h4>Ventas por Mes</h4>
+                        <canvas id="graficoVentasPorMes"></canvas>
                     </div>
 
-                    <!-- Nuevos cards -->
-                    <div class="card card-blue">
-                        <h4>Usuarios activos</h4>
-                        <p>5</p>
+
+                    <div class="card card-red">
+                        <h4>Usuarios no activos</h4>
+                        <p id="cardUsuariosInactivos" th:text="${usuariosInactivos}"></p>
                     </div>
 
+
+                    <!-- 🔹 Órdenes cerradas -->
+                    <div class="card card-green">
+                        <h4>Órdenes cerradas (mes actual)</h4>
+                        <p id="cardOrdenesCerradas">0</p>
+                    </div>
+
+                    <!-- 🔹 Órdenes no cerradas (antes Documentos pendientes) -->
                     <div class="card card-yellow">
-                        <h4>Documentos pendientes</h4>
-                        <p>3</p>
+                        <h4>Órdenes no cerradas</h4>
+                        <p id="cardOrdenesPendientes">0</p>
                     </div>
                 </div>
             </div>
@@ -163,30 +161,33 @@
 </div>
 <!-- Modal Bootstrap -->
 <!-- Modal general para cards -->
-<div class="modal fade" id="cardModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"></h5>
+    <div class="modal fade" id="cardModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="modalCardTitle"></h4>
+                </div>
+                <div class="modal-body text-center">
+                    <p id="modalCardDato"></p>
+                </div>
             </div>
-            <div class="modal-body" id="modal-body"></div>
         </div>
     </div>
-</div>
 
 <!-- Modal exclusivo para gráfico -->
-<div class="modal fade" id="graficoModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Entradas vs Salidas</h5>
-            </div>
-            <div class="modal-body">
-                <canvas id="graficoEntradasVsSalidasModal"></canvas>
+    <div class="modal fade" id="graficoModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Ventas por Mes</h5>
+                </div>
+                <div class="modal-body">
+                    <canvas id="graficoVentasPorMesModal"></canvas>
+                </div>
             </div>
         </div>
     </div>
-</div>
+
 
 
 
@@ -194,9 +195,13 @@
 <div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script th:inline="javascript">
-    const articulos = /*[[${articulos}]]*/ [];
-</script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
+    <script th:inline="javascript">
+        const articulos = /*[[${articulos}]]*/ [];
+        const valorTotalInventario = /*[[${valorTotalInventario}]]*/ 0;
+    </script>
+
 <script src="/js/reportesInventario.js"></script>
 <script src="/js/reportesMovimientos.js"></script>
 <script src="/js/reportesDashboard.js"></script>

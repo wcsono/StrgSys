@@ -102,7 +102,7 @@ body {
 /* ===== Dashboard ===== */
 .dashboard {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* adaptable */
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 15px;
   align-items: start;
   background: #f0f4f8;
@@ -111,44 +111,138 @@ body {
   box-shadow: 0 6px 12px rgba(0,0,0,0.15);
   margin-top: 10px;
   box-sizing: border-box;
-  min-height: auto; /* evita forzar scroll */
+  min-height: auto;
 }
 
+/* Estilo general para los cards del dashboard */
 .dashboard .card {
-  padding: 10px;
-  border-radius: 10px;
-  color: #fff;
-  font-family: Arial, sans-serif;
-  text-align: center;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  cursor: pointer;
-  min-height: 120px; /* altura controlada */
+    text-align: center;
+    padding: 20px;
+    border-radius: 10px;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* ===== Tabla compacta para detalle de órdenes ===== */
-/* Este bloque SOLO afecta a la tabla generada en orden.js con class="table-compact" */
-.table-compact td,
-.table-compact th {
-  padding: 0.35rem 0.5rem;   /* menos espacio vertical */
-  white-space: nowrap;       /* evita saltos de línea */
-  overflow: hidden;          /* oculta texto largo */
-  text-overflow: ellipsis;   /* agrega "..." */
-  font-size: 0.75rem;        /* texto más pequeño */
-  vertical-align: middle;    /* centra verticalmente */
+/* Colores específicos */
+.card-green { background-color: #28a745; }
+.card-blue { background-color: #007bff; }
+.card-darkgreen { background-color: #006400; }
+.card-yellow { background-color: #ffc107; color: #000; }
+.card-red { background-color: #dc3545; }
+.card-light { background-color: #f8f9fa; color: #000; }
+
+/* Estilo para el número grande en cards */
+.dashboard .card p {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin: 0;
 }
 
-/* Limitar ancho de la columna Artículo */
-.table-compact td.text-truncate {
-  max-width: 220px;          /* ajusta según tu diseño */
+/* Estilo para el título en cards */
+.dashboard .card h4 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
 }
 
-/* ===== Panel derecho más compacto ===== */
-/* Reduce el tamaño de todo el texto dentro del panel derecho */
-#detallePanel,
-#detallePanel * {
-  font-size: 0.80rem !important;
+/* ===== Estilos específicos para modales ===== */
+.modal-content h4 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    font-weight: bold;
+    text-align: center;
+    color: inherit;
 }
+
+.modal-content .numero-grande {
+    font-size: 5rem;
+    font-weight: bold;
+    text-align: center;
+    margin: 0;
+    color: inherit;
+}
+
+.modal-content .texto-grande {
+    font-size: 2rem;
+    text-align: center;
+    margin: 0.5rem 0;
+    color: inherit;
+}
+/* ===== Modales con mismo estilo que los cards ===== */
+.modal-content.card-green {
+    background-color: #28a745; /* verde */
+    color: #fff;
+    text-align: center;
+}
+
+.modal-content.card-blue {
+    background-color: #007bff; /* azul */
+    color: #fff;
+    text-align: center;
+}
+
+.modal-content.card-darkgreen {
+    background-color: #006400; /* verde oscuro */
+    color: #fff;
+    text-align: center;
+}
+
+.modal-content.card-red {
+    background-color: #dc3545; /* rojo */
+    color: #fff;
+    text-align: center;
+}
+
+.modal-content.card-yellow {
+    background-color: #ffc107; /* amarillo */
+    color: #000;
+    text-align: center;
+}
+
+.modal-content.card-light {
+    background-color: #f8f9fa; /* gris claro */
+    color: #000;
+    text-align: center;
+}
+
+/* Ajustar título del modal */
+.modal-title {
+    text-align: center;
+    width: 100%;
+    font-weight: bold;
+    color: inherit; /* hereda el color definido arriba */
+}
+/* 🔹 Dashboard: card amarillo con texto negro */
+.card-yellow { background-color: #ffc107; color: #000; }
+
+/* 🔹 Modal: card amarillo con texto blanco */
+.modal-content.card-yellow {
+    background-color: #ffc107;
+    color: #fff; /* texto blanco en modal */
+    text-align: center;
+}
+
+.modal-content.card-yellow h4,
+.modal-content.card-yellow p {
+    color: #fff; /* forzar títulos y párrafos en blanco */
+}
+/* 🔹 Forzar altura uniforme en los cards del dashboard */
+.dashboard .card {
+    flex: 1;                /* que todos crezcan igual */
+    min-height: 180px;      /* altura mínima uniforme */
+    max-height: 180px;      /* altura máxima uniforme */
+    overflow-y: auto;       /* scroll interno si el contenido excede */
+}
+
+/* 🔹 Compactar lista del card Top 3 */
+#topProductosCard ol {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 0.85rem;     /* aún más pequeño */
+    line-height: 1.1;       /* más compacto */
+}
+#topProductosCard li {
+    margin-bottom: 1px;     /* casi sin espacio entre items */
+}
+

@@ -89,22 +89,45 @@ public class OrdenesControlador {
     }
 
     @GetMapping("/agregarOrden")
-    public String mostrarAgregarOrden(Model model) {
+    public String mostrarAgregarOrden(Model model,
+                                      HttpSession session,
+                                      RedirectAttributes redirectAttrs) {
+        Usuario usuarioActivo = (Usuario) session.getAttribute("usuarioSesion");
+        if (usuarioActivo == null) {
+            redirectAttrs.addFlashAttribute("error", "Debe iniciar sesión para continuar.");
+            return "redirect:/login";
+        }
+
+        // Restricción: solo Administrador (1) y Operador/Ventas (2)
+        if (usuarioActivo.getNivelAcceso() != 1 && usuarioActivo.getNivelAcceso() != 2) {
+            redirectAttrs.addFlashAttribute("error", "No tiene Permiso para realizar este proceso");
+            return "redirect:/ordenes";
+        }
+
         model.addAttribute("ordenForma", new Orden());
         model.addAttribute("clienteForma", new Cliente());
         model.addAttribute("tdsAgregarOrden", tipoDocumentoServicio.listarTipoDocumentos());
         logger.info("✅ Preparando formulario de nueva orden");
+
         return "agregarOrden";
     }
 
     @PostMapping("/guardarAgregarOrden")
     public String guardarAgregarOrden(@ModelAttribute("ordenForma") Orden orden,
                                       @RequestParam String codCli,
-                                      HttpSession session) {
+                                      HttpSession session,
+                                      RedirectAttributes redirectAttrs) {
 
         Usuario usuarioActivo = (Usuario) session.getAttribute("usuarioSesion");
         if (usuarioActivo == null) {
+            redirectAttrs.addFlashAttribute("error", "Debe iniciar sesión para continuar.");
             return "redirect:/login";
+        }
+
+        // Restricción: solo Administrador (1) y Operador/Ventas (2)
+        if (usuarioActivo.getNivelAcceso() != 1 && usuarioActivo.getNivelAcceso() != 2) {
+            redirectAttrs.addFlashAttribute("error", "No tiene Permiso para realizar este proceso");
+            return "redirect:/ordenes";
         }
 
         Cliente clienteExistente = clienteServicio.obtenerClientePorCodigo(codCli);
@@ -120,6 +143,7 @@ public class OrdenesControlador {
 
         Orden nuevaOrden = ordenServicio.guardarOrden(orden, clienteExistente, usuarioActivo);
 
+        redirectAttrs.addFlashAttribute("mensaje", "✅ Orden creada correctamente.");
         return "redirect:/ordenDetalle/" + nuevaOrden.getIdOrd();
     }
 
@@ -145,24 +169,30 @@ public class OrdenesControlador {
 
     @GetMapping("/verOrd/{id}")
     @ResponseBody
-    public OrdenDTO verOrd(@PathVariable Integer id, HttpSession session) {
+    public OrdenDTO verOrd(@PathVariable Integer id, HttpSession session, RedirectAttributes redirectAttrs) {
+        Usuario usuarioActivo = (Usuario) session.getAttribute("usuarioSesion");
+        if (usuarioActivo == null) {
+            redirectAttrs.addFlashAttribute("error", "Debe iniciar sesión para continuar.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Debe iniciar sesión para continuar.");
+        }
+
         Orden orden = ordenServicio.buscarOrdenPorId(id);
         if (orden == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Orden no encontrada");
         }
 
-        Usuario usuarioActivo = (Usuario) session.getAttribute("usuarioSesion");
-
-        // 🔹 Reglas de transición de estado con usuario
+        // 🔹 Solo Administrador (1) o Almacén (3) pueden provocar el cambio automático a EN PREPARACIÓN
         if (orden.getTipoDocumento() != null) {
-            if (orden.getTipoDocumento().getTipoMovimiento() == TipoMovimiento.INGRESO
-                    && orden.getEstOrd() == EstadoOrden.ABIERTA) {
-                orden.setEstOrd(EstadoOrden.PREPARACION);
-                ordenServicio.actualizarEstadoOrden(orden, usuarioActivo);
-            } else if (orden.getTipoDocumento().getTipoMovimiento() == TipoMovimiento.SALIDA
-                    && orden.getEstOrd() == EstadoOrden.FACTURADA) {
-                orden.setEstOrd(EstadoOrden.PREPARACION);
-                ordenServicio.actualizarEstadoOrden(orden, usuarioActivo);
+            if (usuarioActivo.getNivelAcceso() == 1 || usuarioActivo.getNivelAcceso() == 3) {
+                if (orden.getTipoDocumento().getTipoMovimiento() == TipoMovimiento.INGRESO
+                        && orden.getEstOrd() == EstadoOrden.ABIERTA) {
+                    orden.setEstOrd(EstadoOrden.PREPARACION);
+                    ordenServicio.actualizarEstadoOrden(orden, usuarioActivo);
+                } else if (orden.getTipoDocumento().getTipoMovimiento() == TipoMovimiento.SALIDA
+                        && orden.getEstOrd() == EstadoOrden.FACTURADA) {
+                    orden.setEstOrd(EstadoOrden.PREPARACION);
+                    ordenServicio.actualizarEstadoOrden(orden, usuarioActivo);
+                }
             }
         }
 
@@ -174,7 +204,6 @@ public class OrdenesControlador {
         dto.setNomOrd(ordenActualizada.getCliente().getNomCli());
         dto.setFecOrd(ordenActualizada.getFecOrd().toString());
 
-        // 🔹 Estado y estilo
         dto.setEstOrd(ordenActualizada.getEstOrd().getDescripcion());
         dto.setCssClass(ordenActualizada.getEstOrd().getCssClass());
 
@@ -183,7 +212,6 @@ public class OrdenesControlador {
                 ordenActualizada.getTipoDocumento() != null ? ordenActualizada.getTipoDocumento().getDesTd() : null
         );
 
-        // 🔹 Formatear fechaEstado
         if (ordenActualizada.getFechaEstado() != null) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
             dto.setFechaEstado(ordenActualizada.getFechaEstado().format(formatter));
@@ -191,7 +219,6 @@ public class OrdenesControlador {
             dto.setFechaEstado(null);
         }
 
-        // 🔹 Nuevo: incluir usuario activo en el DTO
         dto.setUsuarioAccion(
                 ordenActualizada.getUsuario() != null ? ordenActualizada.getUsuario().getNombre() : "—"
         );
@@ -209,22 +236,6 @@ public class OrdenesControlador {
         }).toList());
 
         return dto;
-    }
-
-
-    @GetMapping("/eliminarOrd/{id}")
-    public String eliminarOrden(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
-        Orden orden = ordenServicio.buscarOrdenPorId(id);
-
-        if (orden == null) {
-            redirectAttributes.addFlashAttribute("error", "⚠️ La orden no existe.");
-            return "redirect:/ordenes";
-        }
-
-        ordenServicio.eliminarOrden(orden);
-        redirectAttributes.addFlashAttribute("mensaje", "✅ Orden eliminada correctamente.");
-
-        return "redirect:/ordenes";
     }
 
     @GetMapping("/orden/editar/{idOrd}")
@@ -250,7 +261,14 @@ public class OrdenesControlador {
 
         Usuario usuarioActivo = (Usuario) session.getAttribute("usuarioSesion");
         if (usuarioActivo == null) {
+            redirectAttrs.addFlashAttribute("error", "Debe iniciar sesión para continuar.");
             return "redirect:/login";
+        }
+
+        // 🔹 Restricción: solo Administrador (1) y Ventas (2) pueden guardar ediciones
+        if (usuarioActivo.getNivelAcceso() != 1 && usuarioActivo.getNivelAcceso() != 2) {
+            redirectAttrs.addFlashAttribute("error", "No tiene permisos para editar órdenes.");
+            return "redirect:/ordenes";
         }
 
         Cliente cliente = clienteServicio.obtenerClientePorCodigo(codCli);
@@ -263,9 +281,12 @@ public class OrdenesControlador {
 
         ordenServicio.actualizarOrden(orden, cliente, usuarioActivo);
 
-        redirectAttrs.addFlashAttribute("mensaje", "Orden actualizada correctamente");
-        return "redirect:/ordenDetalle/" + orden.getIdOrd();
+        redirectAttrs.addFlashAttribute("mensaje", "✅ Orden actualizada correctamente.");
+
+        // 🔹 Aquí está el cambio: en lugar de ir a la vista detalle, volvemos al formulario de edición
+        return "redirect:/orden/editar/" + orden.getIdOrd();
     }
+
     @GetMapping("/orden/buscarCliente")
     @ResponseBody
     public Cliente buscarCliente(@RequestParam String codCli) {
@@ -290,21 +311,24 @@ public class OrdenesControlador {
             return "redirect:/login";
         }
 
+        // 🔹 Restricción: solo Administrador (1) y Almacén (3)
+        if (usuarioActivo.getNivelAcceso() != 1 && usuarioActivo.getNivelAcceso() != 3) {
+            redirectAttrs.addFlashAttribute("error", "\"No tiene permisos para realizar este proceso");
+            return "redirect:/ordenes";
+        }
+
         try {
             String tipoMovimiento = orden.getTipoDocumento().getTipoMovimiento().name();
 
             if ("SALIDA".equalsIgnoreCase(tipoMovimiento)) {
-                // Primera pasada: validación
                 for (DetalleOrden detalle : orden.getDetalles()) {
                     Articulo articulo = detalle.getArticulo();
                     if (detalle.getCantidad() > articulo.getStk()) {
-                        // ⚠️ No cambiamos estado aquí, solo enviamos flag al frontend
                         redirectAttrs.addFlashAttribute("errorStock",
                                 "Stock insuficiente para el artículo: " + articulo.getDesArt());
                         return "redirect:/orden/editar/" + idOrd;
                     }
                 }
-                // Segunda pasada: actualización
                 for (DetalleOrden detalle : orden.getDetalles()) {
                     Articulo articulo = detalle.getArticulo();
                     articulo.setStk(articulo.getStk() - detalle.getCantidad());
@@ -318,7 +342,6 @@ public class OrdenesControlador {
                 }
             }
 
-            // Estado según acción
             if ("ENTREGAR".equalsIgnoreCase(accion)) {
                 orden.setEstOrd(EstadoOrden.ENTREGADA);
             } else if ("INGRESAR".equalsIgnoreCase(accion)) {
@@ -355,37 +378,55 @@ public class OrdenesControlador {
             return "redirect:/login";
         }
 
-        // 🔹 Cambiar estado a DEVUELTA
-        orden.setEstOrd(EstadoOrden.DEVUELTA);
-        ordenServicio.actualizarEstadoOrden(orden, usuarioActivo);
-
-        redirectAttrs.addFlashAttribute("mensaje", "La orden fue devuelta a Ventas para corrección.");
-        return "redirect:/ordenes";
-    }
-    @PostMapping("/orden/{id}/eliminarOAnular")
-    public String eliminarOAnularOrden(@PathVariable("id") Integer idOrd,
-                                       HttpSession session,
-                                       RedirectAttributes redirectAttrs) {
-        Usuario usuarioActivo = (Usuario) session.getAttribute("usuarioSesion");
-        if (usuarioActivo == null) {
-            redirectAttrs.addFlashAttribute("error", "Debe iniciar sesión para continuar.");
-            return "redirect:/login";
+        // 🔹 Restricción: solo Administrador (1) y Almacén (3)
+        if (usuarioActivo.getNivelAcceso() != 1 && usuarioActivo.getNivelAcceso() != 3) {
+            redirectAttrs.addFlashAttribute("error", "No tiene permisos para realizar este proceso");
+            return "redirect:/ordenes";
         }
 
         try {
-            ordenServicio.procesarEliminacionOAnulacion(idOrd, usuarioActivo);
-            redirectAttrs.addFlashAttribute("mensaje", "Operación realizada correctamente.");
-        } catch (IllegalStateException e) {
-            // ⚠️ Caso de estados no permitidos
-            redirectAttrs.addFlashAttribute("error", e.getMessage());
-        } catch (RuntimeException e) {
-            // ⚠️ Orden no encontrada u otro error
-            redirectAttrs.addFlashAttribute("error", "Error al procesar la orden: " + e.getMessage());
+            orden.setEstOrd(EstadoOrden.DEVUELTA);
+            ordenServicio.actualizarEstadoOrden(orden, usuarioActivo);
+            redirectAttrs.addFlashAttribute("mensaje", "✅ Orden marcada como DEVUELTA correctamente.");
+        } catch (Exception e) {
+            redirectAttrs.addFlashAttribute("error", "Error al devolver la orden: " + e.getMessage());
         }
 
         return "redirect:/ordenes";
     }
-// Proceso de cerrar una Orden
+
+
+    @PostMapping("/orden/{id}/eliminarOAnular")
+    public String eliminarOAnular(@PathVariable Integer id,
+                                  HttpSession session,
+                                  RedirectAttributes redirectAttributes) {
+        Usuario usuarioActivo = (Usuario) session.getAttribute("usuarioSesion");
+
+        // 🔹 Validar sesión
+        if (usuarioActivo == null) {
+            redirectAttributes.addFlashAttribute("error", "Debe iniciar sesión para continuar.");
+            return "redirect:/login";
+        }
+
+        // 🔹 Bloquear Almacén (nivel 3)
+        if (usuarioActivo.getNivelAcceso() != null && usuarioActivo.getNivelAcceso() == 3) {
+            redirectAttributes.addFlashAttribute("error", "No tiene Permiso para realizar este proceso");
+            return "redirect:/ordenes";
+        }
+
+        // 🔹 Procesar eliminación/anulación
+        try {
+            ordenServicio.procesarEliminacionOAnulacion(id, usuarioActivo);
+            redirectAttributes.addFlashAttribute("mensaje", "✅ Proceso de eliminación/anulación ejecutado correctamente.");
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+
+        return "redirect:/ordenes";
+    }
+
+
+    // Proceso de cerrar una Orden
 @GetMapping("/orden/{id}/cerrar")
 public String cerrarOrden(@PathVariable("id") Integer idOrd,
                           HttpSession session,
@@ -396,15 +437,28 @@ public String cerrarOrden(@PathVariable("id") Integer idOrd,
         return "redirect:/login";
     }
 
+    // Restricción: solo nivelAcceso = 1 puede cerrar órdenes
+    if (usuarioActivo.getNivelAcceso() != 1) {
+        redirectAttrs.addFlashAttribute("error", "No tiene permisos para cerrar órdenes.");
+        return "redirect:/ordenes";
+    }
+
     try {
-        ordenServicio.actualizarEstadoOrden(idOrd, EstadoOrden.CERRADA);
+        Orden orden = new Orden();
+        orden.setIdOrd(idOrd);
+        orden.setEstOrd(EstadoOrden.CERRADA);
+
+        ordenServicio.actualizarEstadoOrden(orden, usuarioActivo);
+
         redirectAttrs.addFlashAttribute("mensaje", "La orden fue cerrada correctamente.");
     } catch (RuntimeException e) {
         redirectAttrs.addFlashAttribute("error", "Error al cerrar la orden: " + e.getMessage());
     }
 
+
     return "redirect:/ordenes";
 }
+
 //EndPoint de Extornar una Orden
 @GetMapping("/orden/{idOrd}/extornar")
 public String extornarOrden(@PathVariable Integer idOrd,

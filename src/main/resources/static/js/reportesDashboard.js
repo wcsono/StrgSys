@@ -5,9 +5,13 @@
 document.addEventListener("DOMContentLoaded", () => {
     actualizarDashboard();
     actualizarTopProductos();
-    actualizarUltimosMovimientos();
-    actualizarGraficoEntradasVsSalidas();
+    actualizarGraficoVentasPorMes(); // ✅ reemplaza la llamada vieja
+    // actualizarCardTotalesMes(); // ❌ comentado porque no existe el endpoint
+    actualizarResumenOrdenes();
 });
+
+// ❌ Función comentada porque no hay card ni endpoint
+// async function actualizarCardTotalesMes() { ... }
 
 function actualizarDashboard() {
     const totalProductos = articulos.length || 0;
@@ -22,158 +26,210 @@ function actualizarDashboard() {
         return acc;
     }, 0);
 
-    const valorTotal = articulos.reduce((acc, art) => acc + (art.stk * art.costo), 0);
-
     document.querySelector('.card-green p').textContent = totalProductos;
-    document.querySelector('.card-blue p').textContent = window.formatoMoneda(valorMovidoMes);
-    document.querySelector('.card-darkgreen p').textContent = window.formatoMoneda(valorTotal);
+document.querySelector('.card-blue p').textContent =
+    valorMovidoMes > 0 ? window.formatoMoneda(valorMovidoMes) : "0";
+    document.querySelector('.card-darkgreen p').textContent = window.formatoMoneda(valorTotalInventario);
 }
 
-function actualizarTopProductos() {
-    if (!todosLosMovimientos || todosLosMovimientos.length === 0) return;
+// 🔹 Top productos más vendidos
+async function actualizarTopProductos() {
+    try {
+        const response = await fetch("/reportes/top-productos-vendidos");
+        const data = await response.json();
 
-    const movimientosPorArticulo = {};
-    todosLosMovimientos.forEach(item => {
-        const entradas = Number(item.entradas) || 0;
-        const salidas = Number(item.salidas) || 0;
-        const totalMov = entradas + salidas;
-        movimientosPorArticulo[item.articulo] = (movimientosPorArticulo[item.articulo] || 0) + totalMov;
-    });
-
-    const top = Object.entries(movimientosPorArticulo)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 3);
-
-    const lista = document.querySelector('.card-red ol');
-    lista.innerHTML = '';
-    top.forEach(([articulo, total]) => {
-        lista.insertAdjacentHTML('beforeend', `<li>${articulo}: ${total} movimientos</li>`);
-    });
-}
-
-function actualizarUltimosMovimientos() {
-    if (!todosLosMovimientos || todosLosMovimientos.length === 0) return;
-
-    const fecha = new Date();
-    const mesActual = fecha.getMonth() + 1;
-    const anioActual = fecha.getFullYear();
-
-    let ingresos = 0;
-    let salidas = 0;
-
-    todosLosMovimientos.forEach(item => {
-        if (Number(item.anio) === anioActual && Number(item.mes) === mesActual) {
-            const valor = Number(item.valorMovido) || 0;
-            const entradas = Number(item.entradas) || 0;
-            const salidasUnidades = Number(item.salidas) || 0;
-
-            if (entradas > 0) ingresos += valor;
-            if (salidasUnidades > 0) salidas += valor;
+        // Usar un id único para el card de Top productos
+        const lista = document.querySelector('#topProductosCard ol');
+        if (lista) {
+            lista.innerHTML = '';
+            data.slice(0, 3).forEach(item => {
+                lista.insertAdjacentHTML(
+                    'beforeend',
+                    `<li>${item.articulo}: ${item.ventas} ventas</li>`
+                );
+            });
         }
-    });
-
-    const lista = document.querySelector('.card-yellow ul');
-    lista.innerHTML = '';
-    lista.insertAdjacentHTML('beforeend', `<li><strong>Ingresos:</strong> ${window.formatoMoneda(ingresos)}</li>`);
-    lista.insertAdjacentHTML('beforeend', `<li><strong>Salidas:</strong> ${window.formatoMoneda(salidas)}</li>`);
-    lista.insertAdjacentHTML('beforeend', `<li><strong>Balance:</strong> ${window.formatoMoneda(ingresos - salidas)}</li>`);
+    } catch (error) {
+        console.error("Error al cargar top productos vendidos:", error);
+    }
 }
 
-async function actualizarGraficoEntradasVsSalidas() {
-    const canvas = document.getElementById('graficoEntradasVsSalidas');
+async function actualizarGraficoVentasPorMes() {
+    const canvas = document.getElementById('graficoVentasPorMes');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
 
     try {
-        const response = await fetch("/reportes/entradas-vs-salidas");
+        const response = await fetch("/reportes/ventas-por-mes");
         const data = await response.json();
 
         new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: data.labels,
+                labels: data.map(item => "Mes " + item.mes),
                 datasets: [
-                    { label: 'Entradas', data: data.entradas, backgroundColor: '#28a745' },
-                    { label: 'Salidas', data: data.salidas, backgroundColor: '#dc3545' }
+                    {
+                        label: 'Ventas',
+                        data: data.map(item => item.ventas),
+                        backgroundColor: '#007bff'
+                    }
                 ]
             },
-            options: { responsive: true, plugins: { legend: { position: 'top' } } }
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    title: { display: true, text: 'Ventas por Mes' },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        formatter: (value) => window.formatoMoneda ? window.formatoMoneda(value) : value,
+                        color: '#000',
+                        font: { weight: 'bold' }
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
         });
     } catch (error) {
-        console.error("No se pudo cargar el gráfico Entradas vs Salidas:", error);
+        console.error("No se pudo cargar el gráfico de ventas por mes:", error);
+    }
+}
+
+// 🔹 Actualizar órdenes cerradas y no cerradas
+async function actualizarResumenOrdenes() {
+    try {
+        const response = await fetch("/reportes/resumen-ordenes");
+        const data = await response.json();
+
+        const cerradasEl = document.getElementById("cardOrdenesCerradas");
+        if (cerradasEl) cerradasEl.textContent = data.cerradasMes;
+
+        const pendientesEl = document.getElementById("cardOrdenesPendientes");
+        if (pendientesEl) pendientesEl.textContent = data.pendientes;
+    } catch (error) {
+        console.error("Error al cargar resumen de órdenes:", error);
+    }
+}
+
+// 🔹 Actualizar usuarios inactivos
+async function actualizarUsuariosInactivos() {
+    try {
+        const response = await fetch("/reportes/usuarios");
+        const data = await response.json();
+
+        const inactivosEl = document.getElementById("cardUsuariosInactivos");
+        if (inactivosEl) inactivosEl.textContent = data.inactivos;
+    } catch (error) {
+        console.error("Error al cargar usuarios inactivos:", error);
     }
 }
 
 //_____________________________________
-// Modales separados
+// Nueva función para modales
 //_____________________________________
+function abrirModalDesdeCard(cardTitulo, cardValor, esNumero, card) {
+  // Título del modal
+  document.getElementById("modalCardTitle").textContent = cardTitulo;
 
+  // Contenido principal del modal
+  const modalDato = document.getElementById("modalCardDato");
+
+  // Limpia clases previas
+  modalDato.className = "";
+
+  // 👉 Si el contenido es una lista (<ol> o <ul>)
+  if (!esNumero && cardValor.includes("<li")) {
+    modalDato.innerHTML = `<ol>${cardValor}</ol>`; // reconstruimos la lista
+    modalDato.classList.add("texto-grande");
+  } else {
+    // Caso normal: número o texto
+    modalDato.textContent = cardValor;
+    if (esNumero) {
+      modalDato.classList.add("numero-grande");
+    } else {
+      modalDato.classList.add("texto-grande");
+    }
+  }
+
+  // 👉 Aplica la clase del card al modal-content
+  const modalContent = document.querySelector("#cardModal .modal-content");
+  if (card && card.classList.length > 1) {
+    modalContent.className = "modal-content " + card.classList[1];
+  } else {
+    modalContent.className = "modal-content";
+  }
+
+  // Mostrar el modal
+  const modal = new bootstrap.Modal(document.getElementById("cardModal"));
+  modal.show();
+}
+
+
+//_____________________________________
+// Eventos de click en los cards
+//_____________________________________
 document.querySelectorAll('.dashboard .card').forEach(card => {
   card.addEventListener('click', () => {
-    const header = card.querySelector('h4')?.textContent || "Detalle";
+    const titulo = card.querySelector('h4')?.textContent || "Detalle";
 
-    if (header.includes("Entradas vs Salidas")) {
-      // 🔹 Modal exclusivo del gráfico
+    // Caso especial: gráfico
+    if (titulo.includes("Ventas por Mes")) {
       const graficoModalEl = document.getElementById("graficoModal");
       const graficoModal = new bootstrap.Modal(graficoModalEl);
       graficoModal.show();
 
-      const ctx = document.getElementById("graficoEntradasVsSalidasModal").getContext("2d");
+      const ctx = document.getElementById("graficoVentasPorMesModal").getContext("2d");
 
-      fetch("/reportes/entradas-vs-salidas")
+      fetch("/reportes/ventas-por-mes")
         .then(resp => resp.json())
         .then(data => {
           new Chart(ctx, {
             type: 'bar',
             data: {
-              labels: data.labels,
+              labels: data.map(item => "Mes " + item.mes),
               datasets: [
-                { label: 'Entradas', data: data.entradas, backgroundColor: '#28a745' },
-                { label: 'Salidas', data: data.salidas, backgroundColor: '#dc3545' }
+                { label: 'Ventas', data: data.map(item => item.ventas), backgroundColor: '#007bff' }
               ]
             },
             options: {
               responsive: true,
               maintainAspectRatio: false,
               plugins: {
-                legend: { position: 'top' },
-                title: { display: true, text: 'Entradas vs Salidas (Órdenes cerradas)' }
+                legend: { display: false },
+                title: { display: true, text: 'Ventas por Mes' },
+                datalabels: {
+                    anchor: 'end',
+                    align: 'top',
+                    formatter: (value) => window.formatoMoneda ? window.formatoMoneda(value) : value,
+                    color: '#000',
+                    font: { weight: 'bold' }
+                }
               }
-            }
+            },
+            plugins: [ChartDataLabels]
           });
         })
         .catch(err => console.error("Error cargando gráfico en modal:", err));
-    } else {
-      // 🔹 Modal general para números y texto
-      const cardModalEl = document.getElementById("cardModal");
-      const cardModal = new bootstrap.Modal(cardModalEl);
-      const modalTitle = cardModalEl.querySelector(".modal-title");
-      const modalBody = cardModalEl.querySelector("#modal-body");
-      const modalContent = cardModalEl.querySelector(".modal-content");
+      } else {
+        let valor = "";
+        let esNumero = false;
 
-      modalTitle.textContent = header;
-
-      const contenidoClonado = card.cloneNode(true);
-      const h4 = contenidoClonado.querySelector("h4");
-      if (h4) h4.remove();
-
-      contenidoClonado.querySelectorAll("p").forEach(p => {
-        if (!isNaN(p.textContent.replace(/[^0-9]/g, ""))) {
-          p.classList.add("numero-grande");
+        // Si el card tiene <p>, usamos ese valor
+        const p = card.querySelector('p');
+        if (p) {
+          valor = p.textContent || "";
+          esNumero = !isNaN(valor.replace(/[^0-9]/g, ""));
         } else {
-          p.classList.add("texto-grande");
+          // Si el card tiene lista (<ol> o <ul>), copiamos toda la lista
+          const lista = card.querySelector('ol, ul');
+          if (lista) {
+            valor = lista.outerHTML; // copiamos la lista completa
+            esNumero = false;
+          }
         }
-      });
 
-      contenidoClonado.querySelectorAll("ul, ol, li").forEach(el => {
-        el.classList.add("texto-grande");
-      });
-
-      // 🔹 aplicar las clases del card al modal-content para que todo el modal herede el color
-      modalContent.className = "modal-content " + card.className.replace("card", "").trim();
-
-      modalBody.innerHTML = contenidoClonado.innerHTML;
-      cardModal.show();
+      abrirModalDesdeCard(titulo, valor, esNumero, card);
     }
   });
 });

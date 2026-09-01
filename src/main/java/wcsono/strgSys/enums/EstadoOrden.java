@@ -34,6 +34,11 @@ public enum EstadoOrden {
         return cssClass;
     }
 
+    /** Devuelve la clase CSS para la fila <tr> */
+    public String getRowClass() {
+        return "tr-" + this.name().toLowerCase();
+    }
+
     public static EstadoOrden fromCodigo(int codigo) {
         for (EstadoOrden estado : values()) {
             if (estado.codigo == codigo) {

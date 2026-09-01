@@ -15,11 +15,16 @@ import wcsono.strgSys.repositorio.ClienteRepositorio;
 import wcsono.strgSys.repositorio.OrdenRepositorio;
 import wcsono.strgSys.repositorio.ArticuloRepositorio;
 import wcsono.strgSys.repositorio.MovimientoRepositorio;
+import wcsono.strgSys.repositorio.UsuarioRepositorio;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+
 
 @Service
 public class OrdenServicio implements IOrdenServicio {
@@ -37,6 +42,10 @@ public class OrdenServicio implements IOrdenServicio {
 
     @Autowired
     private MovimientoRepositorio movimientoRepositorio;
+
+    @Autowired
+    private UsuarioRepositorio usuarioRepositorio;
+
 
     @Autowired
     private FacturacionServicio facturacionServicio; // 🔹 para anular facturas
@@ -83,49 +92,48 @@ public class OrdenServicio implements IOrdenServicio {
             cliente = clienteRepositorio.save(cliente);
         }
         orden.setCliente(cliente);
+
+        // 🔹 Activar usuario si estaba inactivo
+        if (usuario.getEstUsuario() == 0) {
+            usuario.setEstUsuario(1);
+            usuarioRepositorio.save(usuario);
+        }
         orden.setUsuario(usuario);
+
         orden.setEstOrd(EstadoOrden.INICIAL);
         orden.setCosOrd(BigDecimal.ZERO);
         orden.setFechaEstado(LocalDateTime.now());
+
         orden = ordenRepositorio.save(orden);
         orden.setNumOrd(String.valueOf(1000 + orden.getIdOrd()));
         Orden saved = ordenRepositorio.save(orden);
+
         logger.info("Orden guardada -> id={}, numOrd={}, estOrd={}, fechaEstado={}, cliente={}, usuario={}",
                 saved.getIdOrd(), saved.getNumOrd(), saved.getEstOrd(), saved.getFechaEstado(),
                 saved.getCliente().getNomCli(), saved.getUsuario().getNombre());
         return saved;
     }
 
+
     @Override
     @Transactional
     public Orden actualizarOrden(Orden orden, Cliente cliente, Usuario usuario) {
         orden.setCliente(cliente);
+
+        // 🔹 Activar usuario si estaba inactivo
+        if (usuario.getEstUsuario() == 0) {
+            usuario.setEstUsuario(1);
+            usuarioRepositorio.save(usuario);
+        }
         orden.setUsuario(usuario);
+
         orden.setFechaEstado(LocalDateTime.now());
         Orden saved = ordenRepositorio.save(orden);
+
         logger.info("Orden actualizada -> id={}, numOrd={}, estOrd={}, fechaEstado={}, cosOrd={}, cliente={}, usuario={}",
                 saved.getIdOrd(), saved.getNumOrd(), saved.getEstOrd(), saved.getFechaEstado(),
                 saved.getCosOrd(), saved.getCliente().getNomCli(), saved.getUsuario().getNombre());
         return saved;
-    }
-
-    @Override
-    @Transactional
-    public Orden actualizarEstadoOrden(Integer idOrd, EstadoOrden nuevoEstado) {
-        Orden orden = ordenRepositorio.findById(idOrd)
-                .orElseThrow(() -> new RuntimeException("Orden no encontrada"));
-        orden.setEstOrd(nuevoEstado);
-        orden.setFechaEstado(LocalDateTime.now());
-        Orden saved = ordenRepositorio.save(orden);
-        logger.info("Orden actualizada de estado -> id={}, numOrd={}, nuevoEstado={}, fechaEstado={}",
-                saved.getIdOrd(), saved.getNumOrd(), saved.getEstOrd(), saved.getFechaEstado());
-        return saved;
-    }
-
-    @Override
-    public void eliminarOrden(Orden orden) {
-        ordenRepositorio.delete(orden);
-        logger.info("Orden eliminada físicamente -> id={}", orden.getIdOrd());
     }
 
     @Override
@@ -168,8 +176,15 @@ public class OrdenServicio implements IOrdenServicio {
     public Orden actualizarEstadoOrden(Orden orden, Usuario usuario) {
         Orden ordenExistente = ordenRepositorio.findById(orden.getIdOrd())
                 .orElseThrow(() -> new RuntimeException("Orden no encontrada"));
+
         ordenExistente.setEstOrd(orden.getEstOrd());
         ordenExistente.setFechaEstado(LocalDateTime.now());
+
+        // 🔹 Activar usuario si estaba inactivo
+        if (usuario.getEstUsuario() == 0) {
+            usuario.setEstUsuario(1);
+            usuarioRepositorio.save(usuario);
+        }
         ordenExistente.setUsuario(usuario);
 
         // 🔹 Procesar movimientos solo en estados ENTREGADA o INGRESADA
@@ -213,9 +228,10 @@ public class OrdenServicio implements IOrdenServicio {
     }
 
     @Override
-    public List<Object[]> obtenerEntradasVsSalidasPorMes() {
-        return ordenRepositorio.obtenerEntradasVsSalidasPorMes();
+    public List<Object[]> obtenerVentasPorMes() {
+        return ordenRepositorio.obtenerVentasPorMes();
     }
+
 
     @Override
     public Page<Orden> listarOrdenesFiltradas(
@@ -271,6 +287,14 @@ public class OrdenServicio implements IOrdenServicio {
         }
     }
 
+        //Este metodo solo se incluye para cumplir con la interfaz pero no se usa en el sistema
+        // pues ya esta incluido en el metodo siguiente de procesarEliminacionOAnulacion
+    @Override
+    @Transactional
+    public void eliminarOrden(Orden orden) {
+        // 🔹 Redirige a la lógica centralizada
+        procesarEliminacionOAnulacion(orden, orden.getUsuario());
+    }
 
     @Override
     @Transactional
@@ -307,6 +331,20 @@ public class OrdenServicio implements IOrdenServicio {
                 logger.warn("Orden {} en estado {} no puede eliminarse ni anularse", idOrd, orden.getEstOrd());
                 throw new IllegalStateException("No se permite la anulación o eliminación de una orden en estado " + orden.getEstOrd());
         }
+    }
+    @Override
+    public Long contarOrdenesCerradasMesActual() {
+        return ordenRepositorio.contarOrdenesCerradasMesActual();
+    }
+
+    @Override
+    public Long contarOrdenesPendientes() {
+        return ordenRepositorio.contarOrdenesPendientes();
+    }
+
+    @Override
+    public List<Object[]> obtenerTopProductosVendidos() {
+        return ordenRepositorio.obtenerTopProductosVendidos();
     }
 
 }

@@ -21,4 +21,7 @@ public interface ArticuloRepositorio extends JpaRepository<Articulo, Integer> {
                                  @Param("desArt") String desArt,
                                  @Param("ubiArt") String ubiArt,
                                  Pageable pageable);
+    @Query("SELECT SUM(a.stk * a.costo) FROM Articulo a")
+    Double calcularValorTotalInventario();
+
 }

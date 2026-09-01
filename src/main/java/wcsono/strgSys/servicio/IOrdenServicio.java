@@ -23,9 +23,6 @@ public interface IOrdenServicio {
     Orden guardarOrden(Orden orden, Cliente cliente, Usuario usuario);
     Orden actualizarOrden(Orden orden, Cliente cliente, Usuario usuario);
 
-    // ✅ Actualización solo de estado (sin usuario)
-    Orden actualizarEstadoOrden(Integer idOrd, EstadoOrden nuevoEstado);
-
     // ✅ Actualización de estado con usuario y fechaEstado
     Orden actualizarEstadoOrden(Orden orden, Usuario usuario);
 
@@ -49,7 +46,7 @@ public interface IOrdenServicio {
     List<Orden> listarOrdenesPorUsuario(Integer idUsuario);
 
     // 🔹 Estadísticas
-    List<Object[]> obtenerEntradasVsSalidasPorMes();
+    List<Object[]> obtenerVentasPorMes();
 
     // 🔹 Filtros combinados
     Page<Orden> listarOrdenesFiltradas(
@@ -60,6 +57,7 @@ public interface IOrdenServicio {
             Integer estOrd, // ⚠️ se mantiene como Integer porque viene del filtro en la vista
             Pageable pageable
     );
+
     /**
      * Procesa la eliminación o anulación de una orden según reglas de negocio:
      * - DEVUELTA → siempre se ANULA junto con sus facturas
@@ -68,4 +66,8 @@ public interface IOrdenServicio {
      */
     void procesarEliminacionOAnulacion(Integer idOrd, Usuario usuarioActivo);
 
+    // 🔹 Nuevos métodos para dashboard de alertas
+    Long contarOrdenesCerradasMesActual();
+    Long contarOrdenesPendientes();
+    List<Object[]> obtenerTopProductosVendidos();
 }

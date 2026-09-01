@@ -50,4 +50,16 @@ public class ArticuloServicio implements IArticuloServicio {
 
         return articuloRepositorio.findByFiltros(codArt, desArt, ubiArt, pageable);
     }
+
+    public long contarArticulos() {
+        return articuloRepositorio.count();
+    }
+
+    @Override
+    public Double obtenerValorTotalInventario() {
+        Double total = articuloRepositorio.calcularValorTotalInventario();
+        return total != null ? total : 0.0;
+    }
+
+
 }

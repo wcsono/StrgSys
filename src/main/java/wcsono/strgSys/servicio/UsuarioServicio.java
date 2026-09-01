@@ -49,4 +49,14 @@ public class UsuarioServicio implements IUsuarioServicio {
 
         }
     }
+    @Override
+    public Long contarUsuariosActivos() {
+        return usuarioRepositorio.countByEstUsuario(1);
+    }
+
+    @Override
+    public Long contarUsuariosInactivos() {
+        return usuarioRepositorio.countByEstUsuario(0);
+    }
+
 }

@@ -21,7 +21,6 @@ async function cargarMovimientos() {
         // Actualizar dashboard (funciones están en reportesDashboard.js)
         actualizarDashboard();
         actualizarTopProductos();
-        actualizarUltimosMovimientos();
         // actualizarGraficoEntradasVsSalidas(); // pendiente
     } catch (error) {
         console.error("Error cargando movimientos:", error);

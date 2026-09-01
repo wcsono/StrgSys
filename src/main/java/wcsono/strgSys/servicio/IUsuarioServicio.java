@@ -9,4 +9,6 @@ public interface IUsuarioServicio {
     Usuario obtenerUsuarioPorUser(String user);
     List<Usuario> listarUsuarios();
     void eliminarUsuario(Integer idUsuario);
+    Long contarUsuariosActivos();
+    Long contarUsuariosInactivos();
 }

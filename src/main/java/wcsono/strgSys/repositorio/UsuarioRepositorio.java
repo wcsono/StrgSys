@@ -5,4 +5,5 @@ import wcsono.strgSys.modelo.Usuario;
 
 public interface UsuarioRepositorio extends JpaRepository<Usuario, Integer> {
     Usuario findByUser(String user);
+    Long countByEstUsuario(Integer estUsuario);
 }

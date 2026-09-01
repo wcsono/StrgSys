@@ -12,7 +12,7 @@
         <!-- Panel izquierdo -->
         <div class="col-md-7 tabla-ordenes">
             <h3 class="text-primary text-center">Listado de Órdenes</h3>
-            <table class="table table-striped table-sm">
+            <table class="table table-sm">
                 <thead class="table-primary text-center">
                 <tr>
                     <th>N.Orden</th>
@@ -50,9 +50,10 @@
                 <tbody th:unless="${#lists.isEmpty(listadoOrdenes)}">
                 <tr th:each="orden : ${listadoOrdenes}"
                     th:id="'fila-orden-' + ${orden.idOrd}"
-                    class="text-center">
+                    th:class="'text-center ' + ${orden.estOrd.rowClass}">
 
-                    <td th:text="${orden.numOrd}"></td>
+
+                <td th:text="${orden.numOrd}"></td>
                     <td th:text="${orden.cliente.nomCli}"></td>
                     <td th:text="${#temporals.format(orden.fecOrd,'dd/MM/yyyy')}"></td>
                     <td class="col-usuario" th:text="${orden.usuario.nombre}"></td>

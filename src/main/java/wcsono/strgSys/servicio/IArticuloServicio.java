@@ -24,4 +24,12 @@ public interface IArticuloServicio {
 
     // 👇 Nuevo método: búsqueda con filtros (Código, Descripción y Ubicación) con paginación
     Page<Articulo> buscarPorFiltros(String codArt, String desArt, String ubiArt, Pageable pageable);
+
+    // 👇 Nuevo método para el dashboard
+    long contarArticulos();
+
+    // 👇 Nuevo método: valor total del inventario
+    Double obtenerValorTotalInventario();
+
+
 }
