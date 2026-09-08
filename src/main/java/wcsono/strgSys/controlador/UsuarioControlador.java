@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class UsuarioControlador {
@@ -20,33 +20,59 @@ public class UsuarioControlador {
     @Autowired
     private UsuarioServicio usuarioServicio;
 
-    // Listar usuarios
+    // 📌 Listar usuarios → ADMIN y OPERADOR, ALMACÉN no accede
     @GetMapping("/usuarios")
-    public String listarUsuarios(Model model) {
+    public String listarUsuarios(Model model, HttpSession session) {
+        Usuario usuarioActivo = (Usuario) session.getAttribute("usuarioSesion");
+
+        // Caso 1: No hay sesión → al login
+        if (usuarioActivo == null) {
+            model.addAttribute("mensajeError", "Debe iniciar sesión para continuar.");
+            return "login";  // ✅ carga la vista login.html
+        }
+
+        // Caso 2: Usuario Almacén → quedarse en index con alerta
+        if (usuarioActivo.getNivelAcceso() == 3) { // 3 = Almacén
+            model.addAttribute("mensajeError", "No tiene permiso para acceder a esta página");
+            return "index";  // ✅ vuelve a la vista index.html
+        }
+
+        // Caso 3: ADMIN y OPERADOR → acceso normal
         model.addAttribute("usuarios", usuarioServicio.listarUsuarios());
-        return "usuarios";
+        return "usuarios";  // ✅ carga usuarios.html
     }
 
-    // Mostrar formulario para agregar usuario
+    // 📌 Agregar usuario → solo ADMIN
     @GetMapping("/agregarUsuario")
-    public String mostrarFormularioAgregarUsuario(Model model) {
+    public String mostrarFormularioAgregarUsuario(Model model, HttpSession session, RedirectAttributes redirectAttrs) {
+        Usuario usuarioActivo = (Usuario) session.getAttribute("usuarioSesion");
+
+        if (usuarioActivo == null || usuarioActivo.getNivelAcceso() != 1) { // 1 = Admin
+            redirectAttrs.addFlashAttribute("mensajeError", "No tiene Permiso para realizar este proceso");
+            return "redirect:/usuarios";
+        }
+
         Usuario usuario = new Usuario();
-        // estUsuario por defecto en 0 (inactivo hasta que se registre en Órdenes)
-        usuario.setEstUsuario(0);
+        usuario.setEstUsuario(0); // inactivo por defecto
         model.addAttribute("usuarioForma", usuario);
         return "agregarUsuario";
     }
 
-    // Guardar nuevo usuario
     @PostMapping("/guardarUsuario")
     public String guardarUsuario(@ModelAttribute Usuario usuario,
+                                 HttpSession session,
                                  RedirectAttributes redirectAttrs) {
+        Usuario usuarioActivo = (Usuario) session.getAttribute("usuarioSesion");
+
+        if (usuarioActivo == null || usuarioActivo.getNivelAcceso() != 1) {
+            redirectAttrs.addFlashAttribute("mensajeError", "No tiene Permiso para realizar este proceso");
+            return "redirect:/usuarios";
+        }
+
         try {
-            // Encriptar contraseña
             BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
             usuario.setPassword(encoder.encode(usuario.getPassword()));
 
-            // Por defecto, nuevo usuario queda inactivo (0)
             if (usuario.getEstUsuario() == null) {
                 usuario.setEstUsuario(0);
             }
@@ -56,13 +82,21 @@ public class UsuarioControlador {
         } catch (Exception e) {
             redirectAttrs.addFlashAttribute("mensajeError", "Error al registrar usuario: " + e.getMessage());
         }
-
         return "redirect:/usuarios";
     }
 
-//    Eliminar Usuario
+    // 📌 Eliminar usuario → solo ADMIN, y solo si está inactivo
     @GetMapping("/eliminarUsuario/{id}")
-    public String eliminarUsuario(@PathVariable("id") Integer idUsuario, RedirectAttributes redirectAttrs) {
+    public String eliminarUsuario(@PathVariable("id") Integer idUsuario,
+                                  HttpSession session,
+                                  RedirectAttributes redirectAttrs) {
+        Usuario usuarioActivo = (Usuario) session.getAttribute("usuarioSesion");
+
+        if (usuarioActivo == null || usuarioActivo.getNivelAcceso() != 1) {
+            redirectAttrs.addFlashAttribute("mensajeError", "No tiene Permiso para realizar este proceso");
+            return "redirect:/usuarios";
+        }
+
         Usuario usuario = usuarioServicio.obtenerUsuarioPorId(idUsuario);
 
         if (usuario != null) {
@@ -78,39 +112,52 @@ public class UsuarioControlador {
 
         return "redirect:/usuarios";
     }
-    // 🔹 Mostrar formulario de edición
-        @GetMapping("/editarUsuario/{id}")
-        public String mostrarEditarUsuario(@PathVariable("id") Integer idUsuario,
-                                           Model model,
-                                           RedirectAttributes redirectAttrs) {
-            Usuario usuarioEditar = usuarioServicio.obtenerUsuarioPorId(idUsuario);
 
-            if (usuarioEditar != null) {
-                model.addAttribute("usuarioEditar", usuarioEditar);
-                return "editarUsuario"; // vista Thymeleaf
-            } else {
-                redirectAttrs.addFlashAttribute("mensajeError", "Usuario no encontrado.");
-                return "redirect:/usuarios";
-            }
-        }
+    // 📌 Editar usuario → solo ADMIN
+    @GetMapping("/editarUsuario/{id}")
+    public String mostrarEditarUsuario(@PathVariable("id") Integer idUsuario,
+                                       HttpSession session,
+                                       Model model,
+                                       RedirectAttributes redirectAttrs) {
+        Usuario usuarioActivo = (Usuario) session.getAttribute("usuarioSesion");
 
-        // 🔹 Guardar cambios de edición
-        @PostMapping("/guardarEditarUsuario")
-        public String guardarEditarUsuario(@ModelAttribute Usuario usuario,
-                                           RedirectAttributes redirectAttrs) {
-            try {
-                // Encriptar contraseña nuevamente antes de guardar
-                BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-                usuario.setPassword(encoder.encode(usuario.getPassword()));
-
-                usuarioServicio.guardarUsuario(usuario);
-                redirectAttrs.addFlashAttribute("mensajeExito", "Usuario actualizado correctamente.");
-            } catch (Exception e) {
-                redirectAttrs.addFlashAttribute("mensajeError", "Error al actualizar usuario: " + e.getMessage());
-            }
-
+        if (usuarioActivo == null || usuarioActivo.getNivelAcceso() != 1) {
+            redirectAttrs.addFlashAttribute("mensajeError", "No tiene Permiso para realizar este proceso");
             return "redirect:/usuarios";
         }
 
+        Usuario usuarioEditar = usuarioServicio.obtenerUsuarioPorId(idUsuario);
 
+        if (usuarioEditar != null) {
+            model.addAttribute("usuarioEditar", usuarioEditar);
+            return "editarUsuario"; // vista Thymeleaf
+        } else {
+            redirectAttrs.addFlashAttribute("mensajeError", "Usuario no encontrado.");
+            return "redirect:/usuarios";
+        }
+    }
+
+    @PostMapping("/guardarEditarUsuario")
+    public String guardarEditarUsuario(@ModelAttribute Usuario usuario,
+                                       HttpSession session,
+                                       RedirectAttributes redirectAttrs) {
+        Usuario usuarioActivo = (Usuario) session.getAttribute("usuarioSesion");
+
+        if (usuarioActivo == null || usuarioActivo.getNivelAcceso() != 1) {
+            redirectAttrs.addFlashAttribute("mensajeError", "No tiene Permiso para realizar este proceso");
+            return "redirect:/usuarios";
+        }
+
+        try {
+            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+            usuario.setPassword(encoder.encode(usuario.getPassword()));
+
+            usuarioServicio.guardarUsuario(usuario);
+            redirectAttrs.addFlashAttribute("mensajeExito", "Usuario actualizado correctamente.");
+        } catch (Exception e) {
+            redirectAttrs.addFlashAttribute("mensajeError", "Error al actualizar usuario: " + e.getMessage());
+        }
+
+        return "redirect:/usuarios";
+    }
 }

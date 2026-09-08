@@ -42,6 +42,14 @@
 
 <!-- Pie de página -->
 <div th:replace="~{fragmentos/pie-pagina::pie-pagina-seccion}"></div>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var mensajeError = [[${mensajeError}]];
+    if (mensajeError) {
+        alert(mensajeError);  // ✅ popup nativo del navegador
+    }
+    /*]]>*/
+</script>
 
 </body>
 </html>

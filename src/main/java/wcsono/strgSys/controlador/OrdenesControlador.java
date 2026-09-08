@@ -27,6 +27,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+
 
 
 @Controller
@@ -58,35 +60,25 @@ public class OrdenesControlador {
     @GetMapping("/ordenes")
     public String mostrarOrdenes(
             @RequestParam(required = false) String numOrd,
-            @RequestParam(required = false) Integer idCliente,
+            @RequestParam(required = false) String nomCli,
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecOrdDesde,
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecOrdHasta,
-            @RequestParam(required = false) String estOrd,
-            Pageable pageable,
+            @RequestParam(required = false) EstadoOrden estOrd,   // 🔹 enum
+            @PageableDefault(size = 6, sort = "idOrd", direction = Sort.Direction.DESC) Pageable pageable,
             Model model) {
 
-        Integer estado = null;
-        if (estOrd != null && !estOrd.isEmpty()) {
-            estado = Integer.parseInt(estOrd);
-        }
-
-        // 🔹 Forzar orden descendente por ID
-        Pageable pageableOrdenado = PageRequest.of(
-                pageable.getPageNumber(),
-                pageable.getPageSize(),
-                Sort.by(Sort.Direction.DESC, "idOrd")
-        );
-
+        // 🔹 Llamada directa al servicio con el Specification
         Page<Orden> paginaOrdenes = ordenServicio
-                .listarOrdenesFiltradas(numOrd, idCliente, fecOrdDesde, fecOrdHasta, estado, pageableOrdenado);
+                .listarOrdenesFiltradas(numOrd, nomCli, fecOrdDesde, fecOrdHasta, estOrd, pageable);
 
         model.addAttribute("paginaOrdenes", paginaOrdenes);
         model.addAttribute("listadoOrdenes", paginaOrdenes.getContent());
 
         return "ordenes";
     }
+
 
     @GetMapping("/agregarOrden")
     public String mostrarAgregarOrden(Model model,

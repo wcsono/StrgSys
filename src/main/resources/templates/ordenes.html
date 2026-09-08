@@ -92,6 +92,59 @@
                 </tr>
                 </tbody>
             </table>
+
+            <!-- Paginación -->
+            <div class="d-flex justify-content-center mt-3">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination pagination-sm">
+                        <!-- Botón Anterior -->
+                        <li class="page-item" th:classappend="${paginaOrdenes.first}? 'disabled'">
+                            <a class="page-link"
+                               th:href="@{/ordenes(page=${paginaOrdenes.number - 1},
+                                       size=${paginaOrdenes.size},
+                                       numOrd=${param.numOrd},
+                                       nomCli=${param.nomCli},
+                                       fecOrdDesde=${param.fecOrdDesde},
+                                       fecOrdHasta=${param.fecOrdHasta},
+                                       estOrd=${param.estOrd})}">
+                                Anterior
+                            </a>
+                        </li>
+
+                        <!-- Números de página -->
+                        <li class="page-item"
+                            th:each="i : ${#numbers.sequence(0, paginaOrdenes.totalPages - 1)}"
+                            th:classappend="${i == paginaOrdenes.number}? 'active'">
+                            <a class="page-link"
+                               th:href="@{/ordenes(page=${i},
+                                       size=${paginaOrdenes.size},
+                                       numOrd=${param.numOrd},
+                                       nomCli=${param.nomCli},
+                                       fecOrdDesde=${param.fecOrdDesde},
+                                       fecOrdHasta=${param.fecOrdHasta},
+                                       estOrd=${param.estOrd})}"
+                               th:text="${i + 1}">
+                            </a>
+                        </li>
+
+                        <!-- Botón Siguiente -->
+                        <li class="page-item" th:classappend="${paginaOrdenes.last}? 'disabled'">
+                            <a class="page-link"
+                               th:href="@{/ordenes(page=${paginaOrdenes.number + 1},
+                                       size=${paginaOrdenes.size},
+                                       numOrd=${param.numOrd},
+                                       nomCli=${param.nomCli},
+                                       fecOrdDesde=${param.fecOrdDesde},
+                                       fecOrdHasta=${param.fecOrdHasta},
+                                       estOrd=${param.estOrd})}">
+                                Siguiente
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+
+
         </div>
 
         <!-- Panel derecho -->
@@ -99,6 +152,75 @@
             <div id="alertContainer"></div>
             <div id="detalleContenido" class="mt-0 fade-in"></div>
         </div>
+    </div>
+</div>
+
+<!-- Offcanvas de filtros -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="filtroArticulosOffcanvas" aria-labelledby="filtroLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="filtroLabel">Filtros de Órdenes</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form th:action="@{/ordenes}" method="get" class="d-flex flex-column gap-3">
+
+            <!-- Número de Orden -->
+            <div class="input-group">
+                <span class="input-group-text">N.Orden</span>
+                <input id="numOrd" name="numOrd" class="form-control" placeholder="Ej: 1025">
+            </div>
+
+            <!-- Nombre Cliente -->
+            <div class="input-group">
+                <span class="input-group-text">Cliente</span>
+                <input type="text" id="nomCli" name="nomCli" class="form-control" placeholder="Nombre del cliente"
+                       style="text-transform: uppercase;"
+                       oninput="this.value = this.value.toUpperCase();">
+
+            </div>
+
+            <!-- Estado -->
+            <div class="input-group">
+                <span class="input-group-text">Estado</span>
+                <select id="estOrd" name="estOrd" class="form-select">
+                    <option value="">-- Seleccionar --</option>
+                    <option th:each="estado : ${T(wcsono.strgSys.enums.EstadoOrden).values()}"
+                            th:value="${estado.codigo}"
+                            th:text="${estado.descripcion}"></option>
+                </select>
+            </div>
+
+            <!-- Documento de Referencia -->
+            <div class="input-group">
+                <span class="input-group-text">DocRef</span>
+                <input id="docRef" name="docRef" class="form-control" placeholder="Referencia">
+            </div>
+
+            <!-- Tipo Documento -->
+            <div class="input-group">
+                <span class="input-group-text">Tipo Doc</span>
+                <select id="tipoDoc" name="tipoDoc" class="form-select">
+                    <option value="">-- Seleccionar --</option>
+                    <option th:each="td : ${tdsAgregarOrden}"
+                            th:value="${td.idTd}"
+                            th:text="${td.desTd}"></option>
+                </select>
+            </div>
+
+            <!-- Rango de fechas -->
+            <div class="input-group">
+                <span class="input-group-text">Fecha desde</span>
+                <input type="date" id="fecOrdDesde" name="fecOrdDesde" class="form-control">
+            </div>
+            <div class="input-group">
+                <span class="input-group-text">Fecha hasta</span>
+                <input type="date" id="fecOrdHasta" name="fecOrdHasta" class="form-control">
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-2">
+                <i class="bi bi-search"></i> Aplicar Filtros
+            </button>
+        </form>
     </div>
 </div>
 

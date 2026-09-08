@@ -51,10 +51,10 @@ public interface IOrdenServicio {
     // 🔹 Filtros combinados
     Page<Orden> listarOrdenesFiltradas(
             String numOrd,
-            Integer idCliente,
+            String nomCli,
             LocalDate fecOrdDesde,
             LocalDate fecOrdHasta,
-            Integer estOrd, // ⚠️ se mantiene como Integer porque viene del filtro en la vista
+            EstadoOrden estOrd,
             Pageable pageable
     );
 

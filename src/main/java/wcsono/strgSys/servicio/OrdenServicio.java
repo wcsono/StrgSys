@@ -17,13 +17,16 @@ import wcsono.strgSys.repositorio.ArticuloRepositorio;
 import wcsono.strgSys.repositorio.MovimientoRepositorio;
 import wcsono.strgSys.repositorio.UsuarioRepositorio;
 
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import jakarta.persistence.criteria.Predicate;
+import org.springframework.data.jpa.domain.Specification;
+
 
 
 @Service
@@ -236,32 +239,48 @@ public class OrdenServicio implements IOrdenServicio {
     @Override
     public Page<Orden> listarOrdenesFiltradas(
             String numOrd,
-            Integer idCliente,
+            String nomCli,
             LocalDate fecOrdDesde,
             LocalDate fecOrdHasta,
-            Integer estOrd,
+            EstadoOrden estOrd,   // 🔹 enum aquí
             Pageable pageable) {
+
         Specification<Orden> spec = (root, query, cb) -> {
-            var predicates = cb.conjunction();
+            List<Predicate> predicates = new ArrayList<>();
+
             if (numOrd != null && !numOrd.isEmpty()) {
-                predicates = cb.and(predicates, cb.like(root.get("numOrd"), "%" + numOrd + "%"));
+                predicates.add(cb.like(root.get("numOrd"), "%" + numOrd + "%"));
             }
-            if (idCliente != null) {
-                predicates = cb.and(predicates, cb.equal(root.get("cliente").get("idCliente"), idCliente));
+
+            if (nomCli != null && !nomCli.isEmpty()) {
+                // 🔹 LEFT JOIN para evitar inconsistencias en el count
+                predicates.add(cb.like(
+                        root.join("cliente", jakarta.persistence.criteria.JoinType.LEFT).get("nomCli"),
+                        "%" + nomCli + "%"
+                ));
             }
+
             if (fecOrdDesde != null) {
-                predicates = cb.and(predicates, cb.greaterThanOrEqualTo(root.get("fecOrd"), fecOrdDesde));
+                predicates.add(cb.greaterThanOrEqualTo(root.get("fecOrd"), fecOrdDesde));
             }
+
             if (fecOrdHasta != null) {
-                predicates = cb.and(predicates, cb.lessThanOrEqualTo(root.get("fecOrd"), fecOrdHasta));
+                predicates.add(cb.lessThanOrEqualTo(root.get("fecOrd"), fecOrdHasta));
             }
+
             if (estOrd != null) {
-                predicates = cb.and(predicates, cb.equal(root.get("estOrd"), estOrd));
+                predicates.add(cb.equal(root.get("estOrd"), estOrd));
             }
-            return predicates;
+
+            return cb.and(predicates.toArray(new Predicate[0]));
         };
+
         return ordenRepositorio.findAll(spec, pageable);
     }
+
+
+
+
 
     @Override
     @Transactional
